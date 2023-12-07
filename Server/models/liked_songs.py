@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, String
 class Liked_Song(db.Model, SerializerMixin):
     __tablename__ = 'liked_songs'
     
+    id = db.Column(db.String, primary_key=True)
     track_id = db.Column(db.String, db.ForeignKey('tracks.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     album_id= db.Column(db.Integer, db.ForeignKey('albums.id'))

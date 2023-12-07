@@ -1,8 +1,8 @@
 from app_config import db, SerializerMixin  
-from sqlalchemy import Column, Integer, String
-from flask_sqlalchemy import SQLAlchemy
+# from sqlalchemy import Column, Integer, String
+# from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()
+
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
 
@@ -15,8 +15,11 @@ class User(db.Model, SerializerMixin):
     
     #relationship
     liked_songs = db.relationship('Liked_Song', backref='user')
-    # add serialization rules
     playlists = db.relationship('Playlist', backref='user')
+    # add serialization rules
+    serialize_only = ('id', 'name', 'username', 'email', 'password', 'profile_pic')
+
+    
     
     def __repr__(self):
-        return f'<User {self.id, self.name, self.username, self.profile_pic}>'
+        return f'<User {self.id, self.name, self.username}>'

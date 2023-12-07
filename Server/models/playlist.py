@@ -14,6 +14,6 @@ class Playlist(db.Model, SerializerMixin):
     #relationship
     
     # add serialization rules
-    
+    serialize_only = ('id','name','description','track_id','user_id','created_at','public')
     def __repr__(self):
         return f'<Playlist {self.id}>'

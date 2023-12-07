@@ -10,7 +10,7 @@ class Album(db.Model, SerializerMixin):
     released_date= db.Column(db.DateTime)
     image = db.Column(db.String)
     public = db.Column(db.Boolean)
-    artist_id = db.Column(db.Integer)
+    artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'))
     #relationship
     
     # add serialization rules

@@ -2,7 +2,7 @@ from app_config import db, SerializerMixin
 
 
 class Artist(db.Model, SerializerMixin):
-    __tablename__ = 'playlists'
+    __tablename__ = 'artists'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
