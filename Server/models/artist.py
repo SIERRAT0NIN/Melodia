@@ -8,7 +8,6 @@ class Artist(db.Model, SerializerMixin):
     name = db.Column(db.String)
     bio = db.Column(db.String)
     stats = db.Column(db.Integer)
-    user_id = db.Column(db.Integer)
     #relationship
     
     # add serialization rules

@@ -10,7 +10,7 @@ class Track(db.Model, SerializerMixin):
     image = db.Column(db.Integer)
     artist_id = db.Column(db.Integer)
     album_id = db.Column(db.Integer)
-    stats = db.Column(db.DateTime)
+    stats = db.Column(db.String)
     liked = db.Column(db.Boolean)
     
     #relationship

@@ -3,8 +3,8 @@ from app_config import db, SerializerMixin
 class Playlist_Track(db.Model, SerializerMixin):
     __tablename__ = 'playlist_tracks'
 
-    track_id = db.Column(db.String)
-    playlist_id = db.Column(db.String)
+    track_id = db.Column(db.String, db.ForeignKey('tracks.id'))
+    playlist_id = db.Column(db.String, db.ForeignKey('playlists.id'))
 
     #relationship
     
