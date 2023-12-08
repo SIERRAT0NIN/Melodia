@@ -26,6 +26,10 @@ class Album(db.Model):
     
     def __repr__(self):
         return f'<Album {self.id, self.name, self.released_date, self.public}>'
+class AlbumSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Album
+
 
 class Artist(db.Model):
     __tablename__ = 'artists'
@@ -43,7 +47,9 @@ class Artist(db.Model):
 
     def __repr__(self):
         return f'<Artist {self.id, self.name, self.bio, self.stats }>'
-
+class ArtistSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Artist
 
 class Track(db.Model):
     __tablename__ = 'tracks'
@@ -68,7 +74,9 @@ class Track(db.Model):
 
     def __repr__(self):
         return f'<Track {self.id, self.title, self.description, self.image, self.stats, self.liked}>'
-
+class Track_Schema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Track
 
 class Liked_Song(db.Model):
     __tablename__ = 'liked_songs'
@@ -87,6 +95,9 @@ class Liked_Song(db.Model):
 
     def __repr__(self):
         return f'<Liked_Song {self.id}>'
+class Liked_Song_Schema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Liked_Song
 
 class Playlist_Track(db.Model):
     __tablename__ = 'playlist_tracks'
@@ -102,6 +113,8 @@ class Playlist_Track(db.Model):
 
     def __repr__(self):
         return f'<Playlist_Track {self.track_id, self.playlist_id}>'
+
+
 
 class Playlist(db.Model):
     __tablename__ = 'playlists'
@@ -128,7 +141,9 @@ class Playlist(db.Model):
     
     def __repr__(self):
         return f'<Playlist {self.id}>'
-
+class PlaylistSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Playlist
 
 class User(db.Model):
     __tablename__ = 'users'
