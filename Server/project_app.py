@@ -29,18 +29,18 @@ db.init_app(app)
 
 api=Api(app)
 
-# class HomePage(Resource):
-#     def get(self):
-#         return 'Hello, World!'
+class HomePage(Resource):
+    def get(self):
+        return 'Hello, World!'
 
-#     @staticmethod
-#     def get_user(user_id):
-#         user = User.query.get_or_404(user_id)
-#         user_schema = UserSchema()
-#         user_data = user_schema.dump(user)
-#         return user_data
-# api.add_resource(HomePage, '/', endpoint='home_page')
-# api.add_resource(HomePage, '/user/<int:user_id>', endpoint='get_user')
+    @staticmethod
+    def get_user(user_id):
+        user = User.query.get_or_404(user_id)
+        user_schema = UserSchema()
+        user_data = user_schema.dump(user)
+        return user_data
+api.add_resource(HomePage, '/', endpoint='home_page')
+api.add_resource(HomePage, '/user/<int:user_id>', endpoint='get_user')
 
 
 
