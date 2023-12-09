@@ -154,7 +154,7 @@ def create_spotify_oauth():
         client_id,
         client_secret,
         redirect_uri=url_for('redirect', _external=True),
-        scope='user-top-read user-library-read user-library-modify user-read-private user-read-email user-read-currently-playing'
+        scope='user-top-read user-library-read user-library-modify user-read-private user-read-email user-read-currently-playing app-remote-control streaming playlist-read-private user-modify-playback-state'
     )
 
 class CurrentUser(Resource):
@@ -162,30 +162,37 @@ class CurrentUser(Resource):
         user_info = current_user()
         return user_info
 
+def get_all_user_playlists(sp, limit=50):
+    playlists = []
+    offset = 0
+
+    while True:
+        response = sp.current_user_playlists(offset=offset, limit=limit)
+        playlists.extend(response['items'])
+
+        # Check if there are more playlists to fetch
+        if len(response['items']) < limit:
+            break
+        offset += limit
+
+    return playlists
+
 class UserPlaylists(Resource):
     def get(self):
-        playlists = get_all_user_playlists()
-        
-        # Extracting only the names of the playlists
-        playlist_names = [playlist['name'] for playlist in playlists]
+        try:
+            token_info = get_token()
+            sp = spotipy.Spotify(auth=token_info['access_token'])
 
-        return {'playlists': playlist_names}
+            playlists = get_all_user_playlists(sp)
+            
+            # Extracting both the names and IDs of the playlists
+            playlists_info = [{'name': playlist['name'], 'id': playlist['id']} for playlist in playlists]
 
-def get_all_user_playlists():
-    # Initialize an empty list to store all playlists
-    all_playlists = []
+            return {'playlists': playlists_info}
+        except Exception as e:
+            print(f"Error: {str(e)}")
+            return {'message': f'Error retrieving user playlists: {str(e)}'}
 
-    # Fetch the first page of playlists
-    playlists = current_user_playlists()
-
-    # Continue fetching playlists until there are no more pages
-    while playlists:
-        all_playlists.extend(playlists['items'])
-        
-        # Fetch the next page by following the 'next' URL
-        playlists = sp.next(playlists) if playlists.get('next') else None
-
-    return all_playlists
 
 
 
@@ -197,32 +204,84 @@ class CurrentUserTopArtists(Resource):
             token_info = get_token()
             sp = spotipy.Spotify(auth=token_info['access_token'])
             top_artists = sp.current_user_top_artists(time_range=time_range, limit=limit)['items']
-           
-            artist_names = [artist['name'] for artist in top_artists]
-            return {'artists': artist_names}
+
+            artist_info_list = []
+            for artist in top_artists:
+                artist_info = {
+                    'name': artist['name'],
+                    'id': artist['id'],
+                    'uri': artist['uri'],
+                    'images': [image['url'] for image in artist['images']],
+                    'genres': artist['genres'],
+                    'popularity': artist['popularity']
+                }
+                artist_info_list.append(artist_info)
+
+            return {'artists': artist_info_list}
         except Exception as e:
             print(f"Error: {str(e)}")
             return {'message': 'Error retrieving current user top artists'}
+
 
 class CurrentUserTopTracks(Resource):
     def get(self, time_range='medium_term', limit=20):
         try:
             token_info = get_token()
             sp = spotipy.Spotify(auth=token_info['access_token'])
-            top_tracks = sp.current_user_top_tracks(time_range=time_range, limit=limit)
-            return top_tracks
-        except:
+            top_tracks = sp.current_user_top_tracks(time_range=time_range, limit=limit)['items']
+
+            track_info_list = []
+            for track in top_tracks:
+                track_info = {
+                    'name': track['name'],
+                    'id': track['id'],
+                    'uri': track['uri'],
+                    'album': {
+                        'name': track['album']['name'],
+                        'id': track['album']['id'],
+                        'uri': track['album']['uri']
+                    },
+                    'artists': [{'id': artist['id'], 'name': artist['name'], 'uri': artist['uri']} for artist in track['artists']],
+                    'duration_ms': track['duration_ms'],
+                    'popularity': track['popularity']
+                }
+                track_info_list.append(track_info)
+
+            return {'tracks': track_info_list}
+        except Exception as e:
+            print(f"Error: {str(e)}")
             return {'message': 'Error retrieving current user top tracks'}
 
-class CurrentlyPlaying(Resource):
+
+class CurrentlyPlaying(Resource): #Not working
     def get(self):
         try:
             token_info = get_token()
             sp = spotipy.Spotify(auth=token_info['access_token'])
             currently_playing = sp.current_playback()
-            return currently_playing
-        except:
-            return {'message': 'Error retrieving currently playing track'}
+
+            if currently_playing is None:
+                return {'message': 'No track currently playing.'}
+
+            # Extract relevant information from the currently playing response
+            track_info = {
+                'name': currently_playing['item']['name'],
+                'id': currently_playing['item']['id'],
+                'uri': currently_playing['item']['uri'],
+                'album': {
+                    'name': currently_playing['item']['album']['name'],
+                    'id': currently_playing['item']['album']['id'],
+                    'uri': currently_playing['item']['album']['uri']
+                },
+                'artists': [{'id': artist['id'], 'name': artist['name'], 'uri': artist['uri']} for artist in currently_playing['item']['artists']],
+                'duration_ms': currently_playing['item']['duration_ms'],
+                'progress_ms': currently_playing['progress_ms']
+            }
+
+            return {'currently_playing': track_info}
+        except Exception as e:
+            print(f"Error: {str(e)}")
+            return {'message': f'Error retrieving currently playing track: {str(e)}'}
 
 #Playlist
 class FeaturedPlaylists(Resource):
