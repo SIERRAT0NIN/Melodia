@@ -308,21 +308,38 @@ class FeaturedPlaylists(Resource):
             # Use spotipy's featured_playlists method
             featured_playlists = sp.featured_playlists(limit=limit)['playlists']['items']
 
-            # Extracting names, IDs, and images of the playlists
+            # Extracting more details about each playlist
             playlists_info = []
             for playlist in featured_playlists:
                 name = playlist['name']
                 playlist_id = playlist['id']
                 images = playlist['images'] if 'images' in playlist else []
                 image_urls = [image['url'] for image in images]
+                owner = playlist['owner']['id'] if 'owner' in playlist else None
+                is_public = playlist['public']
+                description = playlist['description']
+                total_tracks = playlist['tracks']['total'] if 'tracks' in playlist else None
 
-                playlist_info = {'id': playlist_id, 'name': name, 'images': image_urls}
+                # Determine if the playlist is public or private
+                visibility = 'Public' if is_public else 'Private'
+
+                playlist_info = {
+                    'id': playlist_id,
+                    'name': name,
+                    'images': image_urls,
+                    'owner': owner,
+                    'visibility': visibility,
+                    'description': description,
+                    'total_tracks': total_tracks
+                }
                 playlists_info.append(playlist_info)
 
             return {'playlists': playlists_info}
         except Exception as e:
             print(f"Error: {str(e)}")
             return {'message': 'Error retrieving featured playlists'}
+
+
 
 
 
@@ -386,6 +403,14 @@ class Tracks(Resource):
         except:
             return {'message': 'Error retrieving tracks information'}
 
+class Logout(Resource):
+    def get(self):
+        # Clear the user's session data
+        session.clear()
+
+        # Redirect to the home page or a login page
+        return redirect(url_for('index'))
+
 
 #Routes
 
@@ -405,6 +430,7 @@ api.add_resource(Track, '/track/<string:track_id>')
 api.add_resource(Tracks, '/tracks')
 api.add_resource(Home, '/')
 api.add_resource(Redirect, '/redirect')
+api.add_resource(Logout, '/logout')
 
 if __name__ == '__main__':
     app.run(debug=True)
