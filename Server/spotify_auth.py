@@ -184,11 +184,26 @@ class UserPlaylists(Resource):
             sp = spotipy.Spotify(auth=token_info['access_token'])
 
             playlists = get_all_user_playlists(sp)
-            
-            # Extracting both the names and IDs of the playlists
-            playlists_info = [{'name': playlist['name'], 'id': playlist['id']} for playlist in playlists]
 
-            return {'playlists': playlists_info}
+            playlist_details = []
+            for playlist in playlists:
+                playlist_id = playlist['id']
+                playlist_name = playlist['name']
+                playlist_description = playlist['description']
+                total_tracks = playlist['tracks']['total']
+                is_public = playlist['public']
+                image_url = playlist['images'][0]['url'] if playlist['images'] else None
+
+                playlist_details.append({
+                    'id': playlist_id,
+                    'name': playlist_name,
+                    'description': playlist_description,
+                    'total_tracks': total_tracks,
+                    'public': is_public,
+                    'image_url': image_url
+                })
+
+            return {'playlists': playlist_details}
         except Exception as e:
             print(f"Error: {str(e)}")
             return {'message': f'Error retrieving user playlists: {str(e)}'}
