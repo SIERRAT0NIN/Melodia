@@ -1,4 +1,3 @@
-
 from spotipy.oauth2 import SpotifyOAuth
 from flask import Flask, request, url_for, session, redirect
 from flask_restful import Api, Resource
@@ -26,8 +25,7 @@ class Home(Resource):
     def get(self):
         auth_url = create_spotify_oauth().get_authorize_url()
         return redirect(auth_url)
-
-
+    
 class Redirect(Resource):
     def get(self):
         session.clear()
@@ -35,7 +33,6 @@ class Redirect(Resource):
         token_info = create_spotify_oauth().get_access_token(code)
         session[TOKEN_INFO] = token_info
         return redirect(url_for('currentusertopartists'))
-
 
 class SavedSongs(Resource):
     def get(self):
@@ -49,8 +46,55 @@ class SavedSongs(Resource):
 class UserSavedTracks(Resource):
     def get(self):
         saved_tracks = current_user_saved_tracks()
-        return saved_tracks
-    
+        return self.extract_track_info(saved_tracks)
+
+    def extract_track_info(self, saved_tracks):
+        try:
+            token_info = get_token()
+            sp = spotipy.Spotify(auth=token_info['access_token'])
+
+            track_info_list = []
+            for item in saved_tracks['items']:
+                track = item['track']
+
+                # Extracting information about the track
+                artist_info = track['artists'][0]
+                artist_name = artist_info['name']
+                artist_id = artist_info['id']
+                artist_uri = artist_info['uri']
+
+                # Retrieve artist details to get genres
+                artist_details = sp.artist(artist_id)
+                genres = artist_details['genres'] if 'genres' in artist_details else []
+
+                album_info = track['album']
+                album_name = album_info['name']
+                album_images = album_info['images'] if 'images' in album_info else []
+                album_image_urls = [image['url'] for image in album_images]
+                release_date = album_info.get('release_date', None)
+                track_title = track['name']
+
+                # Creating a dictionary with the extracted information
+                track_info = {
+                    'artist_name': artist_name,
+                    'artist_id': artist_id,
+                    'artist_uri': artist_uri,
+                    'genres': genres,
+                    'album_name': album_name,
+                    'album_images': album_image_urls,
+                    'release_date': release_date,
+                    'track_title': track_title
+                }
+
+                track_info_list.append(track_info)
+
+            return {'tracks': track_info_list}
+
+        except Exception as e:
+            print(f"Error: {str(e)}")
+            return {'message': 'Error retrieving user saved tracks'}
+
+
 class SearchArtist(Resource):
     def get(self, artist_name):
         try:
@@ -92,7 +136,6 @@ def current_user_saved_tracks():
     except:
         return {'message': 'Error retrieving current user saved tracks'}
 
-
 def get_token():
     token_info = session.get(TOKEN_INFO, None)
     if not token_info:
@@ -106,14 +149,14 @@ def get_token():
         token_info = spotify_oauth.refresh_access_token(token_info['refresh_token'])
     return token_info
 
-
 def create_spotify_oauth():
     return SpotifyOAuth(
         client_id,
         client_secret,
         redirect_uri=url_for('redirect', _external=True),
-        scope='user-top-read user-library-read user-library-modify user-read-private user-read-email'
+        scope='user-top-read user-library-read user-library-modify user-read-private user-read-email user-read-currently-playing'
     )
+
 class CurrentUser(Resource):
     def get(self):
         user_info = current_user()
@@ -121,10 +164,33 @@ class CurrentUser(Resource):
 
 class UserPlaylists(Resource):
     def get(self):
-        playlists = current_user_playlists([])
-        return playlists
+        playlists = get_all_user_playlists()
+        
+        # Extracting only the names of the playlists
+        playlist_names = [playlist['name'] for playlist in playlists]
+
+        return {'playlists': playlist_names}
+
+def get_all_user_playlists():
+    # Initialize an empty list to store all playlists
+    all_playlists = []
+
+    # Fetch the first page of playlists
+    playlists = current_user_playlists()
+
+    # Continue fetching playlists until there are no more pages
+    while playlists:
+        all_playlists.extend(playlists['items'])
+        
+        # Fetch the next page by following the 'next' URL
+        playlists = sp.next(playlists) if playlists.get('next') else None
+
+    return all_playlists
 
 
+
+
+#Current User
 class CurrentUserTopArtists(Resource):
     def get(self, time_range='medium_term', limit=20):
         try:
@@ -158,15 +224,33 @@ class CurrentlyPlaying(Resource):
         except:
             return {'message': 'Error retrieving currently playing track'}
 
+#Playlist
 class FeaturedPlaylists(Resource):
     def get(self, limit=20):
         try:
             token_info = get_token()
             sp = spotipy.Spotify(auth=token_info['access_token'])
-            featured_playlists = sp.featured_playlists(limit=limit)
-            return featured_playlists
-        except:
+            
+            # Use spotipy's featured_playlists method
+            featured_playlists = sp.featured_playlists(limit=limit)['playlists']['items']
+
+            # Extracting names, IDs, and images of the playlists
+            playlists_info = []
+            for playlist in featured_playlists:
+                name = playlist['name']
+                playlist_id = playlist['id']
+                images = playlist['images'] if 'images' in playlist else []
+                image_urls = [image['url'] for image in images]
+
+                playlist_info = {'id': playlist_id, 'name': name, 'images': image_urls}
+                playlists_info.append(playlist_info)
+
+            return {'playlists': playlists_info}
+        except Exception as e:
+            print(f"Error: {str(e)}")
             return {'message': 'Error retrieving featured playlists'}
+
+
 
 class Playlist(Resource):
     def get(self, playlist_id):
@@ -231,22 +315,22 @@ class Tracks(Resource):
 
 #Routes
 
+api.add_resource(CurrentUser, '/current_user')
+api.add_resource(UserSavedTracks, '/user_saved_tracks')
 api.add_resource(CurrentUserTopArtists, '/current_user_top_artists')
 api.add_resource(CurrentUserTopTracks, '/current_user_top_tracks')
-api.add_resource(CurrentlyPlaying, '/currently_playing')
+api.add_resource(CurrentlyPlaying, '/currently_playing') #Not working
 api.add_resource(FeaturedPlaylists, '/featured_playlists')
+api.add_resource(UserPlaylists, '/user_playlists')
 api.add_resource(Playlist, '/playlist/<string:playlist_id>')
 api.add_resource(PlaylistCoverImage, '/playlist_cover_image/<string:playlist_id>')
 api.add_resource(PlaylistAddItems, '/playlist_add_items/<string:playlist_id>')
 api.add_resource(Search, '/search')
+api.add_resource(SearchArtist, '/search_artist/<string:artist_name>')
 api.add_resource(Track, '/track/<string:track_id>')
 api.add_resource(Tracks, '/tracks')
-api.add_resource(CurrentUser, '/current_user')
-api.add_resource(UserPlaylists, '/user_playlists')
-api.add_resource(UserSavedTracks, '/user_saved_tracks')
 api.add_resource(Home, '/')
 api.add_resource(Redirect, '/redirect')
-api.add_resource(SearchArtist, '/search_artist/<string:artist_name>')
 
 if __name__ == '__main__':
     app.run(debug=True)
