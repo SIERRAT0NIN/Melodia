@@ -21,10 +21,16 @@ api = Api(app)
 sp = spotipy.Spotify()
 
 
-class Home(Resource):
+class Authenticate(Resource):
     def get(self):
         auth_url = create_spotify_oauth().get_authorize_url()
         return redirect(auth_url)
+    
+class Home(Resource):
+    def get(self):
+        return 'Hello, World!'
+
+    
     
 class Redirect(Resource):
     def get(self):
@@ -32,7 +38,7 @@ class Redirect(Resource):
         code = request.args.get('code')
         token_info = create_spotify_oauth().get_access_token(code)
         session[TOKEN_INFO] = token_info
-        return redirect(url_for('currentusertopartists'))
+        return redirect(url_for('home'))
 
 class SavedSongs(Resource):
     def get(self):
@@ -403,12 +409,18 @@ class Tracks(Resource):
         except:
             return {'message': 'Error retrieving tracks information'}
 
+# current_user_saved_tracks_delete
+
+# user_playlist_change_details
+
+# user_playlist_unfollow
+
 class Logout(Resource):
     def get(self):
         # Clear the user's session data
         session.clear()
 
-        # Redirect to the home page or a login page
+        # Redirect to the Authenticate page or a login page
         return redirect(url_for('index'))
 
 
@@ -423,12 +435,14 @@ api.add_resource(FeaturedPlaylists, '/featured_playlists')
 api.add_resource(UserPlaylists, '/user_playlists')
 api.add_resource(Playlist, '/playlist/<string:playlist_id>')
 api.add_resource(PlaylistCoverImage, '/playlist_cover_image/<string:playlist_id>')
+#POST
 api.add_resource(PlaylistAddItems, '/playlist_add_items/<string:playlist_id>')
-api.add_resource(Search, '/search')
+api.add_resource(Search, '/search')#Not working
 api.add_resource(SearchArtist, '/search_artist/<string:artist_name>')
 api.add_resource(Track, '/track/<string:track_id>')
 api.add_resource(Tracks, '/tracks')
-api.add_resource(Home, '/')
+api.add_resource(Authenticate, '/')
+api.add_resource(Home, '/home')
 api.add_resource(Redirect, '/redirect')
 api.add_resource(Logout, '/logout')
 
