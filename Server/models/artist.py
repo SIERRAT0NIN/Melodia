@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 from sqlalchemy import MetaData
 from flask_migrate import Migrate
-from project_app import db
+from Server.app import db
 
 class Artist(db.Model):
     __tablename__ = 'artists'

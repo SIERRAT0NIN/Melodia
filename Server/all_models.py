@@ -6,8 +6,7 @@ from app_config import db
 from sqlalchemy import MetaData
 from sqlalchemy import Column, String, Integer
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-
-
+from app_config import jwt
 
 
 class User(db.Model):
@@ -19,42 +18,31 @@ class User(db.Model):
     email = db.Column(db.String)
     password = db.Column(db.String)
     profile_pic = db.Column(db.String)
-
-    # Relationship with Liked_Song
+    jwt = db.Column(db.String)
 
     
-    # Relationship with Playlist
-
-
+    def verify_jwt(self, jwt_to_be_checked):
+        return self.jwt == jwt_to_be_checked
+    
     def __repr__(self):
         return f'<User {self.id, self.name, self.username}>'
-    
-    
 class UserSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = User
 
 class Liked_Song(db.Model):
     __tablename__ = 'liked_songs'
-
     id = db.Column(db.String, primary_key=True)
     track_id = db.Column(db.String, db.ForeignKey('tracks.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     album_id = db.Column(db.Integer, db.ForeignKey('albums.id'))
     liked = db.Column(db.Boolean)
-
-    # Relationship with Track
-
-
-    # Relationship with User
-
-
     def __repr__(self):
         return f'<Liked_Song {self.id}>'
 class Liked_Song_Schema(SQLAlchemyAutoSchema):
+    
     class Meta:
         model = Liked_Song
-
 
 class Artist(db.Model):
     __tablename__ = 'artists'
@@ -63,14 +51,12 @@ class Artist(db.Model):
     name = db.Column(db.String)
     bio = db.Column(db.String)
     stats = db.Column(db.Integer)
-
-    # Relationship with Track
-    # Relationship with Album
     def __repr__(self):
         return f'<Artist {self.id, self.name, self.bio, self.stats }>'
 class ArtistSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Artist
+        
 class Album(db.Model):
     __tablename__ = 'albums'
 
@@ -82,12 +68,10 @@ class Album(db.Model):
     public = db.Column(db.Boolean)
     artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'))
 
-    # Relationships
-
     def __repr__(self):
         return f'<Album {self.id, self.name, self.released_date, self.public}>'
-
 class AlbumSchema(SQLAlchemyAutoSchema):
+
     class Meta:
         model = Album
 
@@ -103,13 +87,10 @@ class Track(db.Model):
     stats = db.Column(db.String)
     liked = db.Column(db.Boolean)
 
-    # Relationships
-
-
     def __repr__(self):
         return f'<Track {self.id, self.title, self.description, self.image, self.stats, self.liked}>'
-
 class Track_Schema(SQLAlchemyAutoSchema):
+
     class Meta:
         model = Track
 
@@ -119,8 +100,6 @@ class Playlist_Track(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     track_id = db.Column(db.String, db.ForeignKey('tracks.id'))
     playlist_id = db.Column(db.String, db.ForeignKey('playlists.id'))
-
-    # Relationships
 
     def __repr__(self):
         return f'<Playlist_Track {self.track_id, self.playlist_id}>'
@@ -136,19 +115,14 @@ class Playlist(db.Model):
     created_at = db.Column(db.DateTime)
     public = db.Column(db.Boolean)
 
-    # Relationships
-
-    # Add serialization rules
-    serialize_only = ('id', 'name', 'description', 'track_id', 'user_id', 'created_at', 'public')
-
     def __repr__(self):
         return f'<Playlist {self.id}>'
-
 class PlaylistSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Playlist
 
 
+#Relationships
 
 Liked_Song.track = db.relationship('Track', backref='liked_song_track', foreign_keys='[Liked_Song.track_id]')
 Liked_Song.user = db.relationship('User', backref='liked_song_user')
