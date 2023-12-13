@@ -19,6 +19,7 @@ import time
 load_dotenv()
 client_id = os.environ.get('SPOTIPY_CLIENT_ID')
 client_secret = os.environ.get('SPOTIPY_CLIENT_SECRET')
+redirect_uri = os.environ.get('REDIRECT_URI')
 TOKEN_INFO = 'token_info'
 app.secret_key = 'din12823112390238ub09843209a1234'
 
@@ -64,7 +65,9 @@ class SavedSongs(Resource):
 
 class UserSavedTracks(Resource):
     def get(self):
-        saved_tracks = current_user_saved_tracks()
+        sp = spotipy.Spotify(auth=TOKEN_INFO)
+
+        saved_tracks = sp.current_user_saved_tracks()
         return self.extract_track_info(saved_tracks)
 
     def extract_track_info(self, saved_tracks):
@@ -424,29 +427,6 @@ class Logout(Resource):
         # Redirect to the Authenticate page or a login page
         return redirect(url_for('home'))
 
-# @app.route('/verify/jwt/<int:id>', methods=["GET"])
-# def verify_jwt(id):
-#     try:
-#         data = request.headers["Authorization"]
-#         user = db.session.get(User, id)
-#         if user:
-#             access = user.verify_jwt(data)
-#             response = {
-#                 "access": access
-#             }
-#         else:
-#             response = {
-#                 "access": False
-#             }
-#         return make_response(response, 200)
-        
-#     except (ValueError, AttributeError, TypeError) as e:
-#         return make_response(
-#             {"errors": [str(e)]}, 400
-#         )
-
-# ... (existing code)
-
 class CurrentUserSavedTracksDelete(Resource):
     def delete(self, track_id):
         try:
@@ -509,8 +489,29 @@ class UserPlaylistFollow(Resource):
         except Exception as e:
             print(f"Error: {str(e)}")
             return {'message': 'Error following playlist'}
+        
+        
+class TokenExchange(Resource):
+    def get(self):
+        spotify_oauth = SpotifyOAuth(
+            client_id,
+            client_secret,
+            redirect_uri,
+            scope='user-library-read',
+        )
 
+        # Get the authorization code from the query parameters
+        code = request.args.get('code')
 
+        # Exchange the authorization code for an access token
+        token_info = spotify_oauth.get_access_token(code)
+
+        # Store the token information in the session
+        session['token_info'] = token_info
+
+        # Redirect to your application's home page after successful token exchange
+        return redirect(url_for('home'))
+api.add_resource(TokenExchange, '/token-exchange')
 
 
 #Routes
