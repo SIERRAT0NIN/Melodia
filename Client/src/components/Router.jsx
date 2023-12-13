@@ -8,7 +8,7 @@ import SavedPlaylist from "./SavedPlaylist";
 import SavedSongTable from "./SavedSongTable";
 
 import NotFound from "./NotFound";
-import CurrentlyPlayingCard from "./CurrentlyPlayingCard";
+import CurrentlyPlayingCard from "./MusicPlayer/CurrentlyPlayingCard";
 import NavBar from "./NavBar";
 import SongDetail from "./SongDetail";
 

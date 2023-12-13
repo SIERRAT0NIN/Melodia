@@ -1,6 +1,6 @@
 import NavBar from "./NavBar";
 import SongDetail from "./SongDetail";
-import CurrentlyPlayingCard from "./CurrentlyPlayingCard";
+import CurrentlyPlayingCard from "./MusicPlayer/CurrentlyPlayingCard";
 import SavedSongTable from "./SavedSongTable";
 import Account from "./Account";
 
@@ -10,7 +10,7 @@ function HomePage() {
       <div>
         <NavBar />
       </div>
-      <div className="flex">
+      <div className="flex ">
         <CurrentlyPlayingCard />
       </div>
       <SongDetail />

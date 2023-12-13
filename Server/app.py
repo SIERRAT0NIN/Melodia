@@ -510,7 +510,9 @@ class TokenExchange(Resource):
         session['token_info'] = token_info
 
         # Redirect to your application's home page after successful token exchange
-        return redirect(url_for('home'))
+        redirect_url = url_for('home', token_info=token_info)  # Include token_info in the redirect URL
+        return redirect(redirect_url)
+
 api.add_resource(TokenExchange, '/token-exchange')
 
 

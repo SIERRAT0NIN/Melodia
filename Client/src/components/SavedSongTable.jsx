@@ -9,6 +9,7 @@ import {
 } from "@nextui-org/react";
 import SongDetail from "./SongDetail";
 
+const CLIENT_SECRET = "2fb5a9bb603a48aeadc6dfb28eeb00a0";
 const SPOTIFY_CLIENT_ID = "6abb9eac788d42e08c2a50e3f5ff4e53";
 const REDIRECT_URI = "http://localhost:5555/home"; // Update with your redirect URI
 
@@ -16,43 +17,40 @@ export default function SavedSongTable() {
   const [savedTracks, setSavedTracks] = useState([]);
 
   useEffect(() => {
-    // Function to handle Spotify authorization
     const authorizeSpotify = async () => {
-      // Step 1: Redirect the user to Spotify for authorization
       window.location.href = `https://accounts.spotify.com/authorize?client_id=${SPOTIFY_CLIENT_ID}&redirect_uri=${encodeURIComponent(
         REDIRECT_URI
       )}&scope=user-library-read&response_type=code&state=some-state`;
     };
 
-    // Step 2: Check if the authorization code is present in the URL
     const urlParams = new URLSearchParams(window.location.search);
     const authorizationCode = urlParams.get("code");
 
     if (authorizationCode) {
-      // Step 3: Exchange the authorization code for an access token on your server
-      fetch(`token-exchange${authorizationCode}`)
+      fetch("http://127.0.0.1:5556/token-exchange/" + authorizationCode, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body:
+          "grant_type=authorization_code&client_id=" +
+          SPOTIFY_CLIENT_ID +
+          "&client_secret=" +
+          CLIENT_SECRET +
+          "&redirect_uri=" +
+          REDIRECT_URI +
+          "&code=" +
+          authorizationCode,
+      })
         .then((response) => response.json())
         .then((data) => {
-          // Step 4: Use the access token to fetch user's saved tracks
-          fetch("http://127.0.0.1:5556/user_saved_tracks", {
-            headers: {
-              Authorization: `Bearer ${data.access_token}`,
-            },
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              console.log(data);
-              setSavedTracks(data.tracks || []);
-            })
-            .catch((error) =>
-              console.error("Error fetching user's saved tracks:", error)
-            );
+          console.log(data);
+          setSavedTracks(data.tracks || []);
         })
-        .catch((error) =>
-          console.error("Error exchanging authorization code:", error)
-        );
+        .catch((error) => {
+          console.error("Error fetching user's saved tracks:", error);
+        });
     } else {
-      // Step 1: Redirect the user to Spotify for authorization (if not already authorized)
       authorizeSpotify();
     }
   }, []);

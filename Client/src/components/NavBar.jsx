@@ -5,13 +5,13 @@ import {
   NavbarItem,
   Link,
   Input,
-  DropdownItem,
-  DropdownTrigger,
-  Dropdown,
-  DropdownMenu,
-  Avatar,
+  // DropdownItem,
+  // DropdownTrigger,
+  // Dropdown,
+  // DropdownMenu,
+  // Avatar,
 } from "@nextui-org/react";
-import { AcmeLogo } from "./AcmeLogo.jsx";
+import { NextIcon } from "./MusicPlayer/NextIcon.jsx";
 import { SearchIcon } from "./SearchIcon.jsx";
 import Account from "./Account.jsx";
 
@@ -20,8 +20,8 @@ export default function NavBar() {
     <Navbar isBordered>
       <NavbarContent justify="start">
         <NavbarBrand className="mr-4">
-          <AcmeLogo />
-          <p className="hidden sm:block font-bold text-inherit">ACME</p>
+          <NextIcon />
+          <p className="hidden sm:block font-bold text-inherit">Melody</p>
         </NavbarBrand>
         <NavbarContent className="hidden sm:flex gap-3">
           <NavbarItem>
