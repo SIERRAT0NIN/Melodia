@@ -43,7 +43,7 @@ class LoginPage(Resource):
 class Home(Resource):
     def get(self):
         auth_url = create_spotify_oauth().get_authorize_url()
-        return (f'Hello, World!{auth_url}')
+        return (f'Hello, World!')
         
 class Redirect(Resource):
     def get(self):
@@ -113,6 +113,7 @@ class UserSavedTracks(Resource):
             print(f"Error: {str(e)}")
             return {'message': 'Error retrieving user saved tracks'}
 
+
 class SearchArtist(Resource):
     def get(self, artist_name):
         try:
@@ -157,7 +158,8 @@ def current_user_saved_tracks():
 def get_token():
     token_info = session.get(TOKEN_INFO, None)
     if not token_info:
-        redirect(url_for('login', external=False))
+        # Assuming you want to redirect to the 'login' endpoint
+        return redirect(url_for('usersavedtracks', external=False))
 
     now = int(time.time())
 
@@ -166,6 +168,7 @@ def get_token():
         spotify_oauth = create_spotify_oauth()
         token_info = spotify_oauth.refresh_access_token(token_info['refresh_token'])
     return token_info
+
 
 
 #Scop
