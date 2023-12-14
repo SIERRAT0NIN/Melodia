@@ -85,7 +85,7 @@ const LoginBlob = () => {
           ></animate>
         </path>
       </svg>
-      <a href="/home">
+      <a href="http://127.0.0.1:5556/token-exchange">
         <button className="bn632-hover bn19">Sign Into Spotify!</button>
       </a>
     </div>

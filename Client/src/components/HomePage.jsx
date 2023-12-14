@@ -10,7 +10,7 @@ function HomePage() {
       <div>
         <NavBar />
       </div>
-      <div className="flex ">
+      <div className="flex">
         <CurrentlyPlayingCard />
       </div>
       <SongDetail />
