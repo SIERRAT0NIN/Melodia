@@ -244,16 +244,73 @@
 // };
 
 // export default SavedSongTable;
+// //! ------------------------------------------------------------------------------
+// import React, { useEffect } from "react";
 
-import React, { useEffect } from "react";
+// const SpotifyAuth = () => {
+//   const client_secret = "2fb5a9bb603a48aeadc6dfb28eeb00a0";
+//   const client_id = "6abb9eac788d42e08c2a50e3f5ff4e53";
+//   const redirect_uri = "http://localhost:5555/home";
+
+//   useEffect(() => {
+//     // Function to extract the authorization code from the URL
+//     const getAuthorizationCode = () => {
+//       const urlParams = new URLSearchParams(window.location.search);
+//       return urlParams.get("code");
+//     };
+
+//     const authorizationCode = getAuthorizationCode();
+//     console.log(authorizationCode);
+
+//     if (authorizationCode) {
+//       // Exchange the authorization code for an access token
+//       const authOptions = {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/x-www-form-urlencoded",
+//           Authorization: "Basic " + btoa(client_id + ":" + client_secret),
+//         },
+//         body: new URLSearchParams({
+//           code: authorizationCode,
+//           redirect_uri: redirect_uri,
+//           grant_type: "authorization_code",
+//         }).toString(),
+//       };
+//       console.log("Auth Options:", authOptions);
+
+//       fetch("https://accounts.spotify.com/api/token", authOptions)
+//         .then((response) => response.json())
+//         .then((data) => {
+//           console.log("Access Token:", data.access_token);
+//           console.log("Refresh Token:", data.refresh_token);
+//           // Handle the tokens as needed (e.g., store in state, redirect, etc.)
+//         })
+//         .catch((error) => {
+//           console.error("Error exchanging authorization code:", error);
+//           // Handle the error as needed (e.g., redirect with an error message)
+//         });
+//     } else {
+//       // Handle case where no authorization code is present
+//       console.error("No authorization code found");
+//     }
+//   }, []); // Empty dependency array to run the effect only once
+
+//   return <div>Spotify Authentication</div>;
+// };
+
+// export default SpotifyAuth;
+//! ------------------------------------------------------------------------------
+import React, { useEffect, useState } from "react";
 
 const SpotifyAuth = () => {
+  const [accessToken, setAccessToken] = useState("");
+  const [savedTracks, setSavedTracks] = useState([]);
+
   const client_secret = "2fb5a9bb603a48aeadc6dfb28eeb00a0";
   const client_id = "6abb9eac788d42e08c2a50e3f5ff4e53";
   const redirect_uri = "http://localhost:5555/home";
 
   useEffect(() => {
-    // Function to extract the authorization code from the URL
     const getAuthorizationCode = () => {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get("code");
@@ -263,7 +320,6 @@ const SpotifyAuth = () => {
     console.log(authorizationCode);
 
     if (authorizationCode) {
-      // Exchange the authorization code for an access token
       const authOptions = {
         method: "POST",
         headers: {
@@ -276,27 +332,55 @@ const SpotifyAuth = () => {
           grant_type: "authorization_code",
         }).toString(),
       };
-      console.log("Auth Options:", authOptions);
 
       fetch("https://accounts.spotify.com/api/token", authOptions)
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
           console.log("Access Token:", data.access_token);
-          console.log("Refresh Token:", data.refresh_token);
-          // Handle the tokens as needed (e.g., store in state, redirect, etc.)
+          setAccessToken(data.access_token);
+
+          // Make a fetch request to the user_saved_tracks endpoint with the access token
+          fetch("http://127.0.0.1:5556/user_saved_tracks", {
+            headers: {
+              Authorization: `Bearer ${data.access_token}`,
+            },
+          })
+            .then((response) => response.json())
+            .then((tracks) => {
+              console.log("User Saved Tracks:", tracks);
+              setSavedTracks(tracks);
+              // Handle the tracks as needed
+            })
+            .catch((error) => {
+              console.error("Error fetching user saved tracks:", error);
+              // Handle the error as needed
+            });
         })
         .catch((error) => {
           console.error("Error exchanging authorization code:", error);
-          // Handle the error as needed (e.g., redirect with an error message)
+          // Handle the error as needed
         });
     } else {
-      // Handle case where no authorization code is present
       console.error("No authorization code found");
     }
   }, []); // Empty dependency array to run the effect only once
 
-  return <div>Spotify Authentication</div>;
+  return (
+    <div>
+      <h2>Spotify Authentication</h2>
+      {accessToken && <p>Access Token: {accessToken}</p>}
+      {savedTracks.length > 0 && (
+        <div>
+          <h3>User Saved Tracks:</h3>
+          <ul>
+            {savedTracks.map((track) => (
+              <li key={track.id}>{track.name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default SpotifyAuth;
