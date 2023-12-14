@@ -108,7 +108,7 @@ export default function App() {
               className="object-cover"
               height={200}
               shadow="md"
-              src="https://i.scdn.co/image/ab67616d0000b273651e1dbc0b5218f2306181a1"
+              src="https://i.scdn.co/image/ab67616d00001e02651e1dbc0b5218f2306181a1"
               width="100%"
             />
           </div>
