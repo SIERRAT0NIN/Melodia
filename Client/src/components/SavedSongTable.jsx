@@ -7,7 +7,7 @@
 //   TableRow,
 //   TableCell,
 // } from "@nextui-org/react";
-// import SongDetail from "./SongDetail";
+import SongDetail from "./SongDetail";
 
 // const CLIENT_SECRET = "2fb5a9bb603a48aeadc6dfb28eeb00a0";
 // const SPOTIFY_CLIENT_ID = "6abb9eac788d42e08c2a50e3f5ff4e53";
@@ -122,14 +122,14 @@
 // import { useEffect, useState } from "react";
 // import SongDetail from "./SongDetail";
 
-// import {
-//   Table,
-//   TableHeader,
-//   TableColumn,
-//   TableBody,
-//   TableRow,
-//   TableCell,
-// } from "@nextui-org/react";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@nextui-org/react";
 
 // const client_id = "6abb9eac788d42e08c2a50e3f5ff4e53";
 // const redirect_uri = "http://localhost:5555/home";
@@ -300,24 +300,25 @@
 
 // export default SpotifyAuth;
 //! ------------------------------------------------------------------------------
-import React, { useEffect, useState } from "react";
+
+import { useEffect, useState } from "react";
 
 const SpotifyAuth = () => {
-  const [accessToken, setAccessToken] = useState("");
   const [savedTracks, setSavedTracks] = useState([]);
+  const [accessToken, setAccessToken] = useState(null); // Add accessToken state
 
   const client_secret = "2fb5a9bb603a48aeadc6dfb28eeb00a0";
   const client_id = "6abb9eac788d42e08c2a50e3f5ff4e53";
   const redirect_uri = "http://localhost:5555/home";
 
   useEffect(() => {
+    console.log("Component mounted");
     const getAuthorizationCode = () => {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get("code");
     };
 
     const authorizationCode = getAuthorizationCode();
-    console.log(authorizationCode);
 
     if (authorizationCode) {
       const authOptions = {
@@ -338,47 +339,77 @@ const SpotifyAuth = () => {
         .then((data) => {
           console.log("Access Token:", data.access_token);
           setAccessToken(data.access_token);
-
-          // Make a fetch request to the user_saved_tracks endpoint with the access token
-          fetch("http://127.0.0.1:5556/user_saved_tracks", {
-            headers: {
-              Authorization: `Bearer ${data.access_token}`,
-            },
-          })
-            .then((response) => response.json())
-            .then((tracks) => {
-              console.log("User Saved Tracks:", tracks);
-              setSavedTracks(tracks);
-              // Handle the tracks as needed
-            })
-            .catch((error) => {
-              console.error("Error fetching user saved tracks:", error);
-              // Handle the error as needed
-            });
+          // No need to fetch saved tracks here; it will be handled in the next useEffect
         })
         .catch((error) => {
           console.error("Error exchanging authorization code:", error);
-          // Handle the error as needed
         });
     } else {
       console.error("No authorization code found");
     }
-  }, []); // Empty dependency array to run the effect only once
+  }, [accessToken]); // Dependency array includes accessToken
+
+  useEffect(() => {
+    // Fetch saved tracks when access token changes
+    if (accessToken) {
+      fetch("https://api.spotify.com/v1/me/tracks", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          const tracks = data && data.items ? data.items : [];
+
+          console.log("User Saved Tracks:", tracks);
+
+          if (Array.isArray(tracks)) {
+            setSavedTracks(tracks);
+          } else {
+            console.error("Invalid data format for saved tracks:", tracks);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching user saved tracks:", error);
+        });
+    }
+  }, [accessToken]);
 
   return (
     <div>
-      <h2>Spotify Authentication</h2>
-      {accessToken && <p>Access Token: {accessToken}</p>}
-      {savedTracks.length > 0 && (
-        <div>
-          <h3>User Saved Tracks:</h3>
-          <ul>
+      <>
+        <Table
+          color="default"
+          selectionMode=" "
+          defaultSelectedKeys={[]}
+          aria-label="Example static collection table"
+        >
+          <TableHeader>
+            <TableColumn>Song Title</TableColumn>
+            <TableColumn>Artist</TableColumn>
+            <TableColumn>Album</TableColumn>
+          </TableHeader>
+          <TableBody>
             {savedTracks.map((track) => (
-              <li key={track.id}>{track.name}</li>
+              <TableRow
+                key={track.track.id}
+                // onClick={() => handleRowClick(track)}
+              >
+                <TableCell>{track.track.name || "N/A"}</TableCell>
+                <TableCell>
+                  {(track.track.artists &&
+                    track.track.artists[0] &&
+                    track.track.artists[0].name) ||
+                    "N/A"}
+                </TableCell>
+                <TableCell>
+                  {(track.track.album && track.track.album.name) || "N/A"}
+                </TableCell>
+              </TableRow>
             ))}
-          </ul>
-        </div>
-      )}
+          </TableBody>
+        </Table>
+      </>
     </div>
   );
 };

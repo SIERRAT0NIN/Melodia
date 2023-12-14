@@ -1,4 +1,3 @@
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
@@ -7,8 +6,7 @@ from sqlalchemy import MetaData
 from app_config import db, app
 from all_models import *
 from spotipy.oauth2 import SpotifyOAuth
-from flask import Flask, request, url_for, session, redirect, make_response
-from flask_restful import Api, Resource
+from flask import Flask, request, url_for, session, redirect, make_response, jsonify
 from dotenv import load_dotenv
 from spotipy import util
 import spotipy
@@ -19,31 +17,184 @@ import time
 load_dotenv()
 client_id = os.environ.get('SPOTIPY_CLIENT_ID')
 client_secret = os.environ.get('SPOTIPY_CLIENT_SECRET')
-redirect_uri = os.environ.get('REDIRECT_URI')
+redirect_uri = os.environ.get('REDIRECT_URI') 
 TOKEN_INFO = 'token_info'
 app.secret_key = 'din12823112390238ub09843209a1234'
 
 sp = spotipy.Spotify()
 migrate = Migrate(app, db)
 db.init_app(app)
-CORS(app)
+CORS(app, origins=[redirect_uri])
 api=Api(app)
 
-# The `Authenticate` class is used to handle the GET request for authentication by redirecting the
-# user to the Spotify authorization URL.
+
+#Step 1: Create a oAuth
+#Step 2: Get the token/token info
+#Step 3: 
+
+
+
+
+#Scope
+def create_spotify_oauth():
+    return SpotifyOAuth(
+        client_id,
+        client_secret,
+        redirect_uri = redirect_uri, 
+        scope='user-top-read user-library-read user-library-modify user-read-private user-read-email user-read-currently-playing app-remote-control streaming playlist-read-private user-modify-playback-state',
+        cache_path=".cache", 
+    )
+
+def get_token():
+    token_info = session.get(TOKEN_INFO, None)
+    if not token_info:
+        return redirect(url_for('home'))
+
+    now = int(time.time())
+    is_expired = token_info['expires_at'] - now < 60
+    
+    
+    if is_expired:
+        spotify_oauth = create_spotify_oauth()
+
+        # Use open_url to manually get a new access token with an extended expiration time
+        new_token_info = spotify_oauth.open_url(spotify_oauth.get_authorize_url(show_dialog=False))
+        token_info['access_token'] = new_token_info['access_token']
+        token_info['expires_at'] = new_token_info['expires_at']
+
+    
+    return token_info
+
+
+def exchange_code_for_token(code):
+    try:
+        spotify_oauth = create_spotify_oauth()
+        token_info = spotify_oauth.get_access_token(code)
+        session['token_info'] = token_info
+        return token_info
+    except spotipy.SpotifyException as e:
+        # Handle Spotify API exceptions, e.g., invalid code, etc.
+        app.logger.error(f"Error during token exchange: {str(e)}")
+        return None
+    except Exception as e:
+        # Handle other exceptions
+        app.logger.error(f"Unexpected error during token exchange: {str(e)}")
+        return None
+
+
+
+def current_user():
+    try:
+        token_info = get_token()
+        sp = spotipy.Spotify(auth=token_info['access_token'])
+        user_info = sp.current_user()
+        return user_info
+    except:
+        return {'message': 'Error retrieving current user information'}
+
+def current_user_playlists():
+    try:
+        token_info = get_token()
+        sp = spotipy.Spotify(auth=token_info['access_token'])
+        playlists = sp.current_user_playlists()
+        return playlists
+    except:
+        return {'message': 'Error retrieving current user playlists'}
+
+def current_user_saved_tracks():
+    try:
+        token_info = get_token()
+        sp = spotipy.Spotify(auth=token_info['access_token'])
+        saved_tracks = sp.current_user_saved_tracks()
+        return saved_tracks
+    except spotipy.SpotifyException as e:
+        app.logger.error(f"Spotify API Error: {str(e)}")
+        return {'message': 'Error retrieving current user saved tracks'}
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {str(e)}")
+        return {'message': 'Unexpected error retrieving current user saved tracks'}
+
+class UserSavedTracks(Resource):
+    def get(self):
+        try:
+            access_token = request.headers.get('Authorization').split('Bearer ')[1]
+            session['access_token'] = access_token
+
+            sp = Spotify(auth=access_token)
+            saved_tracks_response = sp.current_user_saved_tracks()
+
+            extracted_tracks = self.extract_track_info(saved_tracks_response.get('items', []))
+
+            return jsonify({'tracks': extracted_tracks})
+        except SpotifyException as e:
+            return jsonify({'message': f'Spotify API Error: {str(e)}'}), 500
+        except Exception as e:
+            return jsonify({'message': f'Error retrieving user saved tracks: {str(e)}'}), 500
+
+    def extract_track_info(self, saved_tracks):
+        track_info_list = []
+
+        for item in saved_tracks:
+            track_info = {
+                'id': item['track']['id'],
+                'name': item['track']['name'],
+                'artists': [artist['name'] for artist in item['track']['artists']],
+                'album': {
+                    'id': item['track']['album']['id'],
+                    'name': item['track']['album']['name'],
+                    'release_date': item['track']['album']['release_date'],
+                    'image_url': item['track']['album']['images'][0]['url'] if item['track']['album']['images'] else None,
+                },
+                'added_at': item['added_at'],
+            }
+            track_info_list.append(track_info)
+
+        return track_info_list
+
+class TokenExchange(Resource):
+    def get(self):
+        # Get the authorization code from the query parameters
+        code = request.args.get('code')
+
+        # Exchange the authorization code for an access token
+        token_info = exchange_code_for_token(code)
+
+        # Store the token information in the session
+        session['token_info'] = token_info
+        app.logger.info(f'Token Info: {token_info}')
+    
+
+        # Redirect to your application's home page after successful token exchange
+        redirect_url = url_for('authenticate')  
+        return redirect(redirect_url)
+    def post(self):
+        # Get the authorization code from the form data
+        code = request.form.get('code')
+
+        # Exchange the authorization code for an access token
+        token_info = exchange_code_for_token(code)
+
+        # Store the token information in the session
+        session['token_info'] = token_info
+        print(token_info)
+
+        # Redirect to your application's home page after successful token exchange
+        return redirect(url_for(redirect_uri))
+
 class Authenticate(Resource):
     def get(self):
         auth_url = create_spotify_oauth().get_authorize_url()
-        return redirect(auth_url)
-
-    
+        # import ipdb; ipdb.set_trace()
+        print(auth_url)
+        return redirect(auth_url)    
 
 class LoginPage(Resource):
-    def get(self):
+    def get(self):  
         return 'Sign In with Spotify!'
+    
 class Home(Resource):
     def get(self):
-        auth_url = create_spotify_oauth().get_authorize_url()
+        # auth_url = create_spotify_oauth().get_authorize_url() 
         return (f'Hello, World!')
         
 class Redirect(Resource):
@@ -52,7 +203,7 @@ class Redirect(Resource):
         code = request.args.get('code')
         token_info = create_spotify_oauth().get_access_token(code)
         session[TOKEN_INFO] = token_info
-        return redirect(url_for('home'))
+        return redirect(url_for(redirect_uri))
 
 class SavedSongs(Resource):
     def get(self):
@@ -63,12 +214,6 @@ class SavedSongs(Resource):
             return redirect('user_saved_songs')
         return "OAUTH SUCCESSFUL"
 
-class UserSavedTracks(Resource):
-    def get(self):
-        sp = spotipy.Spotify(auth=TOKEN_INFO)
-
-        saved_tracks = sp.current_user_saved_tracks()
-        return self.extract_track_info(saved_tracks)
 
     def extract_track_info(self, saved_tracks):
         try:
@@ -131,58 +276,6 @@ class SearchArtist(Resource):
         except:
             return {'message': 'Error searching for artist'}
 
-def current_user():
-    try:
-        token_info = get_token()
-        sp = spotipy.Spotify(auth=token_info['access_token'])
-        user_info = sp.current_user()
-        return user_info
-    except:
-        return {'message': 'Error retrieving current user information'}
-
-def current_user_playlists():
-    try:
-        token_info = get_token()
-        sp = spotipy.Spotify(auth=token_info['access_token'])
-        playlists = sp.current_user_playlists()
-        return playlists
-    except:
-        return {'message': 'Error retrieving current user playlists'}
-
-def current_user_saved_tracks():
-    try:
-        token_info = get_token()
-        sp = spotipy.Spotify(auth=token_info['access_token'])
-        saved_tracks = sp.current_user_saved_tracks()
-        return saved_tracks
-    except:
-        return {'message': 'Error retrieving current user saved tracks'}
-
-def get_token():
-    token_info = session.get(TOKEN_INFO, None)
-    if not token_info:
-        # Assuming you want to redirect to the 'login' endpoint
-        return redirect(url_for('usersavedtracks', external=False))
-
-    now = int(time.time())
-
-    is_expired = token_info['expires_at'] - now < 60
-    if is_expired:
-        spotify_oauth = create_spotify_oauth()
-        token_info = spotify_oauth.refresh_access_token(token_info['refresh_token'])
-    return token_info
-
-
-
-#Scop
-def create_spotify_oauth():
-    return SpotifyOAuth(
-        client_id,
-        client_secret,
-        redirect_uri=url_for('redirect', _external=True),
-        #redirect = 
-        scope='user-top-read user-library-read user-library-modify user-read-private user-read-email user-read-currently-playing app-remote-control streaming playlist-read-private user-modify-playback-state'
-    )
 
 class CurrentUser(Resource):
     def get(self):
@@ -478,7 +571,6 @@ class UserPlaylistCreate(Resource):
             print(f"Error: {str(e)}")
             return {'message': 'Error creating playlist'}
 
-
 class UserPlaylistFollow(Resource):
     def put(self, playlist_id):
         try:
@@ -491,32 +583,12 @@ class UserPlaylistFollow(Resource):
             return {'message': 'Error following playlist'}
         
         
-class TokenExchange(Resource):
-    def get(self):
-        spotify_oauth = SpotifyOAuth(
-            client_id,
-            client_secret,
-            redirect_uri,
-            scope='user-library-read',
-        )
 
-        # Get the authorization code from the query parameters
-        code = request.args.get('code')
-
-        # Exchange the authorization code for an access token
-        token_info = spotify_oauth.get_access_token(code)
-
-        # Store the token information in the session
-        session['token_info'] = token_info
-
-        # Redirect to your application's home page after successful token exchange
-        redirect_url = url_for('home', token_info=token_info)  # Include token_info in the redirect URL
-        return redirect(redirect_url)
-
-api.add_resource(TokenExchange, '/token-exchange')
 
 
 #Routes
+api.add_resource(TokenExchange, '/token-exchange')
+api.add_resource(UserSavedTracks, '/user_saved_tracks')
 api.add_resource(Authenticate, '/authenticate') #perhaps not needed
 api.add_resource(Home, '/home')
 api.add_resource(LoginPage, '/login')
@@ -524,7 +596,6 @@ api.add_resource(Redirect, '/redirect') #to sign in
 api.add_resource(Logout, '/logout')
 api.add_resource(FeaturedPlaylists, '/featured_playlists')
 api.add_resource(CurrentUser, '/current_user')
-api.add_resource(UserSavedTracks, '/user_saved_tracks')
 api.add_resource(CurrentUserSavedTracksDelete, '/current_user_saved_tracks_delete/<string:track_id>')
 api.add_resource(CurrentUserTopArtists, '/current_user_top_artists')
 api.add_resource(CurrentUserTopTracks, '/current_user_top_tracks')
@@ -533,9 +604,6 @@ api.add_resource(Search, '/search')#Not working
 api.add_resource(SearchArtist, '/search_artist/<string:artist_name>')
 api.add_resource(Track, '/track/<string:track_id>')
 api.add_resource(Tracks, '/tracks')
-
-#Playlist
-#GET
 api.add_resource(UserPlaylistCreate, '/user_playlist_create/<string:name>/<int:public>/<int:collaborative>/<string:description>')
 api.add_resource(Playlist, '/playlist/<string:playlist_id>')
 api.add_resource(UserPlaylists, '/user_playlists')
@@ -547,5 +615,5 @@ api.add_resource(UserPlaylistFollow, '/user_playlist_follow/<string:playlist_id>
 
 if __name__ == '__main__':
     app.run(debug=True, port=5556)
-
+    CORS(app, resources={{"origins": "http://localhost:5555"}}) 
 
