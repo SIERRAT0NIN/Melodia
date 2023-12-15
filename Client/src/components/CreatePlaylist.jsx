@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useSpotify } from "./SpotifyContext";
+import { Input } from "@nextui-org/react";
 
 export default function CreatePlaylist() {
   const [playlistName, setPlaylistName] = useState("New Playlist");
-  const { accessToken, userId } = useSpotify(); // Use useSpotify hook to access userId and accessToken
-
+  const [playlistDescription, setPlaylistDescription] = useState("");
+  const { accessToken, userId } = useSpotify();
   const createPlaylist = async () => {
     if (!accessToken || !userId) {
       console.error("Access Token or User ID is missing");
@@ -22,12 +23,13 @@ export default function CreatePlaylist() {
           },
           body: JSON.stringify({
             name: playlistName,
+            description: playlistDescription,
           }),
         }
       );
 
       if (response.ok) {
-        const data = await response.json(); // Fixed to await response.json() instead of console.log
+        const data = await response.json();
         console.log("Playlist created:", data);
       } else {
         console.error("Error creating playlist:", response.statusText);
@@ -39,10 +41,18 @@ export default function CreatePlaylist() {
 
   return (
     <div>
-      <input
+      <Input
         type="text"
         value={playlistName}
         onChange={(e) => setPlaylistName(e.target.value)}
+        placeholder="Playlist Name"
+      />
+      <br />
+      <Input
+        type="text"
+        value={playlistDescription}
+        onChange={(e) => setPlaylistDescription(e.target.value)}
+        placeholder="Playlist Description"
       />
       <button className="bn30" onClick={createPlaylist}>
         Create a Playlist

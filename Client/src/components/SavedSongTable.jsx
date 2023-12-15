@@ -9,11 +9,13 @@ import {
 } from "@nextui-org/react";
 import SpotifyAuth from "./SpotifyAuth";
 import SavedPlaylist from "./SavedPlaylist";
-// Include any other necessary imports
+import SongModal from "./SongDetail"; // Assuming SongModal is the SongDetail component
 
 const SavedSongs = () => {
   const [savedTracks, setSavedTracks] = useState([]);
   const [playlists, setPlaylists] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSong, setSelectedSong] = useState(null); // State to store the selected song
 
   const handleSavedTracksChange = (tracks) => {
     setSavedTracks(tracks);
@@ -22,15 +24,19 @@ const SavedSongs = () => {
   const handlePlaylistsChange = (playlists) => {
     setPlaylists(playlists);
   };
+
+  const onSongClick = (song) => {
+    setSelectedSong(song); // Set the selected song
+    setIsModalOpen(true); // Open the modal
+  };
   console.log(playlists);
-  console.log("Saved Tracks:", savedTracks);
   return (
     <div>
       <SpotifyAuth
         onSavedTracksChange={handleSavedTracksChange}
         onPlaylistsChange={handlePlaylistsChange}
       />
-      <Table color="default" aria-label="Example static collection table">
+      <Table color="default" aria-label="Saved Songs Table">
         <TableHeader>
           <TableColumn>Song Title</TableColumn>
           <TableColumn>Artist</TableColumn>
@@ -38,7 +44,10 @@ const SavedSongs = () => {
         </TableHeader>
         <TableBody>
           {savedTracks.map((track, index) => (
-            <TableRow key={track.id || index}>
+            <TableRow
+              key={track.id || index}
+              onClick={() => onSongClick(track)}
+            >
               <TableCell>{track.name || "N/A"}</TableCell>
               <TableCell>
                 {(track.artists && track.artists[0].name) || "N/A"}
@@ -51,6 +60,13 @@ const SavedSongs = () => {
         </TableBody>
       </Table>
       <SavedPlaylist playlists={playlists} />
+      {selectedSong && (
+        <SongModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          songData={selectedSong}
+        />
+      )}
     </div>
   );
 };

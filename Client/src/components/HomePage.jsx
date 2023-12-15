@@ -15,8 +15,8 @@ function HomePage() {
 
       <div className="saved-song-table-container">
         <br />
-        <CreatePlaylist />
         <br />
+        <CreatePlaylist />
         <SavedSongTable />
       </div>
       <br />

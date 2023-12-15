@@ -146,9 +146,44 @@ const SpotifyAuth = ({
     fetchUserPlaylists();
   }, [accessToken]);
 
+  const addSongToPlaylist = async (playlistId, trackUri) => {
+    if (!accessToken || !playlistId || !trackUri) {
+      console.error("Missing required information");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            uris: [trackUri],
+          }),
+        }
+      );
+
+      if (response.ok) {
+        console.log("Track added to the playlist successfully");
+      } else {
+        console.error(
+          "Error adding track to the playlist:",
+          response.statusText
+        );
+      }
+    } catch (error) {
+      console.error("Error adding track to the playlist:", error);
+    }
+  };
+  //   addSongToPlaylist("playlistId", "spotify:track:trackId");
+
   return (
     <div>
-      <h1>Spotify Authentication</h1>
+      <h1>Sierra</h1>
     </div>
   );
 };
