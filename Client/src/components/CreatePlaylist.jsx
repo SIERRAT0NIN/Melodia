@@ -1,5 +1,7 @@
-function CreatePlaylist() {
-  return <div>CreatePlaylist</div>;
+export default function CreatePlaylist() {
+  return (
+    <a href="/">
+      <button className="bn30">Create a Playlist</button>
+    </a>
+  );
 }
-
-export default CreatePlaylist;

@@ -14,6 +14,7 @@ import {
 import { NextIcon } from "./MusicPlayer/NextIcon.jsx";
 import { SearchIcon } from "./SearchIcon.jsx";
 import Account from "./Account.jsx";
+import CreatePlaylist from "./CreatePlaylist.jsx";
 
 export default function NavBar() {
   return (
@@ -23,6 +24,7 @@ export default function NavBar() {
           <NextIcon />
           <p className="hidden sm:block font-bold text-inherit">Melody</p>
         </NavbarBrand>
+        <CreatePlaylist />
         <NavbarContent className="hidden sm:flex gap-3">
           <NavbarItem>
             <Link color="foreground" href="#">
