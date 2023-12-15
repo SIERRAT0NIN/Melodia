@@ -19,10 +19,10 @@ const SavedSongs = () => {
     setSavedTracks(tracks);
   };
 
-  const handlePlaylistsChange = (pls) => {
-    setPlaylists(pls);
+  const handlePlaylistsChange = (playlists) => {
+    setPlaylists(playlists);
   };
-
+  console.log(playlists);
   console.log("Saved Tracks:", savedTracks);
   return (
     <div>
