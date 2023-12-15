@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
-import SavedSongs from "./SavedSongTable";
+import SavedPlaylist from "./SavedPlaylist";
 
-const SpotifyAuth = () => {
+const SpotifyAuth = ({
+  onAccessTokenChange,
+  onSavedTracksChange,
+  onPlaylistsChange,
+}) => {
   const [savedTracks, setSavedTracks] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
   const [accessToken, setAccessToken] = useState(null);
@@ -72,7 +76,7 @@ const SpotifyAuth = () => {
         if (response.ok) {
           const data = await response.json();
           console.log(data);
-          setSavedTracks(data.items[0].track);
+          setSavedTracks(data.items.map((item) => item.track));
         } else {
           console.error(
             "Error fetching user saved tracks:",
@@ -81,6 +85,9 @@ const SpotifyAuth = () => {
         }
       } catch (error) {
         console.error("Error fetching user saved tracks:", error);
+      }
+      if (onSavedTracksChange) {
+        onSavedTracksChange(savedTracks);
       }
     };
 
@@ -98,6 +105,9 @@ const SpotifyAuth = () => {
         if (response.ok) {
           const data = await response.json();
           setUserPlaylists(data.items);
+          if (onPlaylistsChange) {
+            onPlaylistsChange(data.items); // Pass the actual fetched playlists
+          }
         } else {
           console.error("Error fetching user playlists:", response.statusText);
         }
@@ -108,7 +118,7 @@ const SpotifyAuth = () => {
 
     fetchUserSavedTracks();
     fetchUserPlaylists();
-  }, [accessToken]);
+  }, [accessToken, onSavedTracksChange, onPlaylistsChange]);
   console.log(savedTracks);
   console.log(userPlaylists);
 

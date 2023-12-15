@@ -14,7 +14,7 @@ import { PreviousIcon } from "./PreviousIcon";
 import { RepeatOneIcon } from "./RepeatOneIcon";
 import { ShuffleIcon } from "./ShuffleIcon";
 
-export default function CurrentlyPlayingCard({ accessToken }) {
+export default function CurrentlyPlayingCard({}) {
   const [liked, setLiked] = useState(false);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const [loading, setLoading] = useState(true);
