@@ -23,6 +23,7 @@ export default function NavBar() {
           <NextIcon />
           <p className="hidden sm:block font-bold text-inherit">Melody</p>
         </NavbarBrand>
+
         <NavbarContent className="hidden sm:flex gap-3">
           <NavbarItem>
             <Link color="foreground" href="#">

@@ -7,59 +7,69 @@ import {
   Button,
   useDisclosure,
   Image,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
 } from "@nextui-org/react";
 
-export default function App() {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+import { useState } from "react";
+
+const SongModal = ({ isOpen, onClose, songData }) => {
+  const [popoverMessage, setPopoverMessage] = useState("");
+
+  if (!songData) return null;
+
+  const handleLikeClick = () => {
+    setPopoverMessage("Liked! This song has been added to your saved songs.");
+  };
+
+  const handleAddToPlaylistClick = () => {
+    setPopoverMessage("Song added to playlist.");
+  };
+
+  const popoverContent = (
+    <PopoverContent>
+      <div className="px-1 py-2">
+        <div className="text-small font-bold">{popoverMessage}</div>
+      </div>
+    </PopoverContent>
+  );
 
   return (
-    <>
-      <Button onPress={onOpen} color="success">
-        Song
-      </Button>
-      <Modal
-        // backdrop="opaque"
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        radius="2x1"
-        classNames={{
-          body: "py-6",
-          //   backdrop: "bg-[#292f46]/50 backdrop-opacity-0",
-          base: "border-[#292f46] dark:bg-[#19172c] text-[#000]",
-          header: "border-b-[1px] border-[#292f46]",
-          footer: "border-t-[1px] border-[#292f46]",
-          closeButton: "hover:bg-white/5 active:bg-white/10",
-        }}
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                <Image
-                  className="flex "
-                  src="https://i.scdn.co/image/ab67616d00001e02651e1dbc0b5218f2306181a1"
-                ></Image>
-                <h2>Cowgirl (feat. Lourdiz)</h2>
-                <h4>Nicki Minaj</h4>
-                <h4>Pink Friday 2</h4>
-              </ModalHeader>
-              <ModalBody>
-                <p>Release Data: 2023-12-08</p>
-                <p>Artist Bio:</p>
-                <p>Popularity:</p>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="foreground" variant="light" onPress={onClose}>
-                  Like
-                </Button>
-                <Button color="success" variant="light" onPress={onClose}>
-                  Add to playlist
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-    </>
+    <Modal isOpen={isOpen} onClose={onClose} /* other props */>
+      <ModalContent>
+        <ModalHeader className="flex flex-col gap-1">
+          <Image src={songData.album.images[1].url} alt={songData.name} />
+          <h2>{songData.name}</h2>
+          <h4>{songData.artists.map((artist) => artist.name).join(", ")}</h4>
+          <h4>{songData.album.name}</h4>
+        </ModalHeader>
+        <ModalBody>
+          <p>Release Date: {songData.album.release_date}</p>
+          {/* <p>Artist Bio: {songData.artistBio}</p> */}
+          <p>Popularity: {songData.popularity}</p>
+        </ModalBody>
+        <ModalFooter>
+          <Popover placement="top" color={"default"}>
+            <PopoverTrigger>
+              <Button className="bn30" onClick={handleAddToPlaylistClick}>
+                Add to playlist.
+              </Button>
+            </PopoverTrigger>
+            {popoverContent}
+          </Popover>
+          <Popover placement="top" color={"success"}>
+            <PopoverTrigger>
+              <Button className="bn9" onClick={handleLikeClick}>
+                Like
+              </Button>
+            </PopoverTrigger>
+            {popoverContent}
+          </Popover>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
-}
+};
+
+export default SongModal;

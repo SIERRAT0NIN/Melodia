@@ -1,21 +1,29 @@
+import React from "react";
 import NavBar from "./NavBar";
-import SongDetail from "./SongDetail";
 import CurrentlyPlayingCard from "./MusicPlayer/CurrentlyPlayingCard";
 import SavedSongTable from "./SavedSongTable";
-import Account from "./Account";
+import Container from "react-bootstrap/Container";
+import CreatePlaylist from "./CreatePlaylist";
+import SavedPlaylist from "./SavedPlaylist";
 
 function HomePage() {
   return (
-    <div>
-      <div>
+    <Container>
+      <div className="nav-container">
         <NavBar />
       </div>
+      <br />
       <div className="flex">
-        <CurrentlyPlayingCard />
+        <CreatePlaylist />
       </div>
-      <SongDetail />
-      <SavedSongTable />
-    </div>
+      <div className="saved-song-table-container">
+        <br />
+        <br />
+        <SavedSongTable />
+        <SavedPlaylist />
+      </div>
+      <br />
+    </Container>
   );
 }
 
