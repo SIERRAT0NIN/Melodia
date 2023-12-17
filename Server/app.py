@@ -110,44 +110,44 @@ def current_user_saved_tracks():
         
         return {'message': 'Unexpected error retrieving current user saved tracks'}
 
-    def extract_access_token(self):
-        authorization_header = request.headers.get('Authorization')
-        if not authorization_header or 'Bearer ' not in authorization_header:
-            raise ValueError('Authorization header is missing or invalid')
-        return authorization_header.split('Bearer ')[1]
+def extract_access_token(self):
+    authorization_header = request.headers.get('Authorization')
+    if not authorization_header or 'Bearer ' not in authorization_header:
+        raise ValueError('Authorization header is missing or invalid')
+    return authorization_header.split('Bearer ')[1]
 
-    def extract_track_info(self, tracks):
-        extracted_tracks = []
-        for track_item in tracks:
-            track_info = {
-                'id': track_item['track']['id'],
-                'name': track_item['track']['name'],
-                'artist': track_item['track']['artists'][0]['name'],
-                'album': track_item['track']['album']['name'],
-                'image_url': track_item['track']['album']['images'][0]['url'] if track_item['track']['album']['images'] else None,
-            }
-            extracted_tracks.append(track_info)
-        return extracted_tracks
+def extract_track_info(self, tracks):
+    extracted_tracks = []
+    for track_item in tracks:
+        track_info = {
+            'id': track_item['track']['id'],
+            'name': track_item['track']['name'],
+            'artist': track_item['track']['artists'][0]['name'],
+            'album': track_item['track']['album']['name'],
+            'image_url': track_item['track']['album']['images'][0]['url'] if track_item['track']['album']['images'] else None,
+        }
+        extracted_tracks.append(track_info)
+    return extracted_tracks
 
-    def extract_track_info(self, saved_tracks):
-        track_info_list = []
+def extract_track_info(self, saved_tracks):
+    track_info_list = []
 
-        for item in saved_tracks:
-            track_info = {
-                'id': item['track']['id'],
-                'name': item['track']['name'],
-                'artists': [artist['name'] for artist in item['track']['artists']],
-                'album': {
-                    'id': item['track']['album']['id'],
-                    'name': item['track']['album']['name'],
-                    'release_date': item['track']['album']['release_date'],
-                    'image_url': item['track']['album']['images'][0]['url'] if item['track']['album']['images'] else None,
-                },
-                'added_at': item['added_at'],
-            }
-            track_info_list.append(track_info)
+    for item in saved_tracks:
+        track_info = {
+            'id': item['track']['id'],
+            'name': item['track']['name'],
+            'artists': [artist['name'] for artist in item['track']['artists']],
+            'album': {
+                'id': item['track']['album']['id'],
+                'name': item['track']['album']['name'],
+                'release_date': item['track']['album']['release_date'],
+                'image_url': item['track']['album']['images'][0]['url'] if item['track']['album']['images'] else None,
+            },
+            'added_at': item['added_at'],
+        }
+        track_info_list.append(track_info)
 
-        return track_info_list
+    return track_info_list
 
 class TokenExchange(Resource):
     def get(self):
@@ -592,27 +592,25 @@ class UserPlaylistFollow(Resource):
             return {'message': 'Error following playlist'}
         
         
-class StoreRefreshToken(Resource):
+class RefreshTokenResource(Resource):
     def post(self):
         try:
-            # Extract refresh token from request
             data = request.json
+            user_id = data.get('user_id') # Make sure to send user_id from your frontend
             refresh_token = data.get('refresh_token')
 
-            if not refresh_token:
-                return {'message': 'No refresh token provided'}, 400
+            if not user_id or not refresh_token:
+                return {'message': 'Missing user_id or refresh token'}, 400
 
-            # Store the refresh token securely
-            # Replace this with your actual storage logic
-            user_id = data.get('user_id')  # Assuming the user ID is sent along with the refresh token
-            save_to_database(user_id, refresh_token)  # Placeholder for your database saving function
+            new_token = RefreshToken(user_id=user_id, refresh_token=refresh_token)
+            db.session.add(new_token)
+            db.session.commit()
 
             return {'message': 'Refresh token stored successfully'}, 200
         except Exception as e:
-            print(f"Error: {str(e)}")
-            return {'message': 'Error storing refresh token'}, 500
-
-api.add_resource(StoreRefreshToken, '/store_refresh_token')
+            return {'message': str(e)}, 500
+        
+api.add_resource(RefreshTokenResource, '/store_refresh_token')
 
 #Routes
 api.add_resource(TokenExchange, '/token-exchange')

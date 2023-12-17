@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 export const SpotifyContext = createContext(null);
 
@@ -10,7 +10,39 @@ export const SpotifyProvider = ({ children }) => {
   const [refreshToken, setRefreshToken] = useState(null);
   const [savedTracks, setSavedTracks] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
-  console.log(userId);
+  console.log("user id:", userId);
+  console.log("refresh token:", refreshToken);
+
+  useEffect(() => {
+    if (!refreshToken) return;
+
+    const storeRefreshTokenInBackend = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5556/store_refresh_token",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_id: userId,
+              refresh_token: refreshToken,
+            }),
+          }
+        );
+
+        const data = await response.json();
+        console.log("SRTIB: ", response);
+        console.log("Response from backend:", data);
+      } catch (error) {
+        console.error("Error storing refresh token:", error);
+      }
+    };
+
+    storeRefreshTokenInBackend();
+  }, [refreshToken, userId]);
+
   return (
     <SpotifyContext.Provider
       value={{
