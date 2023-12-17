@@ -41,21 +41,22 @@ class RefreshToken(db.Model):
     refresh_token = db.Column(db.String, nullable=False)
 
 def save_to_database(user_id, refresh_token):
-    # No need to manually connect to the database or manage sessions
-
     # Check if a token already exists for the user
     existing_token = RefreshToken.query.filter_by(user_id=user_id).first()
-
+    
     if existing_token:
         # Update the existing token
         existing_token.refresh_token = refresh_token
     else:
         # Create a new token record
-        new_token = RefreshToken(user_id=user_id, refresh_token=refresh_token)
+        new_token = RefreshToken()
+        new_token.user_id = user_id
+        new_token.refresh_token = refresh_token
         db.session.add(new_token)
 
     # Commit the session
     db.session.commit()
+
     
 
 class Liked_Song(db.Model):
