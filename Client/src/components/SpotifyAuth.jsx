@@ -37,9 +37,10 @@ const SpotifyAuth = ({
     };
 
     //! Fetch token with Auth Code.
+    //* Working
     const fetchAccessToken = async () => {
       const authorizationCode = getAuthorizationCode();
-      console.log(authorizationCode);
+      console.log("Creating authorization code: ", authorizationCode);
       if (!authorizationCode) {
         console.error("No authorization code found");
         return;
@@ -77,6 +78,7 @@ const SpotifyAuth = ({
         console.error("Error exchanging authorization code:", error);
       }
       //! Refresh Access
+
       async function refreshAccessToken() {
         const refresh_token = refreshToken;
 
@@ -103,20 +105,26 @@ const SpotifyAuth = ({
           if (response.ok) {
             setAccessToken(data.access_token);
             setRefreshToken(data.refresh_token);
+            console.log(
+              "*refreshAccessToken function-- Access Token: ",
+              accessToken,
+              "Refresh Token: ",
+              refreshToken
+            );
           } else {
             throw new Error(`Error refreshing token: ${data.error}`);
           }
         } catch (error) {
           console.error("Error refreshing access token:", error);
-          // Handle error - maybe trigger re-authentication
         }
+        refreshAccessToken();
       }
     };
+    //Gets another access token
     fetchAccessToken();
   }, []);
-  console.log("Refresh Token: ", refreshToken);
-
-  //! User Profile
+  //! User Profile {userId}
+  //* Working
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (!accessToken) return;
@@ -145,72 +153,37 @@ const SpotifyAuth = ({
     fetchUserProfile();
   }, [accessToken]);
 
-  //! Refresh Access Token
-
-  async function refreshAccessToken() {
-    const refresh_token = await refreshToken;
-    const authString = btoa(`${client_id}:${client_secret}`);
-    const url = "https://accounts.spotify.com/api/token";
-
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${authString}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          grant_type: "refresh_token",
-          refresh_token: refresh_token,
-        }).toString(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const { access_token, expires_in, new_refresh_token } = data;
-
-      setAccessToken(access_token);
-
-      // Optionally, update the refresh token if a new one is provided
-      // storeRefreshToken(new_refresh_token); // Securely store the new refresh token
-
-      return access_token;
-    } catch (error) {
-      console.error("Error refreshing access token:", error);
-      throw error;
-    }
-  }
   //! Storing Refresh Token in the backend
-  useEffect(() => {
-    if (!refreshToken) return;
+  //! Not Working yet
+  // useEffect(() => {
+  //   if (!refreshToken) return;
 
-    const storeRefreshTokenInBackend = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5556/store_refresh_token",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ refresh_token: refreshToken }),
-          }
-        );
+  //   const storeRefreshTokenInBackend = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         "http://localhost:5556/store_refresh_token",
+  //         {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //           body: JSON.stringify({ refresh_token: refreshToken }),
+  //         }
+  //       );
 
-        const data = await response.json();
-        console.log(data);
-      } catch (error) {
-        console.error("Error storing refresh token:", error);
-      }
-    };
+  //       const data = await response.json();
+  //       console.log("SRTIB: ", response);
+  //       console.log("Response from backend:", data);
+  //     } catch (error) {
+  //       console.error("Error storing refresh token:", error);
+  //     }
+  //   };
 
-    storeRefreshTokenInBackend();
-  }, [refreshToken]);
+  //   storeRefreshTokenInBackend();
+  // }, [refreshToken]);
 
   //! User Saved Tracks
+  //* Working
   useEffect(() => {
     if (!accessToken) return;
 
@@ -240,7 +213,9 @@ const SpotifyAuth = ({
 
     fetchUserSavedTracks();
   }, [accessToken]); //
+
   //! User Playlist
+  //* Working
   useEffect(() => {
     if (!accessToken) return;
 
@@ -270,6 +245,7 @@ const SpotifyAuth = ({
     fetchUserPlaylists();
   }, [accessToken]);
 
+  //! Add song to playlist
   const addSongToPlaylist = async (playlistId, trackUri) => {
     if (!accessToken || !playlistId || !trackUri) {
       console.error("Missing required information");
