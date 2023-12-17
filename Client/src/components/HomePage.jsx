@@ -4,6 +4,7 @@ import CurrentlyPlayingCard from "./MusicPlayer/CurrentlyPlayingCard";
 import SavedSongTable from "./SavedSongTable";
 import Container from "react-bootstrap/Container";
 import CreatePlaylist from "./CreatePlaylist";
+import SavedPlaylist from "./SavedPlaylist";
 
 function HomePage() {
   return (
@@ -12,12 +13,14 @@ function HomePage() {
         <NavBar />
       </div>
       <br />
-
+      <div className="flex">
+        <CreatePlaylist />
+      </div>
       <div className="saved-song-table-container">
         <br />
         <br />
-        <CreatePlaylist />
         <SavedSongTable />
+        <SavedPlaylist />
       </div>
       <br />
     </Container>

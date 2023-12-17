@@ -11,7 +11,7 @@ import NotFound from "./NotFound";
 import CurrentlyPlayingCard from "./MusicPlayer/CurrentlyPlayingCard";
 import NavBar from "./NavBar";
 import SongDetail from "./SongDetail";
-
+import Blob from "./experimental-login";
 import { BrowserRouter as Router } from "react-router-dom";
 // import App from "./App";
 // import "./index.css";
@@ -36,7 +36,8 @@ function App() {
             <Route path="/create_playlist" element={<CreatePlaylist />} />
 
             <Route path="/navbar" element={<NavBar />} />
-            <Route path="/" element={<LoginBlob />} />
+            {/* <Route path="/" element={<LoginBlob />} /> */}
+            <Route path="/" element={<Blob />} />
             <Route path="/logout" element={<Logout />} />
             <Route path="*" element={<NotFound />} />
           </>

@@ -9,8 +9,6 @@ import {
 } from "@nextui-org/react";
 
 export default function SavedPlaylist({ playlists }) {
-  console.log("Received playlists:", playlists);
-
   // Check if playlists data is available
   if (!playlists || playlists.length === 0) {
     return <p>No playlists available to display.</p>;
@@ -25,6 +23,7 @@ export default function SavedPlaylist({ playlists }) {
         <TableColumn>Public</TableColumn>
         <TableColumn>Image</TableColumn>
       </TableHeader>
+
       <TableBody>
         {playlists.map((playlist) => (
           <TableRow key={playlist.id}>

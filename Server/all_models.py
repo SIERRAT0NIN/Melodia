@@ -3,10 +3,15 @@ from flask import Flask
 from sqlalchemy import MetaData
 from flask_migrate import Migrate
 from app_config import db 
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, create_engine, Column, String
 from sqlalchemy import Column, String, Integer
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from app_config import jwt
+
+
+
+
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 
 class User(db.Model):
@@ -18,17 +23,40 @@ class User(db.Model):
     email = db.Column(db.String)
     password = db.Column(db.String)
     profile_pic = db.Column(db.String)
-    jwt = db.Column(db.String)
+    refresh_token = db.Column(db.String)
 
     
-    def verify_jwt(self, jwt_to_be_checked):
-        return self.jwt == jwt_to_be_checked
+    def verify_refresh_token(self, refresh_token_to_be_checked):
+        return self.refresh_token == refresh_token_to_be_checked
     
     def __repr__(self):
         return f'<User {self.id, self.name, self.username}>'
 class UserSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = User
+        
+class RefreshToken(db.Model):
+    __tablename__ = 'refresh_tokens'
+    user_id = db.Column(db.String, primary_key=True)
+    refresh_token = db.Column(db.String, nullable=False)
+
+def save_to_database(user_id, refresh_token):
+    # No need to manually connect to the database or manage sessions
+
+    # Check if a token already exists for the user
+    existing_token = RefreshToken.query.filter_by(user_id=user_id).first()
+
+    if existing_token:
+        # Update the existing token
+        existing_token.refresh_token = refresh_token
+    else:
+        # Create a new token record
+        new_token = RefreshToken(user_id=user_id, refresh_token=refresh_token)
+        db.session.add(new_token)
+
+    # Commit the session
+    db.session.commit()
+    
 
 class Liked_Song(db.Model):
     __tablename__ = 'liked_songs'
@@ -120,6 +148,7 @@ class Playlist(db.Model):
 class PlaylistSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Playlist
+
 
 
 #Relationships

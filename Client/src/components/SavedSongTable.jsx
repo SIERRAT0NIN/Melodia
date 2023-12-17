@@ -9,7 +9,7 @@ import {
 } from "@nextui-org/react";
 import SpotifyAuth from "./SpotifyAuth";
 import SavedPlaylist from "./SavedPlaylist";
-import SongModal from "./SongDetail"; // Assuming SongModal is the SongDetail component
+import SongModal from "./SongDetail";
 
 const SavedSongs = () => {
   const [savedTracks, setSavedTracks] = useState([]);
@@ -29,7 +29,7 @@ const SavedSongs = () => {
     setSelectedSong(song); // Set the selected song
     setIsModalOpen(true); // Open the modal
   };
-  console.log(playlists);
+
   return (
     <div>
       <SpotifyAuth
@@ -59,6 +59,7 @@ const SavedSongs = () => {
           ))}
         </TableBody>
       </Table>
+      <br />
       <SavedPlaylist playlists={playlists} />
       {selectedSong && (
         <SongModal

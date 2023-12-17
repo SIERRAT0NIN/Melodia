@@ -25,14 +25,8 @@ app.secret_key = 'din12823112390238ub09843209a1234'
 sp = spotipy.Spotify()
 migrate = Migrate(app, db)
 db.init_app(app)
-CORS(app, origins=[redirect_uri])
+CORS(app, resources={r"/store_refresh_token": {"origins": "http://localhost:5555"}})
 api=Api(app)
-
-
-#Step 1: Create a oAuth
-#Step 2: Get the token/token info
-#Step 3: 
-
 
 
 
@@ -115,18 +109,6 @@ def current_user_saved_tracks():
         app.logger.error(f"Unexpected error: {str(e)}")
         
         return {'message': 'Unexpected error retrieving current user saved tracks'}
-class UserSavedTracks(Resource):
-    def get(self):
-        try:
-            access_token = self.extract_access_token()
-            sp = Spotify(auth=access_token)
-            saved_tracks_response = sp.current_user_saved_tracks()
-            extracted_tracks = self.extract_track_info(saved_tracks_response.get('items', []))
-            return jsonify({'tracks': extracted_tracks})
-        except SpotifyException as spotify_error:
-            return jsonify({'message': f'Spotify API Error: {str(spotify_error)}'}), 500
-        except Exception as generic_error:
-            return jsonify({'message': f'Error retrieving user saved tracks: {str(generic_error)}'}), 500
 
     def extract_access_token(self):
         authorization_header = request.headers.get('Authorization')
@@ -192,7 +174,7 @@ class TokenExchange(Resource):
 
         # Store the token information in the session
         session['token_info'] = token_info
-        print(token_info)
+        print(f'token infor:', token_info)
 
         # Redirect to your application's home page after successful token exchange
         return redirect(url_for(redirect_uri))
@@ -212,6 +194,18 @@ class Home(Resource):
     def get(self):
         # auth_url = create_spotify_oauth().get_authorize_url() 
         return (f'Hello, World!')
+class UserSavedTracks(Resource):
+    def get(self):
+        try:
+            access_token = self.extract_access_token()
+            sp = Spotify(auth=access_token)
+            saved_tracks_response = sp.current_user_saved_tracks()
+            extracted_tracks = self.extract_track_info(saved_tracks_response.get('items', []))
+            return jsonify({'tracks': extracted_tracks})
+        except SpotifyException as spotify_error:
+            return jsonify({'message': f'Spotify API Error: {str(spotify_error)}'}), 500
+        except Exception as generic_error:
+            return jsonify({'message': f'Error retrieving user saved tracks: {str(generic_error)}'}), 500
         
 class Redirect(Resource):
     def get(self):
@@ -598,8 +592,27 @@ class UserPlaylistFollow(Resource):
             return {'message': 'Error following playlist'}
         
         
+class StoreRefreshToken(Resource):
+    def post(self):
+        try:
+            # Extract refresh token from request
+            data = request.json
+            refresh_token = data.get('refresh_token')
 
+            if not refresh_token:
+                return {'message': 'No refresh token provided'}, 400
 
+            # Store the refresh token securely
+            # Replace this with your actual storage logic
+            user_id = data.get('user_id')  # Assuming the user ID is sent along with the refresh token
+            save_to_database(user_id, refresh_token)  # Placeholder for your database saving function
+
+            return {'message': 'Refresh token stored successfully'}, 200
+        except Exception as e:
+            print(f"Error: {str(e)}")
+            return {'message': 'Error storing refresh token'}, 500
+
+api.add_resource(StoreRefreshToken, '/store_refresh_token')
 
 #Routes
 api.add_resource(TokenExchange, '/token-exchange')
