@@ -179,39 +179,31 @@ function EditPlaylistButton({
   };
 
   return (
-    <>
+    <div>
       <Button color="warning" variant="bordered" onClick={() => handleEdit()}>
         Edit Playlist
       </Button>
-
-      <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-        <ModalHeader>Edit Playlist</ModalHeader>
-        <ModalBody>
-          <Input
-            type="text"
-            label="Edit Name"
-            placeholder="Change the name of the playlist"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <Input
-            type="text"
-            label="Edit Description"
-            placeholder="Change the description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </ModalBody>
-        <ModalFooter>
-          <Button auto flat color="error" onClick={() => setIsOpen(false)}>
-            Cancel
-          </Button>
-          <Button auto onClick={handleEdit}>
-            Save
-          </Button>
-        </ModalFooter>
-      </Modal>
-    </>
+      <Input
+        type="text"
+        label="Edit Name"
+        placeholder="Change the name of the playlist"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <Input
+        type="text"
+        label="Edit Description"
+        placeholder="Change the description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+      <Button auto flat color="error" onClick={() => setIsOpen(false)}>
+        Cancel
+      </Button>
+      <Button auto onClick={handleEdit}>
+        Save
+      </Button>
+    </div>
   );
 }
 
