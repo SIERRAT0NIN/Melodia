@@ -21,9 +21,8 @@ class User(db.Model):
     name = db.Column(db.String)
     username = db.Column(db.String)
     email = db.Column(db.String)
-    password = db.Column(db.String)
     profile_pic = db.Column(db.String)
-    refresh_token = db.Column(db.String)
+    password = db.Column(db.String)
 
     
     def verify_refresh_token(self, refresh_token_to_be_checked):

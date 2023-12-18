@@ -3,7 +3,7 @@ from flask_migrate import Migrate
 from flask_restful import Api, Resource
 from flask_cors import CORS
 from sqlalchemy import MetaData
-from app_config import db, app
+from app_config import db, app, sp
 from all_models import *
 from spotipy.oauth2 import SpotifyOAuth
 from flask import Flask, request, url_for, session, redirect, make_response, jsonify
@@ -22,9 +22,9 @@ redirect_uri = os.environ.get('REDIRECT_URI')
 TOKEN_INFO = 'token_info'
 app.secret_key = 'din12823112390238ub09843209a1234'
 
-sp = spotipy.Spotify()
-migrate = Migrate(app, db)
-db.init_app(app)
+# sp = spotipy.Spotify()
+# migrate = Migrate(app, db)
+# db.init_app(app)
 api=Api(app)
 CORS(app, resources={
         r"/store_refresh_token": {"origins": "http://localhost:5555"},
