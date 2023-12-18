@@ -1,18 +1,26 @@
 import { useState } from "react";
-import { useSpotify } from "./SpotifyContext";
-import { Input } from "@nextui-org/react";
+import { useSpotify } from "../Spotify/SpotifyContext";
+import {
+  Input,
+  Button,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@nextui-org/react";
 
+// Note: Move client_secret and client_id to a secure backend service.
 const client_secret = "2fb5a9bb603a48aeadc6dfb28eeb00a0";
 const client_id = "6abb9eac788d42e08c2a50e3f5ff4e53";
 
 export default function CreatePlaylist() {
-  const [playlistName, setPlaylistName] = useState("New Playlist");
+  const [playlistName, setPlaylistName] = useState("");
   const [playlistDescription, setPlaylistDescription] = useState("");
   const { accessToken, userId, refreshToken, setAccessToken } = useSpotify();
+  const [popoverMessage, setPopoverMessage] = useState("");
 
   const refreshAccessToken = async () => {
-    const refresh_token = refreshToken; // Assuming refreshToken is correctly retrieved
-    const authString = btoa(`${client_id}:${client_secret}`); // Ensure these are securely managed
+    const refresh_token = refreshToken;
+    const authString = btoa(`${client_id}:${client_secret}`);
     const url = "https://accounts.spotify.com/api/token";
 
     try {
@@ -34,11 +42,7 @@ export default function CreatePlaylist() {
 
       const data = await response.json();
       const { access_token } = data;
-
-      setAccessToken(access_token); // Update access token state
-
-      // Handle new refresh token if provided
-      // if (new_refresh_token) storeRefreshToken(new_refresh_token);
+      setAccessToken(access_token);
 
       return access_token;
     } catch (error) {
@@ -46,6 +50,7 @@ export default function CreatePlaylist() {
       throw error;
     }
   };
+
   const createPlaylist = async () => {
     if (!accessToken || !userId) {
       console.error("Access Token or User ID is missing");
@@ -55,15 +60,17 @@ export default function CreatePlaylist() {
     let response = await makePlaylistRequest(accessToken);
 
     if (!response.ok && response.status === 401) {
-      // Token might be expired, try refreshing it
       const newAccessToken = await refreshAccessToken();
-      // Retry the request with the new access token
       response = await makePlaylistRequest(newAccessToken);
     }
 
     if (response.ok) {
       const data = await response.json();
       console.log("Playlist created:", data);
+
+      setPlaylistName("");
+      setPlaylistDescription("");
+      setPopoverMessage("Playlist has been created successfully");
     } else {
       console.error("Error creating playlist:", response.statusText);
     }
@@ -83,6 +90,19 @@ export default function CreatePlaylist() {
     });
   };
 
+  const handleAddToPlaylistClick = () => {
+    createPlaylist();
+    setPopoverMessage("Playlist has been created");
+  };
+
+  const popoverContent = (
+    <PopoverContent>
+      <div className="px-1 py-2">
+        <div className="text-small font-bold">{popoverMessage}</div>
+      </div>
+    </PopoverContent>
+  );
+
   return (
     <div>
       <Input
@@ -90,7 +110,7 @@ export default function CreatePlaylist() {
         value={playlistName}
         onChange={(e) => setPlaylistName(e.target.value)}
         placeholder="Playlist Name"
-        maxLength={"20px"}
+        maxLength={20}
       />
       <br />
       <Input
@@ -100,9 +120,14 @@ export default function CreatePlaylist() {
         placeholder="Playlist Description"
       />
       <br />
-      <button className="bn30" onClick={createPlaylist}>
-        Create a Playlist
-      </button>
+      <Popover placement="top" color={"default"}>
+        <PopoverTrigger>
+          <Button className="bn30" onClick={handleAddToPlaylistClick}>
+            Create a playlist.
+          </Button>
+        </PopoverTrigger>
+        {popoverContent}
+      </Popover>
     </div>
   );
 }

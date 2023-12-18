@@ -1,7 +1,10 @@
-import React from "react";
+import { Button } from "@nextui-org/react";
+import { useSpotify } from "../Spotify/SpotifyContext";
 
-function DeletePlaylistBtn() {
-  const deletePlaylist = async (playlistId, accessToken) => {
+function DeletePlaylistBtn({ playlistId }) {
+  const { accessToken } = useSpotify();
+
+  const deletePlaylist = async () => {
     if (!playlistId || !accessToken) {
       console.error("Playlist ID or Access Token is missing");
       return;
@@ -21,6 +24,8 @@ function DeletePlaylistBtn() {
 
       if (response.ok) {
         console.log("Playlist deleted (unfollowed) successfully");
+        // You might want to add some logic here to update the UI
+        // or inform the parent component about the deletion
       } else {
         console.error(
           "Error deleting (unfollowing) the playlist:",
@@ -34,11 +39,9 @@ function DeletePlaylistBtn() {
 
   return (
     <div>
-      <a href="/">
-        <button className="bn632-hover bn19" onClick={deletePlaylist}>
-          Delete Playlist
-        </button>
-      </a>
+      <Button color="danger" variant="bordered" onClick={deletePlaylist}>
+        Delete Playlist
+      </Button>
     </div>
   );
 }

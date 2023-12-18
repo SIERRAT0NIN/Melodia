@@ -11,16 +11,16 @@ import {
   // DropdownMenu,
   // Avatar,
 } from "@nextui-org/react";
-import { NextIcon } from "./MusicPlayer/NextIcon.jsx";
+// import { NextIcon } from "../MusicPlayer/NextIcon.jsx";
 import { SearchIcon } from "./SearchIcon.jsx";
 import Account from "./Account.jsx";
-
+import EqualizerRoundedIcon from "@mui/icons-material/EqualizerRounded";
 export default function NavBar() {
   return (
     <Navbar isBordered>
       <NavbarContent justify="start">
         <NavbarBrand className="mr-4">
-          <NextIcon />
+          <EqualizerRoundedIcon />
           <p className="hidden sm:block font-bold text-inherit">Melody</p>
         </NavbarBrand>
 
@@ -58,34 +58,6 @@ export default function NavBar() {
           type="search"
         />
         <Account />
-        {/* <Dropdown placement="bottom-end">
-          <DropdownTrigger>
-            <Avatar
-              isBordered
-              as="button"
-              className="transition-transform"
-              color="secondary"
-              name="Jason Hughes"
-              size="z"
-              src="https://lh3.googleusercontent.com/a/ACg8ocJSHiyA9N1JGNlcNwI_WVLFZ1r9Qe73GvjyrVkI85Lxhcw=s288-c-no"
-            />
-          </DropdownTrigger>
-          <DropdownMenu aria-label="Profile Actions" variant="flat">
-            <DropdownItem key="profile" className="h-14 gap-2">
-              <p className="font-semibold">Signed in as</p>
-              <p className="font-semibold">alberto.sierra101@gmail.com</p>
-            </DropdownItem>
-            <DropdownItem key="settings">My Settings</DropdownItem>
-            <DropdownItem key="team_settings">Team Settings</DropdownItem>
-            <DropdownItem key="analytics">Analytics</DropdownItem>
-            <DropdownItem key="system">System</DropdownItem>
-            <DropdownItem key="configurations">Configurations</DropdownItem>
-            <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
-            <DropdownItem key="logout" color="danger">
-              Log Out
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown> */}
       </NavbarContent>
     </Navbar>
   );

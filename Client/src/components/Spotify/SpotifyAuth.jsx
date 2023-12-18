@@ -14,6 +14,7 @@ const SpotifyAuth = ({
     accessToken,
     setAccessToken,
     setUserId,
+    userId,
     refreshToken,
     setRefreshToken,
   } = useSpotify();
@@ -30,6 +31,7 @@ const SpotifyAuth = ({
   ].join(" ");
 
   //! Getting the Auth Code
+  //* Working
   useEffect(() => {
     const getAuthorizationCode = () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -59,7 +61,6 @@ const SpotifyAuth = ({
           scopes: scopes,
         }).toString(),
       };
-
       try {
         const response = await fetch(
           "https://accounts.spotify.com/api/token",
@@ -70,6 +71,10 @@ const SpotifyAuth = ({
         if (response.ok) {
           setAccessToken(data.access_token);
           setRefreshToken(data.refresh_token);
+          const expiryTime = new Date(
+            new Date().getTime() + data.expires_in * 1000
+          );
+          console.log("Token expires at:", expiryTime);
           if (onAccessTokenChange) onAccessTokenChange(data.access_token);
         } else {
           console.error("Error exchanging authorization code:", data);
@@ -123,6 +128,27 @@ const SpotifyAuth = ({
     //Gets another access token
     fetchAccessToken();
   }, []);
+
+  //! Refreshing Access Token with Refresh Token from the back end
+  const refreshAccessToken = async () => {
+    try {
+      const response = await fetch("/refresh_token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_id: userId }),
+      });
+
+      const data = await response.json();
+      if (data.access_token) {
+        setAccessToken(data.access_token); // Update your access token state
+      }
+    } catch (error) {
+      console.error("Error refreshing access token:", error);
+    }
+  };
+
   //! User Profile {userId}
   //* Working
   useEffect(() => {
@@ -152,35 +178,6 @@ const SpotifyAuth = ({
 
     fetchUserProfile();
   }, [accessToken]);
-
-  //! Storing Refresh Token in the backend
-  //! Not Working yet
-  // useEffect(() => {
-  //   if (!refreshToken) return;
-
-  //   const storeRefreshTokenInBackend = async () => {
-  //     try {
-  //       const response = await fetch(
-  //         "http://localhost:5556/store_refresh_token",
-  //         {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //           },
-  //           body: JSON.stringify({ refresh_token: refreshToken }),
-  //         }
-  //       );
-
-  //       const data = await response.json();
-  //       console.log("SRTIB: ", response);
-  //       console.log("Response from backend:", data);
-  //     } catch (error) {
-  //       console.error("Error storing refresh token:", error);
-  //     }
-  //   };
-
-  //   storeRefreshTokenInBackend();
-  // }, [refreshToken]);
 
   //! User Saved Tracks
   //* Working
@@ -246,40 +243,39 @@ const SpotifyAuth = ({
   }, [accessToken]);
 
   //! Add song to playlist
-  const addSongToPlaylist = async (playlistId, trackUri) => {
-    if (!accessToken || !playlistId || !trackUri) {
-      console.error("Missing required information");
-      return;
-    }
+  // const addSongToPlaylist = async (playlistId, trackUri) => {
+  //   if (!accessToken || !playlistId || !trackUri) {
+  //     console.error("Missing required information");
+  //     return;
+  //   }
 
-    try {
-      const response = await fetch(
-        `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            uris: [trackUri],
-          }),
-        }
-      );
+  //   try {
+  //     const response = await fetch(
+  //       `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           Authorization: `Bearer ${accessToken}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           uris: [trackUri],
+  //         }),
+  //       }
+  //     );
 
-      if (response.ok) {
-        console.log("Track added to the playlist successfully");
-      } else {
-        console.error(
-          "Error adding track to the playlist:",
-          response.statusText
-        );
-      }
-    } catch (error) {
-      console.error("Error adding track to the playlist:", error);
-    }
-  };
-  //   addSongToPlaylist("playlistId", "spotify:track:trackId");
+  //     if (response.ok) {
+  //       console.log("Track added to the playlist successfully");
+  //     } else {
+  //       console.error(
+  //         "Error adding track to the playlist:",
+  //         response.statusText
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Error adding track to the playlist:", error);
+  //   }
+  // };
 
   return (
     <div>
