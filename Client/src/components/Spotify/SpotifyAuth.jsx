@@ -277,9 +277,37 @@ const SpotifyAuth = ({
   //   }
   // };
 
+  fetch("http://127.0.0.1:5556/current_user", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    // body: JSON.stringify(userData),
+  })
+    .then((response) => console.log(response.json()))
+    .then((data) => console.log("Current User", data))
+    .catch((error) => console.error("Error:", error));
+
+  const userInformation = {
+    name: "alberto sierra",
+    email: "alberto.sierra@email.com",
+    userId: "alberto_sierra",
+  };
+
+  fetch("http://127.0.0.1:5556/store_user", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(userInformation),
+  })
+    .then((response) => response.json())
+    .then((data) => console.log("Success:", data))
+    .catch((error) => console.error("Error:", error));
+
   return (
     <div>
-      <h1>Sierra</h1>
+      <h1>Melody</h1>
     </div>
   );
 };

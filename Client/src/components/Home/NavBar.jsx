@@ -15,6 +15,7 @@ import {
 import { SearchIcon } from "./SearchIcon.jsx";
 import Account from "./Account.jsx";
 import EqualizerRoundedIcon from "@mui/icons-material/EqualizerRounded";
+import SpotifySearch from "./SpotifySearch.jsx";
 export default function NavBar() {
   return (
     <Navbar isBordered>
@@ -44,7 +45,7 @@ export default function NavBar() {
       </NavbarContent>
 
       <NavbarContent as="div" className="items-center" justify="end">
-        <Input
+        {/* <Input
           classNames={{
             base: "max-w-full sm:max-w-[10rem] h-10",
             mainWrapper: "h-full",
@@ -56,7 +57,10 @@ export default function NavBar() {
           size="sm"
           startContent={<SearchIcon size={18} />}
           type="search"
-        />
+        /> */}
+
+        <SpotifySearch />
+
         <Account />
       </NavbarContent>
     </Navbar>

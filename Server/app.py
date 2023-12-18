@@ -26,6 +26,11 @@ sp = spotipy.Spotify()
 migrate = Migrate(app, db)
 db.init_app(app)
 api=Api(app)
+CORS(app, resources={
+        r"/store_refresh_token": {"origins": "http://localhost:5555"},
+        r"/current_user": {"origins": "http://localhost:5555"},
+        r"/store_user": {"origins": "http://localhost:5555"},
+    })    
 
 
 
@@ -94,14 +99,6 @@ def refresh_access_token(refresh_token):
 
 
 
-def current_user():
-    try:
-        token_info = get_token()
-        sp = spotipy.Spotify(auth=token_info['access_token'])
-        user_info = sp.current_user()
-        return user_info
-    except:
-        return {'message': 'Error retrieving current user information'}
 
 def current_user_playlists():
     try:
@@ -181,32 +178,32 @@ def get_refresh_token_for_user(user_id):
     
 class TokenExchange(Resource):
     def get(self):
-        # Get the authorization code from the query parameters
+        
         code = request.args.get('code')
 
-        # Exchange the authorization code for an access token
+   
         token_info = exchange_code(code)
 
-        # Store the token information in the session
+        
         session['token_info'] = token_info
         app.logger.info(f'Token Info: {token_info}')
 
 
-        # Redirect to your application's home page after successful token exchange
+       
         redirect_url = url_for('authenticate')  
         return redirect(redirect_url)
     def post(self):
-        # Get the authorization code from the form data
+      
         code = request.form.get('code')
 
-        # Exchange the authorization code for an access token
+        
         token_info = exchange_code(code)
 
-        # Store the token information in the session
+        
         session['token_info'] = token_info
         print(f'token infor:', token_info)
 
-        # Redirect to your application's home page after successful token exchange
+       
         return redirect(url_for(redirect_uri))
 
 class Authenticate(Resource):
@@ -215,6 +212,7 @@ class Authenticate(Resource):
         # import ipdb; ipdb.set_trace()
         print(auth_url)
         return redirect(auth_url)    
+
 
 class LoginPage(Resource):
     def get(self):  
@@ -318,8 +316,16 @@ class SearchArtist(Resource):
 
 class CurrentUser(Resource):
     def get(self):
-        user_info = current_user()
-        return user_info
+        try:
+            token_info = get_token()
+            sp = spotipy.Spotify(auth=token_info['access_token'])
+            if not token_info or 'access_token' not in token_info:
+                return {'message': 'Invalid or missing token'}
+            user_info = sp.current_user()
+            return user_info
+        except Exception as e:
+            return {'message': f'Error retrieving current user information: {str(e)}'}
+
 
 def get_all_user_playlists(sp, limit=50):
     playlists = []
@@ -572,7 +578,6 @@ class Tracks(Resource):
             return {'message': 'Error retrieving tracks information'}
 
 class Logout(Resource):
-
     def get(self):
         # Clear the user's session data
         session.clear()
@@ -698,6 +703,21 @@ class Refresh(Resource):
             return jsonify(response.json())
         else:
             return {'error': 'Failed to refresh token'}, response.status_code
+
+class StoreUser(Resource):
+    def post(self):
+        data = request.get_json()
+        # import ipdb; ipdb.set_trace()
+        new_user = User(email=data['email'], name=data['name'],username=data['userId'] )
+        db.session.add(new_user)
+        db.session.commit()
+        return {'message': 'User created successfully'}, 201
+
+    def options(self):
+        # Handle OPTIONS request explicitly (if needed)
+        return {'message': 'OK'}, 200
+
+api.add_resource(StoreUser, '/store_user')
 api.add_resource(Refresh, '/refresh_token')
 api.add_resource(RefreshTokenResource, '/store_refresh_token')
 #Routes
@@ -708,8 +728,12 @@ api.add_resource(Home, '/home')
 api.add_resource(LoginPage, '/login')
 api.add_resource(Redirect, '/redirect') #to sign in
 api.add_resource(Logout, '/logout')
-api.add_resource(FeaturedPlaylists, '/featured_playlists')
+
+
 api.add_resource(CurrentUser, '/current_user')
+
+#Not Used
+api.add_resource(FeaturedPlaylists, '/featured_playlists')
 api.add_resource(CurrentUserSavedTracksDelete, '/current_user_saved_tracks_delete/<string:track_id>')
 api.add_resource(CurrentUserTopArtists, '/current_user_top_artists')
 api.add_resource(CurrentUserTopTracks, '/current_user_top_tracks')
@@ -727,7 +751,13 @@ api.add_resource(PlaylistCoverImage, '/playlist_cover_image/<string:playlist_id>
 api.add_resource(UserPlaylistUnfollow, '/user_playlist_unfollow/<string:playlist_id>')
 api.add_resource(UserPlaylistFollow, '/user_playlist_follow/<string:playlist_id>')
 
+
 if __name__ == '__main__':
-    CORS(app, resources={r"/store_refresh_token": {"origins": "http://localhost:5555"}})
+    # CORS(app, resources={
+    #     r"/store_refresh_token": {"origins": "http://localhost:5555"},
+    #     r"/current_user": {"origins": "http://localhost:5555"},
+    #     r"/store_user": {"origins": "http://localhost:5555"},
+    # })    
     app.run(debug=True, port=5556)
+
 
