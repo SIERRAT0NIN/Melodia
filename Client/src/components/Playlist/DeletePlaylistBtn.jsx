@@ -1,6 +1,6 @@
-import React from "react";
+import { Button } from "@nextui-org/react";
 
-function DeletePlaylistBtn() {
+function DeletePlaylistBtn({ accessToken }) {
   const deletePlaylist = async (playlistId, accessToken) => {
     if (!playlistId || !accessToken) {
       console.error("Playlist ID or Access Token is missing");
@@ -34,11 +34,11 @@ function DeletePlaylistBtn() {
 
   return (
     <div>
-      <a href="/">
-        <button className="bn632-hover bn19" onClick={deletePlaylist}>
-          Delete Playlist
-        </button>
-      </a>
+      {/* <a href="/"> */}
+      <Button color="danger" variant="bordered" onClick={deletePlaylist}>
+        Delete Playlist
+      </Button>
+      {/* </a> */}
     </div>
   );
 }

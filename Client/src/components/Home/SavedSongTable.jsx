@@ -7,15 +7,15 @@ import {
   TableRow,
   TableCell,
 } from "@nextui-org/react";
-import SpotifyAuth from "./SpotifyAuth";
-import SavedPlaylist from "./SavedPlaylist";
+import SpotifyAuth from "../Spotify/SpotifyAuth";
+import SavedPlaylist from "../Playlist/SavedPlaylist";
 import SongModal from "./SongDetail";
 
 const SavedSongs = () => {
   const [savedTracks, setSavedTracks] = useState([]);
   const [playlists, setPlaylists] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedSong, setSelectedSong] = useState(null); // State to store the selected song
+  const [selectedSong, setSelectedSong] = useState(null);
 
   const handleSavedTracksChange = (tracks) => {
     setSavedTracks(tracks);
@@ -60,7 +60,7 @@ const SavedSongs = () => {
         </TableBody>
       </Table>
       <br />
-      <SavedPlaylist playlists={playlists} />
+      <SavedPlaylist playlists={playlists} setPlaylists={setPlaylists} />
       {selectedSong && (
         <SongModal
           isOpen={isModalOpen}

@@ -41,7 +41,7 @@ export const SpotifyProvider = ({ children }) => {
     };
 
     storeRefreshTokenInBackend();
-  }, [refreshToken, userId]);
+  }, [userId, refreshToken]);
 
   return (
     <SpotifyContext.Provider

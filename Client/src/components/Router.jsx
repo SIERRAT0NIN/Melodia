@@ -1,17 +1,17 @@
 import { Route, Routes } from "react-router-dom";
-import Account from "./Account";
-import CreatePlaylist from "./CreatePlaylist";
-import HomePage from "./HomePage";
-import LoginBlob from "./LoginBlob";
-import Logout from "./Logout";
-import SavedPlaylist from "./SavedPlaylist";
-import SavedSongTable from "./SavedSongTable";
+import Account from "./Home/Account";
+import CreatePlaylist from "./Playlist/CreatePlaylist";
+import HomePage from "./Home/HomePage";
+// import LoginBlob from "./Home/-Legacy-LoginBlob";
+import Logout from "./Home/Logout";
+import SavedPlaylist from "./Playlist/SavedPlaylist";
+import SavedSongTable from "./Home/SavedSongTable";
 
-import NotFound from "./NotFound";
+import NotFound from "./Home/NotFound";
 import CurrentlyPlayingCard from "./MusicPlayer/CurrentlyPlayingCard";
-import NavBar from "./NavBar";
-import SongDetail from "./SongDetail";
-import Blob from "./experimental-login";
+import NavBar from "./Home/NavBar";
+import SongDetail from "./Home/SongDetail";
+import Blob from "./Home/NewLoginBlob";
 import { BrowserRouter as Router } from "react-router-dom";
 // import App from "./App";
 // import "./index.css";

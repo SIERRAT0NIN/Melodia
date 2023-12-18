@@ -36,10 +36,16 @@ const SongModal = ({ isOpen, onClose, songData }) => {
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} /* other props */>
+    <Modal isOpen={isOpen} onClose={onClose} backdrop="blur">
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
-          <Image src={songData.album.images[1].url} alt={songData.name} />
+          <Image
+            isBlurred
+            src={songData.album.images[1].url}
+            sizes="lg"
+            alt={songData.name}
+          />
+
           <h2>{songData.name}</h2>
           <h4>{songData.artists.map((artist) => artist.name).join(", ")}</h4>
           <h4>{songData.album.name}</h4>
@@ -60,8 +66,8 @@ const SongModal = ({ isOpen, onClose, songData }) => {
           </Popover>
           <Popover placement="top" color={"success"}>
             <PopoverTrigger>
-              <Button className="bn9" onClick={handleLikeClick}>
-                Like
+              <Button className="bn30" onClick={handleLikeClick}>
+                Unlike
               </Button>
             </PopoverTrigger>
             {popoverContent}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardBody,
@@ -7,14 +7,14 @@ import {
   Slider,
   Spinner,
 } from "@nextui-org/react";
-import { HeartIcon } from "../HeartIcon";
+import { HeartIcon } from "../Home/HeartIcon";
 import { PauseCircleIcon } from "./PauseCircleIcon";
 import { NextIcon } from "./NextIcon";
 import { PreviousIcon } from "./PreviousIcon";
 import { RepeatOneIcon } from "./RepeatOneIcon";
 import { ShuffleIcon } from "./ShuffleIcon";
 
-export default function CurrentlyPlayingCard({}) {
+export default function CurrentlyPlayingCard({ accessToken }) {
   const [liked, setLiked] = useState(false);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -43,12 +43,13 @@ export default function CurrentlyPlayingCard({}) {
           setCurrentlyPlaying(data);
         } else {
           console.error("Failed to fetch currently playing track");
+          setError("Failed to fetch data");
         }
       } catch (error) {
         console.error("Error fetching currently playing track:", error);
         setError("Error fetching data");
       } finally {
-        setLoading(false); // Set loading to false regardless of success or error
+        setLoading(false);
       }
     };
 
@@ -63,16 +64,14 @@ export default function CurrentlyPlayingCard({}) {
     return <p>Error: {error}</p>;
   }
 
-  if (
-    !currentlyPlaying ||
-    !currentlyPlaying.album ||
-    !currentlyPlaying.album.images
-  ) {
+  if (!currentlyPlaying || !currentlyPlaying.item) {
     return <p>No currently playing track.</p>;
   }
 
-  // Ensure that images[0] exists before accessing the url property
-  const albumImageUrl = currentlyPlaying.album.images[0]?.url;
+  const { item } = currentlyPlaying;
+  const albumImageUrl = item.album.images[0]?.url;
+  const trackName = item.name;
+  const artistName = item.artists.map((artist) => artist.name).join(", ");
 
   return (
     <Card
@@ -96,9 +95,11 @@ export default function CurrentlyPlayingCard({}) {
           <div className="flex flex-col col-span-6 md:col-span-8">
             <div className="flex justify-between items-start">
               <div className="flex flex-col gap-0">
-                <h3 className="font-semibold text-foreground/90">Daily Mix</h3>
-                <p className="text-small text-foreground/80">12 Tracks</p>
-                <h1 className="text-large font-medium mt-2">Frontend Radio</h1>
+                <h3 className="font-semibold text-foreground/90">
+                  {trackName}
+                </h3>
+                <p className="text-small text-foreground/80">{artistName}</p>
+                {/* Additional details can be added here */}
               </div>
               <Button
                 isIconOnly
@@ -114,68 +115,58 @@ export default function CurrentlyPlayingCard({}) {
               </Button>
             </div>
 
-            <div className="flex flex-col mt-3 gap-1">
-              <Slider
-                aria-label="Music progress"
-                classNames={{
-                  track: "bg-default-500/30",
-                  thumb: "w-2 h-2 after:w-2 after:h-2 after:bg-foreground",
-                }}
-                color="foreground"
-                defaultValue={33}
-                size="sm"
-              />
-              <div className="flex justify-between">
-                <p className="text-small">1:23</p>
-                <p className="text-small text-foreground/50">4:32</p>
-              </div>
-            </div>
-
-            <div className="flex w-full items-center justify-center">
-              <Button
-                isIconOnly
-                className="data-[hover]:bg-foreground/10"
-                radius="full"
-                variant="light"
-              >
-                <RepeatOneIcon className="text-foreground/80" />
-              </Button>
-              <Button
-                isIconOnly
-                className="data-[hover]:bg-foreground/10"
-                radius="full"
-                variant="light"
-              >
-                <PreviousIcon />
-              </Button>
-              <Button
-                isIconOnly
-                className="w-auto h-auto data-[hover]:bg-foreground/10"
-                radius="full"
-                variant="light"
-              >
-                <PauseCircleIcon size={54} />
-              </Button>
-              <Button
-                isIconOnly
-                className="data-[hover]:bg-foreground/10"
-                radius="full"
-                variant="light"
-              >
-                <NextIcon />
-              </Button>
-              <Button
-                isIconOnly
-                className="data-[hover]:bg-foreground/10"
-                radius="full"
-                variant="light"
-              >
-                <ShuffleIcon className="text-foreground/80" />
-              </Button>
-            </div>
+            {/* ...remaining component structure... */}
           </div>
         </div>
       </CardBody>
     </Card>
   );
 }
+// const Blob = () => {
+//   const blobContent = [
+//     {
+//       name: "Melody",
+//       description: "Your personal music app",
+//       url: "http://127.0.0.1:5556/token-exchange",
+//       username: "Sign in with Spotify!",
+//       className: "linkedin",
+//     },
+//   ];
+
+//   return (
+//     <div>
+//       {blobContent.map((social, index) => (
+//         <div key={index} className={`square ${social.className}`}>
+//           <span></span>
+//           <span></span>
+//           <span></span>
+//           <div className="content">
+//             <h2>{social.name}</h2>
+//             <p>{social.description}</p>
+//             <a href={social.url} rel="noopener noreferrer">
+//               {social.username}
+//             </a>
+//           </div>
+//         </div>
+//       ))}
+//     </div>
+//     // <div>
+//     //   {blobContent.map((social, index) => (
+//     //     <div key={index} className={`square ${social.className}`}>
+//     //       <span></span>
+//     //       <span></span>
+//     //       <span></span>
+//     //       <div className="content">
+//     //         <h2>{social.name}</h2>
+//     //         <p>{social.description}</p>
+//     //         <a href={social.url} rel="noopener noreferrer">
+//     //           {social.username}
+//     //         </a>
+//     //       </div>
+//     //     </div>
+//     //   ))}
+//     // </div>
+//   );
+// };
+
+// export  Blob;
