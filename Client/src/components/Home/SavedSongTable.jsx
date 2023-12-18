@@ -45,6 +45,7 @@ const SavedSongs = () => {
         <TableBody>
           {savedTracks.map((track, index) => (
             <TableRow
+              css={{ cursor: "pointer" }}
               key={track.id || index}
               onClick={() => onSongClick(track)}
             >
