@@ -708,7 +708,7 @@ class StoreUser(Resource):
     def post(self):
         data = request.get_json()
         # import ipdb; ipdb.set_trace()
-        new_user = User(email=data['email'], name=data['name'],username=data['userId'] )
+        new_user = User(email=data['email'], name=data['name'],username=data['userId'], profile_pic=data['userImage'] )
         db.session.add(new_user)
         db.session.commit()
         return {'message': 'User created successfully'}, 201
