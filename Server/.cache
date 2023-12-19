@@ -1,8 +1,1 @@
-{
-  "access_token": "BQBYLtqeLXU2TgomUk9xGobx9GmxyKmXrS5TWeN6AexnhhmhlxqAoa8v-5SzAieg3191My5lwsVn5pnjEwdCs7xI5bSjzEbq0cutDH1rDzxtDXbB4Tc83lvsCu-VBTcRod8Zr3A-kZNPJ83T9pYkNs8EVT-dAS_4ya1jAdnO8uii-0ubpYo91g1X8pbtsnDB7yM5KBB5Q6jiI1ti465fvOigI7fp1U53D2Wqm6Y-Yh0V0T9SsF1TlqHQg0zSVCLxZaPrieXDicMbniYqgibaHKlx8KEz5ckTdGX2yz30UllNdADml4c",
-  "token_type": "Bearer",
-  "expires_in": 3600,
-  "scope": "user-top-read user-library-read user-library-modify user-read-private user-read-email user-read-currently-playing app-remote-control streaming playlist-read-private user-modify-playback-state",
-  "expires_at": 1702802649,
-  "refresh_token": "AQCjxq2xF_MtIU6qBX-gXIv2L2M3Eowv01b1YOGVVu0RJwcIIq8rocGuMRsfI8brxk_JX5j5C9eZrhpjTAriYJfSEqvUfI6XE6De3NdzSAk3d_T4-BOMmViSZmCkbwxlcig"
-}
+{"access_token": "BQBN6AX32qOGkUCxAKjdCCAKZmpZJ5rVVtrX4v5imkYUQFQx_cofTSNOAKwrYTEfBoSW4_8Yuw5KoXv2gR6QgEVZ87zVJu_ZspW6GbO9KwNXh-iy2h7Pr63Ty0eyjo3k_x8fJakcXVzYt5m9OROKO_3uEryAgVivpaFzapQNPi5kJgpMXD2LQzjx_L9n3JPTeeEpl7xC_oNQqB-kGmU66AAITQK7iECqnbLOezNq9GnLp1MHxfiBReq2kfTfwz71kkEN4liZpuaPBrhjn1dWP0sNT78PZFKMNHnc45V4Ol7S8hyzCHs", "token_type": "Bearer", "expires_in": 3600, "scope": null, "expires_at": 1702982193, "refresh_token": "AQBo95I2B3SdtT9PJ-kk3FJibIdFlh-4ghjnbMcDzr1u0uVmLb_oZFA9fdPVLyvMQtV4kng3zX7fMekZTFzEfDt9Yngqv6tEFZAQVDyIHqnpzoBppjNNtqWs1sAV7xgm7YI"}

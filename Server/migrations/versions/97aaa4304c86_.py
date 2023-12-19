@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 866f44086e13
+Revision ID: 97aaa4304c86
 Revises: 
-Create Date: 2023-12-18 12:50:10.584301
+Create Date: 2023-12-18 18:16:11.375610
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '866f44086e13'
+revision = '97aaa4304c86'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -29,6 +29,15 @@ def upgrade():
     sa.Column('user_id', sa.String(), nullable=False),
     sa.Column('refresh_token', sa.String(), nullable=False),
     sa.PrimaryKeyConstraint('user_id')
+    )
+    op.create_table('user_tokens',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('access_token', sa.String(length=255), nullable=False),
+    sa.Column('refresh_token', sa.String(length=255), nullable=True),
+    sa.Column('expires_at', sa.DateTime(), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id')
     )
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -105,6 +114,7 @@ def downgrade():
     op.drop_table('tracks')
     op.drop_table('albums')
     op.drop_table('users')
+    op.drop_table('user_tokens')
     op.drop_table('refresh_tokens')
     op.drop_table('artists')
     # ### end Alembic commands ###
