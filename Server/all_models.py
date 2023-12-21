@@ -23,7 +23,7 @@ class User(db.Model):
     email = db.Column(db.String)
     profile_pic = db.Column(db.String)
     password = db.Column(db.String)
-
+    jwt = db.Column(db.String)
     
     def verify_refresh_token(self, refresh_token_to_be_checked):
         return self.refresh_token == refresh_token_to_be_checked
