@@ -3,7 +3,7 @@ from flask_migrate import Migrate
 from flask_restful import Api, Resource
 from flask_cors import CORS
 from sqlalchemy import MetaData
-from app_config import db, app
+from app_config import db, app, sp
 from all_models import *
 from spotipy.oauth2 import SpotifyOAuth
 from flask import Flask, request, url_for, session, redirect, make_response, jsonify
@@ -12,6 +12,12 @@ from spotipy import util
 import spotipy
 import os
 import time
+import base64
+import requests
+from datetime import datetime, timedelta
+import jwt
+import logging
+
 
 
 from spotipy import Spotify, SpotifyException
@@ -22,10 +28,12 @@ redirect_uri = os.environ.get('REDIRECT_URI')
 TOKEN_INFO = 'token_info'
 app.secret_key = 'din12823112390238ub09843209a1234'
 
-sp = spotipy.Spotify()
-migrate = Migrate(app, db)
-db.init_app(app)
 api=Api(app)
+CORS(app, resources={
+        r"/store_refresh_token": {"origins": "http://localhost:5555"},
+        r"/current_user": {"origins": "http://localhost:5555"},
+        r"/store_user": {"origins": "http://localhost:5555"},
+    })    
 
 
 
@@ -42,39 +50,21 @@ def create_spotify_oauth():
 def get_token():
     token_info = session.get(TOKEN_INFO, None)
     if not token_info:
-        return redirect(url_for('home'))
+        return None  
 
     now = int(time.time())
     is_expired = token_info['expires_at'] - now < 60
     
-    
     if is_expired:
-        spotify_oauth = create_spotify_oauth()
-
-        # Use open_url to manually get a new access token with an extended expiration time
-        new_token_info = spotify_oauth.open_url(spotify_oauth.get_authorize_url(show_dialog=False))
-        token_info['access_token'] = new_token_info['access_token']
-        token_info['expires_at'] = new_token_info['expires_at']
-
+        token_info = refresh_access_token(token_info['refresh_token'])
+        if token_info:
+            session[TOKEN_INFO] = token_info  
+        else:
+            return None  
     
     return token_info
 
-
-def exchange_code(code):
-    try:
-        spotify_oauth = create_spotify_oauth()
-        token_info = spotify_oauth.get_access_token(code)
-        session['token_info'] = token_info
-        return token_info
-    except spotipy.SpotifyException as e:
-        # Handle Spotify API exceptions, e.g., invalid code, etc.
-        app.logger.error(f"Error during token exchange: {str(e)}")
-        return None
-    except Exception as e:
-        # Handle other exceptions
-        app.logger.error(f"Unexpected error during token exchange: {str(e)}")
-        return None
-
+#
 def refresh_access_token(refresh_token):
     auth_header = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
     payload = {
@@ -88,20 +78,29 @@ def refresh_access_token(refresh_token):
 
     response = requests.post('https://accounts.spotify.com/api/token', data=payload, headers=headers)
     if response.status_code == 200:
-        return response.json()['access_token']
+        refreshed_token_info = response.json()
+        refreshed_token_info['expires_at'] = datetime.utcnow() + timedelta(seconds=refreshed_token_info.get('expires_in', 3600))
+        return refreshed_token_info  # Return the new token info
     else:
+        # Log the error or handle it as per your application's requirement
+        print(f"Failed to refresh token: {response.text}")
         return None
 
 
 
-def current_user():
+def exchange_code(code):
     try:
-        token_info = get_token()
-        sp = spotipy.Spotify(auth=token_info['access_token'])
-        user_info = sp.current_user()
-        return user_info
-    except:
-        return {'message': 'Error retrieving current user information'}
+        spotify_oauth = create_spotify_oauth()
+        token_info = spotify_oauth.get_access_token(code)
+        session['token_info'] = token_info
+        return token_info
+    except spotipy.SpotifyException as e:
+        app.logger.error(f"Error during token exchange: {str(e)}")
+        return None
+    except Exception as e:
+        app.logger.error(f"Unexpected error during token exchange: {str(e)}")
+        return None
+
 
 def current_user_playlists():
     try:
@@ -179,42 +178,89 @@ def get_refresh_token_for_user(user_id):
     else:
         return None
     
+# class TokenExchange(Resource):
+#     def get(self):
+#         code = request.args.get('code')
+#         token_info = exchange_code(code)
+
+#         if not token_info:
+#             return {'message': 'Failed to exchange code'}, 400
+
+#         # Assuming you have a function to identify the current user
+#         user_id = get_current_user_id()
+        
+#         # Function to store token in the database
+#         store_token_for_user(user_id, token_info)
+
+#         redirect_url = url_for('authenticate')
+#         return redirect(redirect_url)
+
+#     def post(self):
+#         code = request.form.get('code')
+#         token_info = exchange_code(code)
+
+#         if not token_info:
+#             return {'message': 'Failed to exchange code'}, 400
+
+#         user_id = get_current_user_id()
+#         store_token_for_user(user_id, token_info)
+
+#         return redirect(url_for(redirect_uri))
+
+
+
+def get_current_user_id():
+    token = request.headers.get('Authorization')
+    if token and token.startswith('Bearer '):
+        try:
+            # Assuming the JWT token is after 'Bearer '
+            decoded_token = jwt.decode(token.split(' ')[1], client_secret, algorithms=['HS256'])
+            return decoded_token.get('user_id', None)
+        except jwt.ExpiredSignatureError:
+            # Handle expired token
+            return None
+        except jwt.InvalidTokenError:
+            # Handle invalid token
+            return None
+    return None
+
+
+
 class TokenExchange(Resource):
-    def get(self):
-        # Get the authorization code from the query parameters
-        code = request.args.get('code')
-
-        # Exchange the authorization code for an access token
-        token_info = exchange_code(code)
-
-        # Store the token information in the session
-        session['token_info'] = token_info
-        app.logger.info(f'Token Info: {token_info}')
-
-
-        # Redirect to your application's home page after successful token exchange
-        redirect_url = url_for('authenticate')  
-        return redirect(redirect_url)
     def post(self):
-        # Get the authorization code from the form data
         code = request.form.get('code')
-
-        # Exchange the authorization code for an access token
         token_info = exchange_code(code)
 
-        # Store the token information in the session
-        session['token_info'] = token_info
-        print(f'token infor:', token_info)
+        if not token_info:
+            return {'message': 'Failed to exchange code'}, 400
 
-        # Redirect to your application's home page after successful token exchange
-        return redirect(url_for(redirect_uri))
+        # Assuming a function to get the current user's ID
+        user_id = get_current_user_id()
+        store_token_for_user(user_id, token_info)
+
+        return redirect(url_for(redirect_uri))  # Or any other relevant redirect
+
+def store_token_for_user(user_id, token_info):
+    # Check for existing token record
+    user_token = UserToken.query.filter_by(user_id=user_id).first()
+
+    if not user_token:
+        user_token = UserToken(user_id=user_id)
+        db.session.add(user_token)
+
+    # Update token information
+    user_token.access_token = token_info['access_token']
+    user_token.refresh_token = token_info.get('refresh_token')
+    user_token.expires_at = datetime.utcnow() + timedelta(seconds=token_info['expires_in'])
+
+    # Commit changes to the database
+    db.session.commit()
 
 class Authenticate(Resource):
     def get(self):
         auth_url = create_spotify_oauth().get_authorize_url()
-        # import ipdb; ipdb.set_trace()
-        print(auth_url)
-        return redirect(auth_url)    
+        return redirect(auth_url)
+
 
 class LoginPage(Resource):
     def get(self):  
@@ -318,8 +364,16 @@ class SearchArtist(Resource):
 
 class CurrentUser(Resource):
     def get(self):
-        user_info = current_user()
-        return user_info
+        try:
+            token_info = get_token()
+            sp = spotipy.Spotify(auth=token_info['access_token'])
+            if not token_info or 'access_token' not in token_info:
+                return {'message': 'Invalid or missing token'}
+            user_info = sp.current_user()
+            return user_info
+        except Exception as e:
+            return {'message': f'Error retrieving current user information: {str(e)}'}
+
 
 def get_all_user_playlists(sp, limit=50):
     playlists = []
@@ -572,7 +626,6 @@ class Tracks(Resource):
             return {'message': 'Error retrieving tracks information'}
 
 class Logout(Resource):
-
     def get(self):
         # Clear the user's session data
         session.clear()
@@ -641,13 +694,54 @@ class UserPlaylistFollow(Resource):
         except Exception as e:
             print(f"Error: {str(e)}")
             return {'message': 'Error following playlist'}
+
+def get_token_for_user(user_id):
+    user_token = UserToken.query.filter_by(user_id=user_id).first()
+    if user_token:
+        if datetime.utcnow() < user_token.expires_at:
+            return {
+                'access_token': user_token.access_token,
+                'refresh_token': user_token.refresh_token,
+                'expires_at': user_token.expires_at
+            }
+        else:
+            # Token is expired, so refresh it
+            new_token_info = refresh_access_token(user_token.refresh_token)
+            if new_token_info:
+                user_token.access_token = new_token_info['access_token']
+                user_token.refresh_token = new_token_info.get('refresh_token', user_token.refresh_token)
+                user_token.expires_at = datetime.utcnow() + timedelta(seconds=new_token_info['expires_in'])
+                db.session.commit()
+                return {
+                    'access_token': user_token.access_token,
+                    'refresh_token': user_token.refresh_token,
+                    'expires_at': user_token.expires_at
+                }
+    return None
+
+class AccessTokenResource(Resource):
+    def get(self):
+        # Authenticate the user here
+        user_id = get_current_user_id()
+
+        # Retrieve the access token from the database
+        token_info = get_token_for_user(user_id)
+
+        if token_info:
+            return {'access_token': token_info['access_token']}
+        else:
+            return {'message': 'Token not found'}, 404
+
+        
+        
         
         
 class RefreshTokenResource(Resource):
     def post(self):
         try:
             data = request.json
-            user_id = data.get('user_id')  # Make sure to send user_id from your frontend
+            # user_id = data.get('user_id') 
+            user_id = 'alberto_sierra'  
             refresh_token = data.get('refresh_token')
 
             if not user_id or not refresh_token:
@@ -657,10 +751,10 @@ class RefreshTokenResource(Resource):
             existing_token = RefreshToken.query.filter_by(user_id=user_id).first()
             
             if existing_token:
-                # Update the existing token
+                
                 existing_token.refresh_token = refresh_token
             else:
-                # Create a new token record
+                
                 new_token = RefreshToken()
                 new_token.user_id = user_id
                 new_token.refresh_token = refresh_token
@@ -673,43 +767,121 @@ class RefreshTokenResource(Resource):
             return {'message': str(e)}, 500
 
 
+
+
 class Refresh(Resource):
-    
     def post(self):
+        # Step 1: Retrieve user_id and refresh token
+        logging.info(f"Received request data: {request.json}")
         user_id = request.json.get('user_id')
-        refresh_token = get_refresh_token_for_user(user_id)  # Implement this function
+        if not user_id or user_id is None:
+            return {'error': 'User ID is missing or invalid'}, 400
 
+
+        user = RefreshToken.query.filter_by(user_id=user_id).first()
+        if not user:
+            return {'error': 'User not found'}, 404
+
+        refresh_token = user.refresh_token
         if not refresh_token:
-            return {'error': 'No refresh token found for user'}, 404
+            return {'error': 'Refresh token not found'}, 404
 
-        auth_header = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
+        # Step 2: Request a new access token using Spotipy
+        oauth = spotipy.SpotifyOAuth(client_id=client_id, 
+                                     client_secret=client_secret,
+                                     redirect_uri=redirect_uri)
+        token_info = oauth.refresh_access_token(refresh_token)
 
-        payload = {
-            'grant_type': 'refresh_token',
-            'refresh_token': refresh_token
-        }
-        headers = {
-            'Authorization': f'Basic {auth_header}',
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
+        # Step 3: Update the access token in the database
+        user.access_token = token_info['access_token']
+        db.session.commit()
 
-        response = requests.post('https://accounts.spotify.com/api/token', data=payload, headers=headers)
-        if response.status_code == 200:
-            return jsonify(response.json())
-        else:
-            return {'error': 'Failed to refresh token'}, response.status_code
+        # Step 4: Return the new access token
+        return {'access_token': token_info['access_token']}, 200
+
+    
+    
+    
+    
+    
+    
+    
+    
+    # def post(self):
+    #     user_id = request.json.get('user_id')
+    #     if not user_id:
+    #         return {'error': 'User ID is missing'}, 400
+
+    #     user_token = User.query.filter_by(user_id=user_id).first()
+    #     if not user_token:
+    #         return {'error': 'User token not found'}, 404
+
+    #     if user_token.is_token_expired():
+    #         # Prepare the data for the token request
+    #         token_data = {
+    #             'grant_type': 'refresh_token',
+    #             'refresh_token': user_token.refresh_token,
+    #         }
+
+    #         token_headers = {
+    #             'Authorization': f'Basic {encode_client_credentials(client_id, client_secret)}',
+    #         }
+
+    #         # Spotify token endpoint
+    #         token_url = "https://accounts.spotify.com/api/token"
+
+    #         # Send the request
+    #         response = requests.post(token_url, data=token_data, headers=token_headers)
+
+    #         # Handle the response
+    #         if response.status_code == 200:
+    #             new_token_info = response.json()
+    #             # Update the access token in your database
+    #             user_token.access_token = new_token_info['access_token']
+    #             user_token.expires_at = datetime.utcnow() + timedelta(seconds=new_token_info['expires_in'])
+
+    #             # Commit changes to the database
+    #             db.session.commit()
+
+    #             return {'access_token': new_token_info['access_token']}
+    #         else:
+    #             return {'error': 'Failed to refresh token'}, response.status_code
+    #     else:
+    #         # Token is still valid, return the current access token
+    #         return {'access_token': user_token.access_token}
+def encode_client_credentials(client_id, client_secret):
+    import base64
+    client_credentials = f'{client_id}:{client_secret}'
+    client_credentials_b64 = base64.b64encode(client_credentials.encode()).decode()
+    return client_credentials_b64
+
+class StoreUser(Resource):
+    def post(self):
+        data = request.get_json()
+
+        new_user = User(email=data['email'], name=data['name'],username=data['userId'], profile_pic=data['userImage'] )
+        db.session.add(new_user)
+        db.session.commit()
+        return {'message': 'User created successfully'}, 201
+
+    def options(self):
+        # Handle OPTIONS request explicitly (if needed)
+        return {'message': 'OK'}, 200
 api.add_resource(Refresh, '/refresh_token')
+api.add_resource(AccessTokenResource, '/access_token')
 api.add_resource(RefreshTokenResource, '/store_refresh_token')
-#Routes
 api.add_resource(TokenExchange, '/token-exchange')
+api.add_resource(StoreUser, '/store_user')
+#Routes
 api.add_resource(UserSavedTracks, '/user_saved_tracks')
 api.add_resource(Authenticate, '/authenticate') #perhaps not needed
 api.add_resource(Home, '/home')
 api.add_resource(LoginPage, '/login')
 api.add_resource(Redirect, '/redirect') #to sign in
 api.add_resource(Logout, '/logout')
-api.add_resource(FeaturedPlaylists, '/featured_playlists')
 api.add_resource(CurrentUser, '/current_user')
+#Not Used
+api.add_resource(FeaturedPlaylists, '/featured_playlists')
 api.add_resource(CurrentUserSavedTracksDelete, '/current_user_saved_tracks_delete/<string:track_id>')
 api.add_resource(CurrentUserTopArtists, '/current_user_top_artists')
 api.add_resource(CurrentUserTopTracks, '/current_user_top_tracks')
@@ -727,7 +899,13 @@ api.add_resource(PlaylistCoverImage, '/playlist_cover_image/<string:playlist_id>
 api.add_resource(UserPlaylistUnfollow, '/user_playlist_unfollow/<string:playlist_id>')
 api.add_resource(UserPlaylistFollow, '/user_playlist_follow/<string:playlist_id>')
 
+
 if __name__ == '__main__':
-    CORS(app, resources={r"/store_refresh_token": {"origins": "http://localhost:5555"}})
+    # CORS(app, resources={
+    #     r"/store_refresh_token": {"origins": "http://localhost:5555"},
+    #     r"/current_user": {"origins": "http://localhost:5555"},
+    #     r"/store_user": {"origins": "http://localhost:5555"},
+    # })    
     app.run(debug=True, port=5556)
+
 

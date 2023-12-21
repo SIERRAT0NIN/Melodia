@@ -6,7 +6,7 @@ from app_config import db
 from sqlalchemy import MetaData, create_engine, Column, String
 from sqlalchemy import Column, String, Integer
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-
+from datetime import datetime
 
 
 
@@ -21,9 +21,8 @@ class User(db.Model):
     name = db.Column(db.String)
     username = db.Column(db.String)
     email = db.Column(db.String)
-    password = db.Column(db.String)
     profile_pic = db.Column(db.String)
-    refresh_token = db.Column(db.String)
+    password = db.Column(db.String)
 
     
     def verify_refresh_token(self, refresh_token_to_be_checked):
@@ -39,6 +38,8 @@ class RefreshToken(db.Model):
     __tablename__ = 'refresh_tokens'
     user_id = db.Column(db.String, primary_key=True)
     refresh_token = db.Column(db.String, nullable=False)
+    access_token = db.Column(db.String) 
+    
 
 def save_to_database(user_id, refresh_token):
     # Check if a token already exists for the user
@@ -149,6 +150,30 @@ class Playlist(db.Model):
 class PlaylistSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Playlist
+        
+class UserToken(db.Model):
+    __tablename__ = 'user_tokens'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False, unique=True)
+    access_token = db.Column(db.String(255), nullable=False)
+    refresh_token = db.Column(db.String(255), nullable=True)
+    expires_at = db.Column(db.DateTime, nullable=False)
+
+    def __init__(self, user_id, access_token, refresh_token, expires_at):
+        self.user_id = user_id
+        self.access_token = access_token
+        self.refresh_token = refresh_token
+        self.expires_at = expires_at
+
+    def __repr__(self):
+        return f'<UserToken {self.user_id}>'
+
+    # Optionally, add a method to check if the token is expired
+    def is_token_expired(self):
+        return datetime.utcnow() > self.expires_at
+        
+        
 
 
 

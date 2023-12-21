@@ -11,14 +11,16 @@ import {
 } from "@nextui-org/react";
 import DeletePlaylistBtn from "./DeletePlaylistBtn";
 import EditPlaylistButton from "./EditPlaylist";
+import SongModal from "../Home/SongDetail";
 
+//! PLAYLISTDETAILS
 export default function PlaylistDetails({
   playlist,
   isOpen,
   onClose,
   setPlaylists,
 }) {
-  const { accessToken } = useSpotify();
+  const { accessToken, selectedSong, setSelectedSong } = useSpotify();
   const [trackList, setTrackList] = useState([]);
   // const [playlistDetails, setPlaylistDetails] = useState(playlist);
 
@@ -75,6 +77,12 @@ export default function PlaylistDetails({
       });
     });
   };
+  const handleSongClick = (song) => {
+    setSelectedSong(song);
+  };
+  const closeSongModal = () => {
+    setSelectedSong(null);
+  };
 
   return (
     <Modal backdrop="blur" isOpen={isOpen} onClose={onClose} className="flex">
@@ -90,7 +98,7 @@ export default function PlaylistDetails({
           <p>Total Tracks: {trackList.length ?? DEFAULT_TRACK_COUNT}</p>
           <ul>
             {trackList.map((item, index) => (
-              <li key={index}>
+              <li key={index} onClick={() => handleSongClick(item.track)}>
                 {item.track.name} by{" "}
                 {item.track.artists.map((artist) => artist.name).join(", ")}
               </li>
