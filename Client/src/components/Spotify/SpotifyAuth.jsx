@@ -8,8 +8,7 @@ const SpotifyAuth = ({
 }) => {
   const {
     setSavedTracks,
-    savedTracks,
-    userPlaylists,
+
     setUserPlaylists,
     accessToken,
     setAccessToken,
@@ -51,29 +50,28 @@ const SpotifyAuth = ({
       const authOptions = {
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: "Basic " + btoa(client_id + ":" + client_secret),
+          "Content-Type": "application/json",
         },
-        body: new URLSearchParams({
+        body: JSON.stringify({
           code: authorizationCode,
-          redirect_uri: redirect_uri,
-          grant_type: "authorization_code",
-          scopes: scopes,
-        }).toString(),
+        }),
       };
       try {
         const response = await fetch(
-          "https://accounts.spotify.com/api/token",
+          "http://127.0.0.1:5556/token-exchange",
           authOptions
         );
         const data = await response.json();
+        console.log("exchange token: ", data);
 
-        if (response.ok) {
+        if (response.ok && data.success) {
           setAccessToken(data.access_token);
           setRefreshToken(data.refresh_token);
+
           const expiryTime = new Date(
             new Date().getTime() + data.expires_in * 1000
           );
+
           console.log("Token expires at:", expiryTime);
           if (onAccessTokenChange) onAccessTokenChange(data.access_token);
         } else {
@@ -90,20 +88,17 @@ const SpotifyAuth = ({
         const authString = btoa(`${client_id}:${client_secret}`);
 
         try {
-          const response = await fetch(
-            "https://accounts.spotify.com/api/token",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                Authorization: `Basic ${authString}`,
-              },
-              body: new URLSearchParams({
-                grant_type: "refresh_token",
-                refresh_token: refresh_token,
-              }).toString(),
-            }
-          );
+          const response = await fetch("http://127.0.0.1:5556/token-exchange", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Authorization: `Basic ${authString}`,
+            },
+            body: new URLSearchParams({
+              grant_type: "refresh_token",
+              refresh_token: refresh_token,
+            }).toString(),
+          });
 
           const data = await response.json();
 
@@ -122,32 +117,40 @@ const SpotifyAuth = ({
         } catch (error) {
           console.error("Error refreshing access token:", error);
         }
-        refreshAccessToken();
       }
     };
     //Gets another access token
     fetchAccessToken();
   }, []);
 
-  //! Refreshing Access Token with Refresh Token from the back end
-  const refreshAccessToken = async () => {
-    try {
-      const response = await fetch("/refresh_token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ user_id: userId }),
-      });
+  console.log("Access:", accessToken);
+  console.log("Refresh:", refreshToken);
+  // useEffect(() => {
+  //   fetch("http://127.0.0.1:5556/token-exchange")
+  //     .then((r) => r.json())
+  //     .then((data) => console.log("TOKEN:", data))
+  //     .catch(Error);
+  // }, []);
 
-      const data = await response.json();
-      if (data.access_token) {
-        setAccessToken(data.access_token); // Update your access token state
-      }
-    } catch (error) {
-      console.error("Error refreshing access token:", error);
-    }
-  };
+  //! Refreshing Access Token with Refresh Token from the back end
+  // const refreshAccessToken = async () => {
+  //   try {
+  //     const response = await fetch("/refresh_token", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ user_id: userId }),
+  //     });
+
+  //     const data = await response.json();
+  //     if (data.access_token) {
+  //       setAccessToken(data.access_token); // Update your access token state
+  //     }
+  //   } catch (error) {
+  //     console.error("Error refreshing access token:", error);
+  //   }
+  // };
 
   //! User Profile {userId}
   //* Working

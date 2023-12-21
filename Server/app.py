@@ -5,31 +5,35 @@ from flask_cors import CORS
 from sqlalchemy import MetaData
 from app_config import db, app, sp
 from all_models import *
-from spotipy.oauth2 import SpotifyOAuth
 from flask import Flask, request, url_for, session, redirect, make_response, jsonify
-from dotenv import load_dotenv
 from spotipy import util
-import spotipy
-import os
 import time
 import base64
-import requests
 from datetime import datetime, timedelta
 import jwt
 import logging
 
 
-
 from spotipy import Spotify, SpotifyException
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+from dotenv import load_dotenv
+import os
+import requests
+
 load_dotenv()
 client_id = os.environ.get('SPOTIPY_CLIENT_ID')
 client_secret = os.environ.get('SPOTIPY_CLIENT_SECRET')
 # redirect_uri = os.environ.get('REDIRECT_URI') 
-redirect_uri = 'http://127.0.0.1:5556/token-exchange' 
-# redirect_uri = 'http://127.0.0.1:5556/current_user' 
-TOKEN_INFO = 'token_info'
-app.secret_key = 'din12823112390238ub09843209a1234'
 
+TOKEN_INFO = 'token_info'
+
+
+
+app.secret_key = 'din12823112390238ub09843209a1234'
+redirect_uri = 'http://127.0.0.1:5556/token-exchange' 
+# redirect_uri = 'http://127.0.0.1:5556/user_saved_tracks' 
+# redirect_uri = 'http://127.0.0.1:5556/current_user' 
 api=Api(app)
 CORS(app, resources={
         r"/store_refresh_token": {"origins": "http://localhost:5555"},
@@ -40,12 +44,8 @@ CORS(app, resources={
 
 
 
-#Scope
-class Home(Resource):
-    def get(self):
-        auth_url = create_spotify_oauth().get_authorize_url() 
-        # Will be redirected to localhost:5555/home
-        return redirect(auth_url)
+
+
     
 def create_spotify_oauth():
     return SpotifyOAuth(
@@ -54,8 +54,7 @@ def create_spotify_oauth():
         redirect_uri = redirect_uri, 
         scope='user-top-read user-library-read user-library-modify user-read-private user-read-email user-read-currently-playing app-remote-control streaming playlist-read-private user-modify-playback-state playlist-modify-public playlist-modify-private',
         cache_path=".cache", 
-    )
-    
+    )    
 
 def get_token():
     token_info = session.get(TOKEN_INFO, None)
@@ -74,21 +73,6 @@ def get_token():
     
     return token_info
 
-class TokenExchange(Resource):
-    def get(self):
-# The above code is retrieving the value of the 'code' parameter from the request arguments.
-        code = request.args.get('code')
-        return {'message': 'Code processed'}, 200
-
-    def post(self):
-        code = request.json.get('code')
-        token_info = exchange_code(code)
-        if not token_info:
-            return {'message': 'Failed to exchange code'}, 400
-        user_id = get_current_user_id()
-        store_token_for_user(user_id, token_info)
-
-        return redirect('http://localhost:5555/home')
 def exchange_code(code):
     try:
         spotify_oauth = create_spotify_oauth()
@@ -101,8 +85,7 @@ def exchange_code(code):
     except Exception as e:
         app.logger.error(f"Unexpected error during token exchange: {str(e)}")
         return None
-
-#
+    
 def refresh_access_token(refresh_token):
     auth_header = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
     payload = {
@@ -113,21 +96,15 @@ def refresh_access_token(refresh_token):
         'Authorization': f'Basic {auth_header}',
         'Content-Type': 'application/x-www-form-urlencoded'
     }
-
     response = requests.post('https://accounts.spotify.com/api/token', data=payload, headers=headers)
     if response.status_code == 200:
         refreshed_token_info = response.json()
         refreshed_token_info['expires_at'] = datetime.utcnow() + timedelta(seconds=refreshed_token_info.get('expires_in', 3600))
-        return refreshed_token_info  # Return the new token info
+        return refreshed_token_info  
     else:
-        # Log the error or handle it as per your application's requirement
+
         print(f"Failed to refresh token: {response.text}")
         return None
-
-
-
-
-
 
 def current_user_playlists():
     try:
@@ -145,11 +122,8 @@ def current_user_saved_tracks():
         saved_tracks = sp.current_user_saved_tracks()
         return saved_tracks
     except spotipy.SpotifyException as e:
-        app.logger.error(f"Spotify API Error: {str(e)}")
         return {'message': 'Error retrieving current user saved tracks'}
     except Exception as e:
-        app.logger.error(f"Unexpected error: {str(e)}")
-        
         return {'message': 'Unexpected error retrieving current user saved tracks'}
 
 def extract_access_token(self):
@@ -221,10 +195,6 @@ def get_current_user_id():
             return None
     return None
 
-
-
-
-
 def store_token_for_user(user_id, token_info):
     # Check for existing token record
     user_token = UserToken.query.filter_by(user_id=user_id).first()
@@ -242,86 +212,183 @@ def store_token_for_user(user_id, token_info):
     db.session.commit()
 
 
-class LoginPage(Resource):
-    def get(self):  
-        return 'Sign In with Spotify!'
-    
 
 
 
+# class TokenExchange(Resource):
+#     def post(self):
+#         code = request.json.get('code')
+#         if not code:
+#             return {'message': 'No code provided'}, 400
+#         token_info = exchange_code(code)
+#         if not token_info:
+#             return {'message': 'Failed to exchange code'}, 400
+#         # Further processing, if necessary
+#         return token_info, 200
+class Home(Resource):
+    def get(self):
+        auth_url = create_spotify_oauth().get_authorize_url() 
+        return redirect(auth_url)
 
+class TokenExchange(Resource):
+    def get(self):
+        code = request.args.get('code')
+        if not code:
+            return {'message': 'No code provided'}, 400
+        token_info = exchange_code(code)
+        if token_info:
+            session['token_info'] = token_info
+            return redirect('http://127.0.0.1:5556/token-exchange')  
+        else:
+            return ({'error': str(e)}), 500
+
+    def post(self):
+        data = request.get_json()
+        code = data.get('code')
+
+        if not code:
+            return ({'error': 'Authorization code not provided'}), 400
+
+        try:
+            spotify_oauth = SpotifyOAuth(client_id=client_id,
+                                         client_secret=client_secret,
+                                         redirect_uri=redirect_uri)
+            token_info = spotify_oauth.get_access_token(code)
+            return (token_info), 200
+        except spotipy.SpotifyException as e:
+            return ({'error': str(e)}), 500
+
+
+
+#Probably not needed
 class Redirect(Resource):
     def get(self):
         session.clear()
         code = request.args.get('code')
         token_info = create_spotify_oauth().get_access_token(code)
         session[TOKEN_INFO] = token_info
-        return redirect(url_for(redirect_uri))
+        return redirect('http://127.0.0.1:5556/token-exchange')
 
+
+
+
+
+
+
+
+# class SavedSongs(Resource):
+    # def get(self):
+    #     try:
+    #         access_token = self.extract_access_token()  
+    #         sp = Spotify(auth=access_token)  
+    #         saved_tracks_response = sp.current_user_saved_tracks()  # Fetch saved tracks
+
+    #         extracted_tracks = self.extract_track_info(saved_tracks_response.get('items', []))
+            
+    #         return jsonify({'tracks': extracted_tracks})  # Return serialized JSON
+    #     except SpotifyException as spotify_error:
+
+    #         return jsonify({'message': f'Spotify API Error: {str(spotify_error)}'}), 500
+    #     except Exception as generic_error:
+
+    #         return jsonify({'message': f'Error retrieving user saved tracks: {str(generic_error)}'}), 500
+
+        token_info = exchange_code(code)
+        token_info = exchange_code(code)
+        if token_info:
+            session['token_info'] = token_info
+            return redirect('http://localhost:5555/home')  
+        else:
+            return ({'error': str(e)}), 500
 class SavedSongs(Resource):
     def get(self):
-        try:
-            access_token = self.extract_access_token()  
-            import ipdb; ipdb.set_trace()
-            sp = Spotify(auth=access_token)  
-            saved_tracks_response = sp.current_user_saved_tracks()  # Fetch saved tracks
-
-            extracted_tracks = self.extract_track_info(saved_tracks_response.get('items', []))
+        code = request.args.get('code')
+        if not code:
+            return {'message': 'No code provided'}, 400
+        access_token = self.get_access_token_from_request()        
+        token_info = exchange_code(code)
+        if token_info:
+            session['token_info'] = token_info
+            return redirect('http://127.0.0.1:5556/user_saved_tracks')  
+        else:
+            return ({'error': str(e)}), 500
+            # results = sp.current_user_saved_tracks()
+            # songs = self.extract_songs(results)
             
-            return jsonify({'tracks': extracted_tracks})  # Return serialized JSON
-        except SpotifyException as spotify_error:
+            # return ({'songs': songs}), 200
+            # except Exception as e:
+            # return ({"error": str(e)}), 500
+    def get_access_token_from_request(self):
+        """
+        The function `get_access_token_from_request` extracts the access token from the Authorization header
+        in a request.
+        :return: The access token is being returned.
+        """
 
-            return jsonify({'message': f'Spotify API Error: {str(spotify_error)}'}), 500
-        except Exception as generic_error:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+     
+            return None
+        return auth_header.split(' ')[1]
+    def extract_songs(self, results):
+    
+        songs = []
+        for item in results['items']:
+            track = item['track']
+            songs.append({
+                "id": track["id"],
+                "name": track["name"],
+                "artists": [artist["name"] for artist in track["artists"]],
+                "album": track["album"]["name"]
+            })
+            logging.debug('This is a debug message')
+        return songs
 
-            return jsonify({'message': f'Error retrieving user saved tracks: {str(generic_error)}'}), 500
+    # def extract_track_info(self, saved_tracks):
+    #     try:
+    #         token_info = get_token()
+    #         sp = spotipy.Spotify(auth=token_info['access_token'])
 
+    #         track_info_list = []
+    #         for item in saved_tracks['items']:
+    #             track = item['track']
 
-    def extract_track_info(self, saved_tracks):
-        try:
-            token_info = get_token()
-            sp = spotipy.Spotify(auth=token_info['access_token'])
+    #             # Extracting information about the track
+    #             artist_info = track['artists'][0]
+    #             artist_name = artist_info['name']
+    #             artist_id = artist_info['id']
+    #             artist_uri = artist_info['uri']
 
-            track_info_list = []
-            for item in saved_tracks['items']:
-                track = item['track']
+    #             # Retrieve artist details to get genres
+    #             artist_details = sp.artist(artist_id)
+    #             genres = artist_details['genres'] if 'genres' in artist_details else []
 
-                # Extracting information about the track
-                artist_info = track['artists'][0]
-                artist_name = artist_info['name']
-                artist_id = artist_info['id']
-                artist_uri = artist_info['uri']
+    #             album_info = track['album']
+    #             album_name = album_info['name']
+    #             album_images = album_info['images'] if 'images' in album_info else []
+    #             album_image_urls = [image['url'] for image in album_images]
+    #             release_date = album_info.get('release_date', None)
+    #             track_title = track['name']
 
-                # Retrieve artist details to get genres
-                artist_details = sp.artist(artist_id)
-                genres = artist_details['genres'] if 'genres' in artist_details else []
+    #             # Creating a dictionary with the extracted information
+    #             track_info = {
+    #                 'artist_name': artist_name,
+    #                 'artist_id': artist_id,
+    #                 'artist_uri': artist_uri,
+    #                 'genres': genres,
+    #                 'album_name': album_name,
+    #                 'album_images': album_image_urls,
+    #                 'release_date': release_date,
+    #                 'track_title': track_title
+    #             }
 
-                album_info = track['album']
-                album_name = album_info['name']
-                album_images = album_info['images'] if 'images' in album_info else []
-                album_image_urls = [image['url'] for image in album_images]
-                release_date = album_info.get('release_date', None)
-                track_title = track['name']
+    #             track_info_list.append(track_info)
 
-                # Creating a dictionary with the extracted information
-                track_info = {
-                    'artist_name': artist_name,
-                    'artist_id': artist_id,
-                    'artist_uri': artist_uri,
-                    'genres': genres,
-                    'album_name': album_name,
-                    'album_images': album_image_urls,
-                    'release_date': release_date,
-                    'track_title': track_title
-                }
+    #         return {'tracks': track_info_list}
 
-                track_info_list.append(track_info)
-
-            return {'tracks': track_info_list}
-
-        except Exception as e:
-            print(f"Error: {str(e)}")
-            return {'message': 'Error retrieving user saved tracks'}
+    #     except Exception as e:
+    #         print(f"Error: {str(e)}")
+    #         return {'message': 'Error retrieving user saved tracks'}
 
 
 class SearchArtist(Resource):
@@ -834,7 +901,7 @@ def encode_client_credentials(client_id, client_secret):
 
 class StoreUser(Resource):
     def post(self):
-        import ipdb; ipdb.set_trace()
+
         data = request.get_json()
 
         new_user = User(email=data['email'], name=data['name'],username=data['userId'], profile_pic=data['userImage'] )
@@ -847,17 +914,17 @@ class StoreUser(Resource):
         return {'message': 'OK'}, 200
     
     
-
 api.add_resource(Home, '/home')
 api.add_resource(TokenExchange, '/token-exchange')
-api.add_resource(Refresh, '/refresh_token')
 api.add_resource(AccessTokenResource, '/access_token')
+api.add_resource(Refresh, '/refresh_token')
 api.add_resource(RefreshTokenResource, '/store_refresh_token')
 api.add_resource(StoreUser, '/store_user')
+
 #Routes
 api.add_resource(SavedSongs, '/user_saved_tracks')
+api.add_resource(Redirect, '/redirect')
 
-api.add_resource(LoginPage, '/login')
 
 api.add_resource(Logout, '/logout')
 api.add_resource(CurrentUser, '/current_user')
@@ -885,4 +952,12 @@ if __name__ == '__main__':
    
     app.run(debug=True, port=5556)
 
+
+
+
+# class LoginPage(Resource):
+#     def get(self):  
+#         return 'Sign In with Spotify!'
+# api.add_resource(LoginPage, '/login')
+    
 
