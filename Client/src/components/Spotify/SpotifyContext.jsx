@@ -11,6 +11,9 @@ export const SpotifyProvider = ({ children }) => {
   const [savedTracks, setSavedTracks] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
   const [selectedSong, setSelectedSong] = useState(null);
+  const [displayName, setDisplayName] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
+  const [userImg, setUserImg] = useState(null);
 
   console.log("user id:", userId);
   console.log("refresh token:", refreshToken);
@@ -60,6 +63,12 @@ export const SpotifyProvider = ({ children }) => {
         setUserPlaylists,
         selectedSong,
         setSelectedSong,
+        displayName,
+        userEmail,
+        userImg,
+        setDisplayName,
+        setUserEmail,
+        setUserImg,
       }}
     >
       {children}

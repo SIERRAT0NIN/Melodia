@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import Account from "./Home/Account";
+// import Account from "./Home/Account";
 import CreatePlaylist from "./Playlist/CreatePlaylist";
 import HomePage from "./Home/HomePage";
 // import LoginBlob from "./Home/-Legacy-LoginBlob";
@@ -25,7 +25,7 @@ function App() {
         {is_logged_in ? (
           <>
             <Route path="/home" element={<HomePage />} />
-            <Route path="/account" element={<Account />} />
+            {/* <Route path="/account" element={<Account />} /> */}
             <Route path="/saved_songs" element={<SavedSongTable />} />
             <Route path="/song_details" element={<SongDetail />} />
             <Route
@@ -43,7 +43,7 @@ function App() {
           </>
         ) : (
           <>
-            <Route path="/login" element={<LoginBlob />} />
+            {/* <Route path="/login" element={<LoginBlob />} /> */}
             <Route path="*" element={<HomePage />} />
           </>
         )}

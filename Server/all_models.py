@@ -126,11 +126,9 @@ class Track_Schema(SQLAlchemyAutoSchema):
 
 class Playlist_Track(db.Model):
     __tablename__ = 'playlist_tracks'
-
     id = db.Column(db.Integer, primary_key=True)
     track_id = db.Column(db.String, db.ForeignKey('tracks.id'))
     playlist_id = db.Column(db.String, db.ForeignKey('playlists.id'))
-
     def __repr__(self):
         return f'<Playlist_Track {self.track_id, self.playlist_id}>'
 
@@ -179,19 +177,38 @@ class UserToken(db.Model):
 
 #Relationships
 
-Liked_Song.track = db.relationship('Track', backref='liked_song_track', foreign_keys='[Liked_Song.track_id]')
-Liked_Song.user = db.relationship('User', backref='liked_song_user')
+# Liked_Song.track = db.relationship('Track', backref='liked_song_track', foreign_keys='[Liked_Song.track_id]')
+# Liked_Song.user = db.relationship('User', backref='liked_song_user')
 
-Artist.tracks = db.relationship('Track', backref='artist_tracks', foreign_keys='[Track.artist_id]')
-Artist.albums = db.relationship('Album', backref='artist_albums')
+track = db.relationship('Track', back_populates='liked_songs', foreign_keys='[Liked_Song.track_id]')
+user = db.relationship('User', backref='liked_songs')
 
-Album.artist = db.relationship('Artist', backref='albums_relationship', foreign_keys='[Album.artist_id]')
-Album.liked_songs = db.relationship('Liked_Song', backref='album')
 
-Track.artist = db.relationship('Artist', backref='track_artist', foreign_keys='[Track.artist_id]')
-Track.album = db.relationship('Album', backref='tracks', foreign_keys='[Track.album_id]')
-Track.liked_songs = db.relationship('Liked_Song', backref='track_liked_songs')
+# Artist.tracks = db.relationship('Track', backref='artist_tracks', foreign_keys='[Track.artist_id]')
+# Artist.albums = db.relationship('Album', backref='artist_albums')
 
-Playlist.track = db.relationship('Track', backref='track_playlists')
-Playlist.user = db.relationship('User', backref='user_playlists')
-Playlist.playlist_tracks = db.relationship('Playlist_Track', backref='playlist_playlist_track')
+tracks = db.relationship('Track', back_populates='artist', foreign_keys='[Track.artist_id]')
+albums = db.relationship('Album', back_populates='artist', foreign_keys='[Album.artist_id]')
+
+
+# Album.artist = db.relationship('Artist', backref='albums_relationship', foreign_keys='[Album.artist_id]')
+# Album.liked_songs = db.relationship('Liked_Song', backref='album')
+
+artist = db.relationship('Artist', back_populates='albums', foreign_keys='[Album.artist_id]')
+liked_songs = db.relationship('Liked_Song', back_populates='album')
+
+
+# Track.artist = db.relationship('Artist', backref='track_artist', foreign_keys='[Track.artist_id]')
+# Track.album = db.relationship('Album', backref='tracks', foreign_keys='[Track.album_id]')
+# Track.liked_songs = db.relationship('Liked_Song', backref='track_liked_songs')
+
+artist = db.relationship('Artist', back_populates='tracks', foreign_keys='[Track.artist_id]')
+album = db.relationship('Album', back_populates='tracks', foreign_keys='[Track.album_id]')
+liked_songs = db.relationship('Liked_Song', back_populates='track')
+
+
+# Playlist.track = db.relationship('Track', backref='track_playlists')
+# Playlist.user = db.relationship('User', backref='user_playlists')
+# Playlist.playlist_tracks = db.relationship('Playlist_Track', backref='playlist_playlist_track')
+tracks = db.relationship('Track', secondary='playlist_tracks', back_populates='playlists')
+playlists = db.relationship('Playlist', secondary='playlist_tracks', back_populates='tracks')

@@ -12,8 +12,6 @@ import base64
 from datetime import datetime, timedelta
 import jwt
 import logging
-
-
 from spotipy import Spotify, SpotifyException
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -24,17 +22,17 @@ import requests
 load_dotenv()
 client_id = os.environ.get('SPOTIPY_CLIENT_ID')
 client_secret = os.environ.get('SPOTIPY_CLIENT_SECRET')
-# redirect_uri = os.environ.get('REDIRECT_URI') 
+redirect_uri = os.environ.get('REDIRECT_URI') 
 
 TOKEN_INFO = 'token_info'
 
-
-
 app.secret_key = 'din12823112390238ub09843209a1234'
-redirect_uri = 'http://127.0.0.1:5556/token-exchange' 
+# redirect_uri = 'http://127.0.0.1:5556/token-exchange' 
 # redirect_uri = 'http://127.0.0.1:5556/user_saved_tracks' 
 # redirect_uri = 'http://127.0.0.1:5556/current_user' 
 api=Api(app)
+
+#CORS Routes
 CORS(app, resources={
         r"/store_refresh_token": {"origins": "http://localhost:5555"},
         r"/current_user": {"origins": "http://localhost:5555"},
@@ -42,11 +40,7 @@ CORS(app, resources={
         r"/user_saved_tracks": {"origins": "http://localhost:5555"},
     })    
 
-
-
-
-
-    
+# Working
 def create_spotify_oauth():
     return SpotifyOAuth(
         client_id,
@@ -56,11 +50,11 @@ def create_spotify_oauth():
         cache_path=".cache", 
     )    
 
+# Working
 def get_token():
     token_info = session.get(TOKEN_INFO, None)
     if not token_info:
         return None  
-
     now = int(time.time())
     is_expired = token_info['expires_at'] - now < 60
     
@@ -178,7 +172,6 @@ def get_refresh_token_for_user(user_id):
         return token_record.refresh_token
     else:
         return None
-    
 
 def get_current_user_id():
     token = request.headers.get('Authorization')
@@ -196,39 +189,75 @@ def get_current_user_id():
     return None
 
 def store_token_for_user(user_id, token_info):
-    # Check for existing token record
+
     user_token = UserToken.query.filter_by(user_id=user_id).first()
 
     if not user_token:
         user_token = UserToken(user_id=user_id)
         db.session.add(user_token)
 
-    # Update token information
     user_token.access_token = token_info['access_token']
     user_token.refresh_token = token_info.get('refresh_token')
     user_token.expires_at = datetime.utcnow() + timedelta(seconds=token_info['expires_in'])
-
-    # Commit changes to the database
     db.session.commit()
 
+def encode_client_credentials(client_id, client_secret):
+    import base64
+    client_credentials = f'{client_id}:{client_secret}'
+    client_credentials_b64 = base64.b64encode(client_credentials.encode()).decode()
+    return client_credentials_b64
 
+def get_token_for_user(user_id):
+    user_token = UserToken.query.filter_by(user_id=user_id).first()
+    if user_token:
+        if datetime.utcnow() < user_token.expires_at:
+            return {
+                'access_token': user_token.access_token,
+                'refresh_token': user_token.refresh_token,
+                'expires_at': user_token.expires_at
+            }
+        else:
+            # Token is expired, so refresh it
+            new_token_info = refresh_access_token(user_token.refresh_token)
+            if new_token_info:
+                user_token.access_token = new_token_info['access_token']
+                user_token.refresh_token = new_token_info.get('refresh_token', user_token.refresh_token)
+                user_token.expires_at = datetime.utcnow() + timedelta(seconds=new_token_info['expires_in'])
+                db.session.commit()
+                return {
+                    'access_token': user_token.access_token,
+                    'refresh_token': user_token.refresh_token,
+                    'expires_at': user_token.expires_at
+                }
+    return None
 
+def get_all_user_playlists(sp, limit=50):
+    playlists = []
+    offset = 0
 
+    while True:
+        response = sp.current_user_playlists(offset=offset, limit=limit)
+        playlists.extend(response['items'])
 
-# class TokenExchange(Resource):
-#     def post(self):
-#         code = request.json.get('code')
-#         if not code:
-#             return {'message': 'No code provided'}, 400
-#         token_info = exchange_code(code)
-#         if not token_info:
-#             return {'message': 'Failed to exchange code'}, 400
-#         # Further processing, if necessary
-#         return token_info, 200
+        # Check if there are more playlists to fetch
+        if len(response['items']) < limit:
+            break
+        offset += limit
+
+    return playlists
+
 class Home(Resource):
     def get(self):
         auth_url = create_spotify_oauth().get_authorize_url() 
         return redirect(auth_url)
+
+class Redirect(Resource):
+    def get(self):
+        session.clear()
+        code = request.args.get('code')
+        token_info = create_spotify_oauth().get_access_token(code)
+        session[TOKEN_INFO] = token_info
+        return redirect('http://127.0.0.1:5556/token-exchange')
 
 class TokenExchange(Resource):
     def get(self):
@@ -238,7 +267,7 @@ class TokenExchange(Resource):
         token_info = exchange_code(code)
         if token_info:
             session['token_info'] = token_info
-            return redirect('http://127.0.0.1:5556/token-exchange')  
+            return redirect('http://localhost:5555/home')  
         else:
             return ({'error': str(e)}), 500
 
@@ -256,50 +285,8 @@ class TokenExchange(Resource):
             token_info = spotify_oauth.get_access_token(code)
             return (token_info), 200
         except spotipy.SpotifyException as e:
-            return ({'error': str(e)}), 500
-
-
-
-#Probably not needed
-class Redirect(Resource):
-    def get(self):
-        session.clear()
-        code = request.args.get('code')
-        token_info = create_spotify_oauth().get_access_token(code)
-        session[TOKEN_INFO] = token_info
-        return redirect('http://127.0.0.1:5556/token-exchange')
-
-
-
-
-
-
-
-
-# class SavedSongs(Resource):
-    # def get(self):
-    #     try:
-    #         access_token = self.extract_access_token()  
-    #         sp = Spotify(auth=access_token)  
-    #         saved_tracks_response = sp.current_user_saved_tracks()  # Fetch saved tracks
-
-    #         extracted_tracks = self.extract_track_info(saved_tracks_response.get('items', []))
-            
-    #         return jsonify({'tracks': extracted_tracks})  # Return serialized JSON
-    #     except SpotifyException as spotify_error:
-
-    #         return jsonify({'message': f'Spotify API Error: {str(spotify_error)}'}), 500
-    #     except Exception as generic_error:
-
-    #         return jsonify({'message': f'Error retrieving user saved tracks: {str(generic_error)}'}), 500
-
-        token_info = exchange_code(code)
-        token_info = exchange_code(code)
-        if token_info:
-            session['token_info'] = token_info
-            return redirect('http://localhost:5555/home')  
-        else:
-            return ({'error': str(e)}), 500
+            return ({'error': str(e)}), 500     
+ 
 class SavedSongs(Resource):
     def get(self):
         code = request.args.get('code')
@@ -390,7 +377,6 @@ class SavedSongs(Resource):
     #         print(f"Error: {str(e)}")
     #         return {'message': 'Error retrieving user saved tracks'}
 
-
 class SearchArtist(Resource):
     def get(self, artist_name):
         try:
@@ -405,34 +391,22 @@ class SearchArtist(Resource):
         except:
             return {'message': 'Error searching for artist'}
 
-
 class CurrentUser(Resource):
     def get(self):
         try:
             token_info = get_token()
-            sp = spotipy.Spotify(auth=token_info['access_token'])
             if not token_info or 'access_token' not in token_info:
-                return {'message': 'Invalid or missing token'}
+                return {'message': 'Invalid or missing token'}, 401
+
+            sp = spotipy.Spotify(auth=token_info['access_token'])
             user_info = sp.current_user()
             return user_info
+        except spotipy.SpotifyException as e:
+
+            return {'message': f'Error retrieving Spotify user information: {e}'}, e.http_status
         except Exception as e:
-            return {'message': f'Error retrieving current user information: {str(e)}'}
 
-
-def get_all_user_playlists(sp, limit=50):
-    playlists = []
-    offset = 0
-
-    while True:
-        response = sp.current_user_playlists(offset=offset, limit=limit)
-        playlists.extend(response['items'])
-
-        # Check if there are more playlists to fetch
-        if len(response['items']) < limit:
-            break
-        offset += limit
-
-    return playlists
+            return {'message': f'Error retrieving current user information: {str(e)}'}, 500
 
 class UserPlaylists(Resource):
     def get(self):
@@ -618,7 +592,6 @@ class CreatePlaylist(Resource):
         playlist = create_playlist(user_id, access_token, playlist_name)
         return {'message': 'Playlist created successfully', 'playlist_id': playlist['id']}
 
-
 class PlaylistCoverImage(Resource):
     def get(self, playlist_id):
         try:
@@ -710,7 +683,6 @@ class UserPlaylistUnfollow(Resource):
             print(f"Error: {str(e)}")
             return {'message': 'Error unfollowing playlist'}
 
-
 class UserPlaylistCreate(Resource):
     def post(self, name, public=False, collaborative=False, description=None):
         try:
@@ -739,30 +711,6 @@ class UserPlaylistFollow(Resource):
             print(f"Error: {str(e)}")
             return {'message': 'Error following playlist'}
 
-def get_token_for_user(user_id):
-    user_token = UserToken.query.filter_by(user_id=user_id).first()
-    if user_token:
-        if datetime.utcnow() < user_token.expires_at:
-            return {
-                'access_token': user_token.access_token,
-                'refresh_token': user_token.refresh_token,
-                'expires_at': user_token.expires_at
-            }
-        else:
-            # Token is expired, so refresh it
-            new_token_info = refresh_access_token(user_token.refresh_token)
-            if new_token_info:
-                user_token.access_token = new_token_info['access_token']
-                user_token.refresh_token = new_token_info.get('refresh_token', user_token.refresh_token)
-                user_token.expires_at = datetime.utcnow() + timedelta(seconds=new_token_info['expires_in'])
-                db.session.commit()
-                return {
-                    'access_token': user_token.access_token,
-                    'refresh_token': user_token.refresh_token,
-                    'expires_at': user_token.expires_at
-                }
-    return None
-
 class AccessTokenResource(Resource):
     def get(self):
         # Authenticate the user here
@@ -775,10 +723,6 @@ class AccessTokenResource(Resource):
             return {'access_token': token_info['access_token']}
         else:
             return {'message': 'Token not found'}, 404
-
-        
-        
-        
         
 class RefreshTokenResource(Resource):
     def post(self):
@@ -809,9 +753,6 @@ class RefreshTokenResource(Resource):
             return {'message': 'Refresh token stored successfully'}, 200
         except Exception as e:
             return {'message': str(e)}, 500
-
-
-
 
 class Refresh(Resource):
     def post(self):
@@ -893,41 +834,49 @@ class Refresh(Resource):
     #     else:
     #         # Token is still valid, return the current access token
     #         return {'access_token': user_token.access_token}
-def encode_client_credentials(client_id, client_secret):
-    import base64
-    client_credentials = f'{client_id}:{client_secret}'
-    client_credentials_b64 = base64.b64encode(client_credentials.encode()).decode()
-    return client_credentials_b64
 
 class StoreUser(Resource):
     def post(self):
-
         data = request.get_json()
 
-        new_user = User(email=data['email'], name=data['name'],username=data['userId'], profile_pic=data['userImage'] )
+        # Validate data
+        required_fields = ['email', 'name', 'userId', ]
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return {'error': f'Missing fields: {", ".join(missing_fields)}'}, 400
+
+        # Create a new user with safe data access
+        new_user = User(
+            email=data.get('email'),
+            name=data.get('name'),
+            username=data.get('userId'),
+            profile_pic=data.get('userImage', 'default_image.jpg')
+        )
         db.session.add(new_user)
-        db.session.commit()
-        return {'message': 'User created successfully'}, 201
+
+        # Commit to the database with error handling
+        try:
+            db.session.commit()
+            return {'message': 'User created successfully'}, 201
+        except Exception as e:
+            db.session.rollback()
+            return {'error': str(e)}, 500
 
     def options(self):
-     
         return {'message': 'OK'}, 200
-    
+
     
 api.add_resource(Home, '/home')
 api.add_resource(TokenExchange, '/token-exchange')
 api.add_resource(AccessTokenResource, '/access_token')
+api.add_resource(Redirect, '/redirect')
 api.add_resource(Refresh, '/refresh_token')
 api.add_resource(RefreshTokenResource, '/store_refresh_token')
 api.add_resource(StoreUser, '/store_user')
-
 #Routes
-api.add_resource(SavedSongs, '/user_saved_tracks')
-api.add_resource(Redirect, '/redirect')
-
-
-api.add_resource(Logout, '/logout')
 api.add_resource(CurrentUser, '/current_user')
+api.add_resource(SavedSongs, '/user_saved_tracks')
+api.add_resource(Logout, '/logout')
 #Not Used
 api.add_resource(FeaturedPlaylists, '/featured_playlists')
 api.add_resource(CurrentUserSavedTracksDelete, '/current_user_saved_tracks_delete/<string:track_id>')
@@ -948,9 +897,31 @@ api.add_resource(UserPlaylistUnfollow, '/user_playlist_unfollow/<string:playlist
 api.add_resource(UserPlaylistFollow, '/user_playlist_follow/<string:playlist_id>')
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
    
     app.run(debug=True, port=5556)
+
+
+
+
+
+
+
+
 
 
 

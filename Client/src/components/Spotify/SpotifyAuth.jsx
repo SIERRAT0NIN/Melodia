@@ -8,14 +8,20 @@ const SpotifyAuth = ({
 }) => {
   const {
     setSavedTracks,
-
     setUserPlaylists,
     accessToken,
     setAccessToken,
     setUserId,
-    userId,
     refreshToken,
     setRefreshToken,
+    setUserImage,
+    setDisplayName,
+    setUserEmail,
+    setUserImg,
+    displayName,
+    userEmail,
+    userImage,
+    userId,
   } = useSpotify();
 
   const client_secret = "2fb5a9bb603a48aeadc6dfb28eeb00a0";
@@ -50,29 +56,34 @@ const SpotifyAuth = ({
       const authOptions = {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          // "Content-Type": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: JSON.stringify({
+        body: new URLSearchParams({
+          grant_type: "authorization_code",
           code: authorizationCode,
-        }),
+          redirect_uri,
+          client_id,
+          client_secret,
+        }).toString(),
       };
       try {
         const response = await fetch(
-          "http://127.0.0.1:5556/token-exchange",
+          "https://accounts.spotify.com/api/token",
           authOptions
         );
         const data = await response.json();
         console.log("exchange token: ", data);
 
-        if (response.ok && data.success) {
+        if (response.ok) {
           setAccessToken(data.access_token);
           setRefreshToken(data.refresh_token);
-
           const expiryTime = new Date(
             new Date().getTime() + data.expires_in * 1000
           );
 
           console.log("Token expires at:", expiryTime);
+
           if (onAccessTokenChange) onAccessTokenChange(data.access_token);
         } else {
           console.error("Error exchanging authorization code:", data);
@@ -160,8 +171,10 @@ const SpotifyAuth = ({
 
       try {
         const response = await fetch("https://api.spotify.com/v1/me", {
+          // const response = await fetch("http://127.0.0.1:5556/current_user", {
           headers: {
             Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
           },
         });
 
@@ -170,8 +183,17 @@ const SpotifyAuth = ({
           console.log("Response:", response);
           console.log("User Profile:", data);
           setUserId(data.id);
-          // Here, you can set this data to your state or context
+          setDisplayName(data.display_name);
+          setUserEmail(data.email);
+          if (data.images && data.images.length > 0) {
+            setUserImg(data.images[0].url); // Use the first image URL
+          } else {
+            setUserImg(null); // Or set a default image URL
+          }
         } else {
+          console.error("Error fetching user profile:", response.statusText);
+        }
+        {
           console.error("Error fetching user profile:", response.statusText);
         }
       } catch (error) {
@@ -181,6 +203,7 @@ const SpotifyAuth = ({
 
     fetchUserProfile();
   }, [accessToken]);
+  console.log("ALL DATA:", userId, displayName, userEmail, userImage);
 
   //! User Saved Tracks
   //* Working
@@ -280,22 +303,31 @@ const SpotifyAuth = ({
   //   }
   // };
 
-  fetch("http://127.0.0.1:5556/current_user", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    // body: JSON.stringify(userData),
-  })
-    .then((response) => console.log(response.json()))
-    .then((data) => console.log("Current User", data))
-    .catch((error) => console.error("Error:", error));
-
+  // fetch("http://127.0.0.1:5556/current_user", {
+  //   method: "GET",
+  //   headers: {
+  //     Authorization: `Bearer ${accessToken}`,
+  //     "Content-Type": "application/json",
+  //   },
+  // })
+  //   .then((response) => response.json())
+  //   .then((data) => {
+  //     console.log("Current User", data);
+  //     setDisplayName(data.display_name);
+  //     setUserEmail(data.email);
+  //     setUserId(data.id);
+  //     setUserImage(data.images[0].url);
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error:", error);
+  //   });
   const userInformation = {
-    name: "alberto sierra",
-    email: "alberto.sierra@email.com",
-    userId: "alberto_sierra",
+    name: displayName,
+    email: userEmail,
+    userId: userId,
+    userImage: userImage,
   };
+  console.log(userInformation);
 
   fetch("http://127.0.0.1:5556/store_user", {
     method: "POST",
