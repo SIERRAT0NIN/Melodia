@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSpotify } from "../Spotify/SpotifyContext";
-
+import { Input } from "@nextui-org/react";
 const SpotifySearch = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -39,16 +39,17 @@ const SpotifySearch = () => {
 
   return (
     <div>
-      <form onSubmit={handleSearch}>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search for artists, songs, albums..."
-        />
-        <button type="submit">Search</button>
-      </form>
-
+      <div className="flex">
+        <form onSubmit={handleSearch}>
+          <Input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search for artists, songs, albums..."
+          />
+          <button type="submit">Search</button>
+        </form>
+      </div>
       {isLoading ? (
         <p>Loading...</p>
       ) : (

@@ -8,9 +8,11 @@ import {
   ModalFooter,
   Button,
   Image,
+  RadioGroup,
+  Radio,
 } from "@nextui-org/react";
 import DeletePlaylistBtn from "./DeletePlaylistBtn";
-import EditPlaylistButton from "./EditPlaylist";
+import EditPlaylistModal from "./EditPlaylist";
 import SongModal from "./PlaylistSongDetail";
 
 //! PLAYLISTDETAILS
@@ -22,6 +24,8 @@ export default function PlaylistDetails({
 }) {
   const { accessToken, selectedSong, setSelectedSong } = useSpotify();
   const [trackList, setTrackList] = useState([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
   // const [playlistDetails, setPlaylistDetails] = useState(playlist);
 
   // Constants for fallback values
@@ -85,17 +89,25 @@ export default function PlaylistDetails({
   const closeSongModal = () => {
     setSelectedSong(null);
   };
+  const toggleEditModal = () => {
+    setIsEditModalOpen(!isEditModalOpen);
+  };
 
   return (
-    <Modal backdrop="blur" isOpen={isOpen} onClose={onClose} className="flex">
+    <Modal
+      backdrop="blur"
+      isOpen={isOpen}
+      onClose={onClose}
+      className="flex"
+      scrollBehavior={"inside"}
+    >
       <ModalContent>
-        <Image isBlurred src={imageUrl} />
-
         <ModalHeader className="flex flex-col gap-1">
           <h2>{name ?? DEFAULT_PLAYLIST_NAME}</h2>
         </ModalHeader>
 
         <ModalBody>
+          <Image isBlurred src={imageUrl} />
           <p>{description ?? DEFAULT_DESCRIPTION}</p>
           <p>Total Tracks: {trackList.length ?? DEFAULT_TRACK_COUNT}</p>
           <ul>
@@ -110,16 +122,29 @@ export default function PlaylistDetails({
 
         <ModalFooter>
           <DeletePlaylistBtn accessToken={accessToken} playlistId={id} />
-          <EditPlaylistButton
-            playlistId={id}
-            accessToken={accessToken}
-            onPlaylistUpdated={onPlaylistUpdated}
-            initialDetails={{ name, description }}
-          />
+          <Button
+            auto
+            flat
+            color="warning"
+            variant="bordered"
+            onClick={toggleEditModal}
+          >
+            Edit
+          </Button>
           <Button color="danger" variant="light" onPress={onClose}>
             Close
           </Button>
         </ModalFooter>
+        {/* Edit Playlist Modal */}
+        {isEditModalOpen && (
+          <EditPlaylistModal
+            playlistId={id}
+            accessToken={accessToken}
+            onPlaylistUpdated={onPlaylistUpdated}
+            initialDetails={{ name, description }}
+            onClose={onClose}
+          />
+        )}
       </ModalContent>
       <SongModal
         isOpen={isSongModalOpen}

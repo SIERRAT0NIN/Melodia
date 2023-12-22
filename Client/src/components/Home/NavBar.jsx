@@ -5,6 +5,7 @@ import {
   NavbarItem,
   Link,
   Input,
+  Button,
   // DropdownItem,
   // DropdownTrigger,
   // Dropdown,
@@ -15,7 +16,7 @@ import {
 import { SearchIcon } from "./SearchIcon.jsx";
 // import Account from "./Account.jsx";
 import EqualizerRoundedIcon from "@mui/icons-material/EqualizerRounded";
-import SpotifySearch from "./SpotifySearch.jsx";
+import SpotifySearch from "../Search/SpotifySearch.jsx";
 export default function NavBar() {
   return (
     <Navbar isBordered>
@@ -23,6 +24,11 @@ export default function NavBar() {
         <NavbarBrand className="mr-4">
           <EqualizerRoundedIcon />
           <p className="hidden sm:block font-bold text-inherit">Melody</p>
+          <h1>Melody</h1>
+          <Button>Liked Songs</Button>
+          <Button>Playlist</Button>
+          <Button>Song Baskets</Button>
+          <Button>Create a Playlist</Button>
         </NavbarBrand>
 
         <NavbarContent className="hidden sm:flex gap-3">

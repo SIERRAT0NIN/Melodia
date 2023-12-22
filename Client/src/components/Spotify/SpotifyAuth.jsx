@@ -271,11 +271,7 @@ const SpotifyAuth = ({
       .then((data) => console.log("Success:", data))
       .catch((error) => console.error("Error:", error));
   }, [userId, displayName, userEmail, userImg]);
-  return (
-    <div>
-      <h1>Melody</h1>
-    </div>
-  );
+  return <div></div>;
 };
 
 export default SpotifyAuth;
