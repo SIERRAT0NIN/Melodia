@@ -11,7 +11,7 @@ import {
 } from "@nextui-org/react";
 import DeletePlaylistBtn from "./DeletePlaylistBtn";
 import EditPlaylistButton from "./EditPlaylist";
-import SongModal from "../Home/SongDetail";
+import SongModal from "./PlaylistSongDetail";
 
 //! PLAYLISTDETAILS
 export default function PlaylistDetails({
@@ -80,6 +80,8 @@ export default function PlaylistDetails({
   const handleSongClick = (song) => {
     setSelectedSong(song);
   };
+  const isSongModalOpen = selectedSong != null;
+
   const closeSongModal = () => {
     setSelectedSong(null);
   };
@@ -119,6 +121,11 @@ export default function PlaylistDetails({
           </Button>
         </ModalFooter>
       </ModalContent>
+      <SongModal
+        isOpen={isSongModalOpen}
+        onClose={closeSongModal}
+        song={selectedSong}
+      />
     </Modal>
   );
 }

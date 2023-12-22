@@ -119,7 +119,6 @@ def current_user_saved_tracks():
         return {'message': 'Error retrieving current user saved tracks'}
     except Exception as e:
         return {'message': 'Unexpected error retrieving current user saved tracks'}
-
 def extract_access_token(self):
     authorization_header = request.headers.get('Authorization')
     if not authorization_header or 'Bearer ' not in authorization_header:

@@ -17,7 +17,7 @@ const SongModal = ({ isOpen, onClose, song }) => {
   const [popoverMessage, setPopoverMessage] = useState("");
   const [isLiked, setIsLiked] = useState(true);
   const { accessToken } = useSpotify();
-
+  if (!isOpen) return null;
   if (!song) return null;
 
   const handleLikeUnlikeClick = () => {

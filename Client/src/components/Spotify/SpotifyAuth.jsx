@@ -14,13 +14,12 @@ const SpotifyAuth = ({
     setUserId,
     refreshToken,
     setRefreshToken,
-    setUserImage,
     setDisplayName,
     setUserEmail,
     setUserImg,
     displayName,
     userEmail,
-    userImage,
+    userImg,
     userId,
   } = useSpotify();
 
@@ -136,39 +135,13 @@ const SpotifyAuth = ({
 
   console.log("Access:", accessToken);
   console.log("Refresh:", refreshToken);
-  // useEffect(() => {
-  //   fetch("http://127.0.0.1:5556/token-exchange")
-  //     .then((r) => r.json())
-  //     .then((data) => console.log("TOKEN:", data))
-  //     .catch(Error);
-  // }, []);
-
-  //! Refreshing Access Token with Refresh Token from the back end
-  // const refreshAccessToken = async () => {
-  //   try {
-  //     const response = await fetch("/refresh_token", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ user_id: userId }),
-  //     });
-
-  //     const data = await response.json();
-  //     if (data.access_token) {
-  //       setAccessToken(data.access_token); // Update your access token state
-  //     }
-  //   } catch (error) {
-  //     console.error("Error refreshing access token:", error);
-  //   }
-  // };
 
   //! User Profile {userId}
   //* Working
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (!accessToken) return;
-
+      userImg;
       try {
         const response = await fetch("https://api.spotify.com/v1/me", {
           // const response = await fetch("http://127.0.0.1:5556/current_user", {
@@ -180,15 +153,15 @@ const SpotifyAuth = ({
 
         if (response.ok) {
           const data = await response.json();
-          console.log("Response:", response);
-          console.log("User Profile:", data);
+          console.log("User Images:", data.images[0].url);
           setUserId(data.id);
           setDisplayName(data.display_name);
           setUserEmail(data.email);
+          setUserImg(data.images[0].url);
           if (data.images && data.images.length > 0) {
-            setUserImg(data.images[0].url); // Use the first image URL
+            setUserImg(data.images[0].url);
           } else {
-            setUserImg(null); // Or set a default image URL
+            setUserImg(null);
           }
         } else {
           console.error("Error fetching user profile:", response.statusText);
@@ -203,7 +176,6 @@ const SpotifyAuth = ({
 
     fetchUserProfile();
   }, [accessToken]);
-  console.log("ALL DATA:", userId, displayName, userEmail, userImage);
 
   //! User Saved Tracks
   //* Working
@@ -268,78 +240,37 @@ const SpotifyAuth = ({
     fetchUserPlaylists();
   }, [accessToken]);
 
-  //! Add song to playlist
-  // const addSongToPlaylist = async (playlistId, trackUri) => {
-  //   if (!accessToken || !playlistId || !trackUri) {
-  //     console.error("Missing required information");
-  //     return;
-  //   }
-
-  //   try {
-  //     const response = await fetch(
-  //       `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           Authorization: `Bearer ${accessToken}`,
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           uris: [trackUri],
-  //         }),
-  //       }
-  //     );
-
-  //     if (response.ok) {
-  //       console.log("Track added to the playlist successfully");
-  //     } else {
-  //       console.error(
-  //         "Error adding track to the playlist:",
-  //         response.statusText
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error("Error adding track to the playlist:", error);
-  //   }
-  // };
-
-  // fetch("http://127.0.0.1:5556/current_user", {
-  //   method: "GET",
-  //   headers: {
-  //     Authorization: `Bearer ${accessToken}`,
-  //     "Content-Type": "application/json",
-  //   },
-  // })
-  //   .then((response) => response.json())
-  //   .then((data) => {
-  //     console.log("Current User", data);
-  //     setDisplayName(data.display_name);
-  //     setUserEmail(data.email);
-  //     setUserId(data.id);
-  //     setUserImage(data.images[0].url);
-  //   })
-  //   .catch((error) => {
-  //     console.error("Error:", error);
-  //   });
   const userInformation = {
     name: displayName,
     email: userEmail,
     userId: userId,
-    userImage: userImage,
+    userImage: userImg,
   };
-  console.log(userInformation);
 
-  fetch("http://127.0.0.1:5556/store_user", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(userInformation),
-  })
-    .then((response) => response.json())
-    .then((data) => console.log("Success:", data))
-    .catch((error) => console.error("Error:", error));
+  useEffect(() => {
+    // Ensure all required user information is available
+    if (!userId || !displayName || !userEmail || !userImg) return;
 
+    // Define the user information object
+    const userInformation = {
+      name: displayName,
+      email: userEmail,
+      userId: userId,
+      userImage: userImg,
+    };
+
+    // Send user information to the backend
+    fetch("http://127.0.0.1:5556/store_user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userInformation),
+    })
+      .then((response) => response.json())
+      .then((data) => console.log("Success:", data))
+      .catch((error) => console.error("Error:", error));
+  }, [userId, displayName, userEmail, userImg]);
   return (
     <div>
       <h1>Melody</h1>
