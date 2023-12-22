@@ -13,7 +13,7 @@ import {
 } from "@nextui-org/react";
 // import { NextIcon } from "../MusicPlayer/NextIcon.jsx";
 import { SearchIcon } from "./SearchIcon.jsx";
-import Account from "./Account.jsx";
+// import Account from "./Account.jsx";
 import EqualizerRoundedIcon from "@mui/icons-material/EqualizerRounded";
 import SpotifySearch from "./SpotifySearch.jsx";
 export default function NavBar() {
@@ -61,7 +61,7 @@ export default function NavBar() {
 
         <SpotifySearch />
 
-        <Account />
+        {/* <Account /> */}
       </NavbarContent>
     </Navbar>
   );

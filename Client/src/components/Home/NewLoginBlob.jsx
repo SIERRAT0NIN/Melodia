@@ -3,7 +3,7 @@ const Blob = () => {
     {
       name: "Melody",
       description: "Your personal music app",
-      url: "http://127.0.0.1:5556/token-exchange",
+      url: "http://127.0.0.1:5556/home",
       username: "Sign in with Spotify!",
       className: "linkedin",
     },
