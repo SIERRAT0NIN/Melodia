@@ -7,6 +7,8 @@ import {
   TableRow,
   TableCell,
   useDisclosure,
+  Select,
+  SelectItem,
 } from "@nextui-org/react";
 import PlaylistDetails from "./PlaylistDetails"; // Ensure this is the correct path
 
@@ -31,6 +33,16 @@ export default function UserPlaylists({ playlists, setPlaylists }) {
           <TableColumn>Playlist Name</TableColumn>
         </TableHeader>
         <TableBody>
+          <Select
+            items={animals}
+            label="Favorite Animal"
+            placeholder="Select an animal"
+            className="max-w-xs"
+          >
+            {(animal) => (
+              <SelectItem key={animal.value}>{animal.label}</SelectItem>
+            )}
+          </Select>
           {playlists.map((playlist) => (
             <TableRow
               key={playlist.id}

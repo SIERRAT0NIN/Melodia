@@ -25,7 +25,7 @@ export default function SavedPlaylist({ playlists, setPlaylists }) {
 
   return (
     <>
-      <Table aria-label="User Playlists">
+      <Table aria-label="User Playlists" css={{ cursor: "pointer" }}>
         <TableHeader>
           <TableColumn>Playlist Name</TableColumn>
         </TableHeader>

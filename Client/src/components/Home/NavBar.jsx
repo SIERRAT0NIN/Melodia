@@ -6,6 +6,7 @@ import {
   Link,
   Input,
   Button,
+  ButtonGroup,
   // DropdownItem,
   // DropdownTrigger,
   // Dropdown,
@@ -19,56 +20,54 @@ import EqualizerRoundedIcon from "@mui/icons-material/EqualizerRounded";
 import SpotifySearch from "../Search/SpotifySearch.jsx";
 export default function NavBar() {
   return (
-    <Navbar isBordered>
-      <NavbarContent justify="start">
-        <NavbarBrand className="mr-4">
-          <EqualizerRoundedIcon />
-          <p className="hidden sm:block font-bold text-inherit">Melody</p>
-          <h1>Melody</h1>
-          <Button>Liked Songs</Button>
-          <Button>Playlist</Button>
-          <Button>Song Baskets</Button>
-          <Button>Create a Playlist</Button>
-        </NavbarBrand>
+    <>
+      <Navbar isBordered>
+        <NavbarContent justify="start">
+          <NavbarBrand className="mr-4">
+            <EqualizerRoundedIcon />
+            <p className="hidden sm:block font-bold text-inherit">Melody</p>
+            <h1>Melody </h1>
+            <ButtonGroup
+              variant="bordered"
+              color="primary"
+              justify="end"
+              className="nav-btn"
+            >
+              <Button className="nav-btn">
+                <a href="/saved_songs"> Liked Songs </a>
+              </Button>
+              <Button className="nav-btn">
+                <a href="/user_playlist"> Playlist</a>
+              </Button>
+              <Button className="nav-btn">
+                <a href="/baskets"> Song Baskets</a>
+              </Button>
+              <Button className="nav-btn">
+                <a href="/create_playlist"> Create a playlist</a>
+              </Button>
+            </ButtonGroup>
+          </NavbarBrand>
 
-        <NavbarContent className="hidden sm:flex gap-3">
-          <NavbarItem>
-            <Link color="foreground" href="#">
-              Features
-            </Link>
-          </NavbarItem>
-          <NavbarItem isActive>
-            <Link href="#" aria-current="page" color="secondary">
-              Customers
-            </Link>
-          </NavbarItem>
-          <NavbarItem>
-            <Link color="foreground" href="#">
-              Integrations
-            </Link>
-          </NavbarItem>
+          <NavbarContent className="hidden sm:flex gap-3">
+            <NavbarItem>
+              <Link color="foreground" href="#">
+                Features
+              </Link>
+            </NavbarItem>
+            <NavbarItem isActive>
+              <Link href="#" aria-current="page" color="secondary">
+                Customers
+              </Link>
+            </NavbarItem>
+            <NavbarItem>
+              <Link color="foreground" href="#">
+                Integrations
+              </Link>
+            </NavbarItem>
+          </NavbarContent>
         </NavbarContent>
-      </NavbarContent>
-
-      <NavbarContent as="div" className="items-center" justify="end">
-        {/* <Input
-          classNames={{
-            base: "max-w-full sm:max-w-[10rem] h-10",
-            mainWrapper: "h-full",
-            input: "text-small",
-            inputWrapper:
-              "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
-          }}
-          placeholder="Type to search..."
-          size="sm"
-          startContent={<SearchIcon size={18} />}
-          type="search"
-        /> */}
-
-        <SpotifySearch />
-
-        {/* <Account /> */}
-      </NavbarContent>
-    </Navbar>
+      </Navbar>
+      <SpotifySearch />
+    </>
   );
 }

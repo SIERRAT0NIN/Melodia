@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -196,7 +197,6 @@ body {
   background: #ebebeb;
   border-radius: 30px;
 }
-@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap");
 
 * {
   margin: 0;
@@ -433,4 +433,29 @@ body {
 }
 .panel-header {
   margin-bottom: 20px;
+}
+
+.glass-footer {
+  margin-left: 25%;
+  margin-right: 25%;
+  color: white;
+  font-weight: bold;
+  background: rgba(68, 53, 162, 0.411);
+  border-radius: 10px;
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.475);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.144);
+}
+.img-opacity {
+  opacity: 100;
+}
+.basket {
+  color: white;
+  font-size: 12px;
+  padding: 5%;
+}
+.basket-collection {
+  position: relative;
+  display: block;
 }
