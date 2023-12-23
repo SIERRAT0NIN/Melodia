@@ -1,71 +1,85 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useSpotify } from "../Spotify/SpotifyContext";
-import { Input } from "@nextui-org/react";
+import { Input, Button } from "@nextui-org/react";
+import SearchResults from "./SearchResults";
+
 const SpotifySearch = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState({
+    tracks: { items: [] },
+    artists: { items: [] },
+    albums: { items: [] },
+  });
   const [isLoading, setIsLoading] = useState(false);
-  const { accessToken } = useSpotify("");
+  const { accessToken, setSelectedSong } = useSpotify("");
+
+  const fetchSpotifyData = async (query, token) => {
+    const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(
+      query
+    )}&type=track,artist,album`;
+    const headers = { Authorization: `Bearer ${token}` };
+
+    try {
+      const response = await fetch(url, { headers });
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      throw error; // Rethrow the error for handling it in the calling function
+    }
+  };
+
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchQuery) return;
 
     setIsLoading(true);
-
     try {
-      const response = await fetch(
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(
-          searchQuery
-        )}&type=track,artist,album`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await fetchSpotifyData(searchQuery, accessToken);
       setSearchResults(data);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      // Handle error (maybe set an error state and display a message to the user)
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleSongClick = (song) => {
+    console.log("Selected Song:", song);
+    setSelectedSong(song);
+  };
+
+  const handleArtistClick = (artist) => {
+    console.log("Selected Artist:", artist);
+  };
+
+  const handleAlbumClick = (album) => {
+    console.log("Selected Album:", album);
+  };
+
   return (
     <div>
-      <div className="flex">
-        <form onSubmit={handleSearch}>
-          <Input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search for artists, songs, albums..."
-          />
-          <button type="submit">Search</button>
-        </form>
-      </div>
+      <form onSubmit={handleSearch}>
+        <Input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search for artists, songs, albums..."
+        />
+        <Button type="submit">Search</Button>
+      </form>
+
       {isLoading ? (
         <p>Loading...</p>
       ) : (
-        <div>
-          {/* Render search results here */}
-          {/* Example: */}
-          {searchResults.tracks?.items.map((track) => (
-            <div key={track.id}>
-              <p>
-                {track.name} -{" "}
-                {track.artists.map((artist) => artist.name).join(", ")}
-              </p>
-            </div>
-          ))}
-          {/* Similar rendering for artists and albums */}
-        </div>
+        <SearchResults
+          searchData={searchResults}
+          onSongClick={handleSongClick}
+          onArtistClick={handleArtistClick}
+          onAlbumClick={handleAlbumClick}
+        />
       )}
     </div>
   );

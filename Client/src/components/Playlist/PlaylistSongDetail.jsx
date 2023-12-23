@@ -63,7 +63,6 @@ const SongModal = ({ isOpen, onClose, song }) => {
       if (!response.ok) {
         throw new Error("Failed to update song like status");
       }
-      // Update the state if needed, e.g., refresh the list of liked songs
     } catch (error) {
       console.error("Error:", error);
     }
@@ -79,7 +78,6 @@ const SongModal = ({ isOpen, onClose, song }) => {
             sizes="lg"
             alt={song.name}
           />
-
           <h2>{song.name}</h2>
           <h4>{song.artists.map((artist) => artist.name).join(", ")}</h4>
           <h4>{song.album.name}</h4>

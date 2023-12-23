@@ -6,6 +6,7 @@ import "./index.css";
 import { NextUIProvider } from "@nextui-org/react";
 import { ScrollShadow } from "@nextui-org/react";
 import { SpotifyProvider } from "./components/Spotify/SpotifyContext.jsx";
+import Footer from "./components/Home/Footer.jsx";
 // import App from "./components/App.jsx";
 // import LoginBlob from "./components/LoginBlob.jsx";
 // import SavedSongTable from "./components/SavedSongTable.jsx";
