@@ -120,7 +120,7 @@ export default function PlaylistDetails({
           </ul>
         </ModalBody>
 
-        <ModalFooter>
+        <ModalFooter className="flex justify-center items-center">
           <DeletePlaylistBtn accessToken={accessToken} playlistId={id} />
           <Button
             auto

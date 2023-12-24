@@ -10,35 +10,21 @@ import { useSpotify } from "../Spotify/SpotifyContext";
 import Footer from "./Footer";
 
 function HomePage() {
-  const {
-    setSavedTracks,
-    savedTracks,
-    userPlaylists,
-    setUserPlaylists,
-    accessToken,
-    setAccessToken,
-    setUserId,
-    userId,
-    refreshToken,
-    setRefreshToken,
-  } = useSpotify();
+  const { accessToken } = useSpotify();
   return (
     <Container>
       <div className="nav-container">
         <NavBar />
       </div>
-      <br />
-      <div>
-        <CurrentlyPlayingCard accessToken={accessToken} />
-      </div>
-      <div className="flex"></div>
+
       <div className="saved-song-table-container">
         <br />
+        <CurrentlyPlayingCard accessToken={accessToken} />
         <br />
         <SavedSongTable />
         <br />
-        <CreatePlaylist />
-        <SavedPlaylist />
+        {/* <CreatePlaylist /> */}
+        {/* <SavedPlaylist /> */}
       </div>
       <Footer />
     </Container>

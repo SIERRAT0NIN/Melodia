@@ -61,7 +61,10 @@ const SpotifySearch = () => {
 
   return (
     <div>
-      <form onSubmit={handleSearch}>
+      <form
+        onSubmit={handleSearch}
+        style={{ display: "flex", alignItems: "center" }}
+      >
         <Input
           type="text"
           value={searchQuery}

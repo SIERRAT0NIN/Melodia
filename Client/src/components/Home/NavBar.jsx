@@ -4,67 +4,45 @@ import {
   NavbarContent,
   NavbarItem,
   Link,
-  Input,
   Button,
   ButtonGroup,
-  // DropdownItem,
-  // DropdownTrigger,
-  // Dropdown,
-  // DropdownMenu,
-  // Avatar,
 } from "@nextui-org/react";
-// import { NextIcon } from "../MusicPlayer/NextIcon.jsx";
-import { SearchIcon } from "./SearchIcon.jsx";
-// import Account from "./Account.jsx";
 import EqualizerRoundedIcon from "@mui/icons-material/EqualizerRounded";
 import SpotifySearch from "../Search/SpotifySearch.jsx";
+
 export default function NavBar() {
   return (
     <>
       <Navbar isBordered>
-        <NavbarContent justify="start">
-          <NavbarBrand className="mr-4">
-            <EqualizerRoundedIcon />
-            <p className="hidden sm:block font-bold text-inherit">Melody</p>
-            <h1>Melody </h1>
-            <ButtonGroup
-              variant="bordered"
-              color="primary"
-              justify="end"
-              className="nav-btn"
-            >
+        <NavbarContent justify="space-between">
+          {/* Grouping Brand and Title together on the left */}
+          <div className="flex items-center justify-start">
+            <NavbarBrand className="flex items-center mr-4">
+              <EqualizerRoundedIcon />
+              <p className="hidden sm:block font-bold text-inherit ml-2">
+                Melody
+              </p>
+            </NavbarBrand>
+            <h1>Melodía</h1>
+          </div>
+
+          {/* Button Group on the right */}
+          <div className="flex items-center justify-end">
+            <ButtonGroup variant="bordered" color="primary" className="nav-btn">
               <Button className="nav-btn">
-                <a href="/saved_songs"> Liked Songs </a>
+                <a href="/saved_songs">Liked Songs</a>
               </Button>
               <Button className="nav-btn">
-                <a href="/user_playlist"> Playlist</a>
+                <a href="/user_playlist">Playlist</a>
               </Button>
               <Button className="nav-btn">
-                <a href="/baskets"> Song Baskets</a>
+                <a href="/baskets">Song Baskets</a>
               </Button>
               <Button className="nav-btn">
-                <a href="/create_playlist"> Create a playlist</a>
+                <a href="/create_playlist">Create a playlist</a>
               </Button>
             </ButtonGroup>
-          </NavbarBrand>
-
-          <NavbarContent className="hidden sm:flex gap-3">
-            <NavbarItem>
-              <Link color="foreground" href="#">
-                Features
-              </Link>
-            </NavbarItem>
-            <NavbarItem isActive>
-              <Link href="#" aria-current="page" color="secondary">
-                Customers
-              </Link>
-            </NavbarItem>
-            <NavbarItem>
-              <Link color="foreground" href="#">
-                Integrations
-              </Link>
-            </NavbarItem>
-          </NavbarContent>
+          </div>
         </NavbarContent>
       </Navbar>
       <SpotifySearch />

@@ -456,6 +456,12 @@ body {
   padding: 5%;
 }
 .basket-collection {
-  position: relative;
   display: block;
+  position: relative;
+}
+.song-basket-col {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Add more styles as needed */
 }
