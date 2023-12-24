@@ -46,7 +46,7 @@ def create_spotify_oauth():
         client_id,
         client_secret,
         redirect_uri = redirect_uri, 
-        scope='user-top-read user-library-read user-library-modify user-read-private user-read-email user-read-currently-playing app-remote-control streaming playlist-read-private user-modify-playback-state playlist-modify-public playlist-modify-private',
+        scope='user-read-playback-position user-read-playback-state user-top-read user-library-read user-library-modify user-read-private user-read-email user-read-currently-playing app-remote-control streaming playlist-read-private user-modify-playback-state playlist-modify-public playlist-modify-private',
         cache_path=".cache", 
     )    
 

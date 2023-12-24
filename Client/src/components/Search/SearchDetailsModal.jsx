@@ -69,7 +69,7 @@ const SongModal = ({ isOpen, onClose, songData }) => {
       console.error("Error:", error);
     }
   };
-
+  console.log(songData);
   return (
     <Modal isOpen={isOpen} onClose={onClose} backdrop="blur">
       <ModalContent>
@@ -77,7 +77,7 @@ const SongModal = ({ isOpen, onClose, songData }) => {
           <Image
             isBlurred
             src={songData.album.images[1].url}
-            sizes="xl"
+            sizes="lg"
             alt={songData.name}
           />
 

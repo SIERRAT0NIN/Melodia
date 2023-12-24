@@ -135,17 +135,18 @@ import {
 import { HeartIcon } from "./HeartIcon";
 import { NextIcon } from "./NextIcon";
 import { PauseCircleIcon } from "./PauseCircleIcon";
+
 import { RepeatOneIcon } from "./RepeatOneIcon";
 import { ShuffleIcon } from "./ShuffleIcon";
 import { PreviousIcon } from "./PreviousIcon";
-import { useSpotify } from "../Spotify/SpotifyContext";
+// import { useSpotify } from "../Spotify/SpotifyContext";
 
-export default function CurrentlyPlayingCard() {
+export default function CurrentlyPlayingCard({ accessToken }) {
   const [liked, setLiked] = useState(false);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { accessToken } = useSpotify();
+  // const { accessToken } = useSpotify();
   const [songPosition, setSongPosition] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -236,6 +237,7 @@ export default function CurrentlyPlayingCard() {
   if (error) return <p>Error: {error}</p>;
   if (!currentlyPlaying || !currentlyPlaying.item)
     return <p>No currently playing track.</p>;
+
   const handlePrevious = async () => {
     handleNextPrevious("previous");
   };
@@ -243,7 +245,7 @@ export default function CurrentlyPlayingCard() {
   const handleNext = async () => {
     handleNextPrevious("next");
   };
-
+  console.log(accessToken);
   return (
     <Card
       isBlurred
