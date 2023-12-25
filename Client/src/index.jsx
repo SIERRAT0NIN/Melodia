@@ -16,7 +16,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <NextUIProvider>
       <ScrollShadow>
         <SpotifyProvider>
-          <div className="w-screen h-screen p-8 flex items-start justify-center text-foreground bg-background ">
+          <div className="w-screen h-screen p-8 flex items-start justify-center text-foreground ">
             <App />
           </div>
         </SpotifyProvider>

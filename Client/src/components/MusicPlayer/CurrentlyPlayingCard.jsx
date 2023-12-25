@@ -139,14 +139,14 @@ import { PauseCircleIcon } from "./PauseCircleIcon";
 import { RepeatOneIcon } from "./RepeatOneIcon";
 import { ShuffleIcon } from "./ShuffleIcon";
 import { PreviousIcon } from "./PreviousIcon";
-// import { useSpotify } from "../Spotify/SpotifyContext";
+import { useSpotify } from "../Spotify/SpotifyContext";
 
-export default function CurrentlyPlayingCard({ accessToken }) {
+export default function CurrentlyPlayingCard() {
   const [liked, setLiked] = useState(false);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // const { accessToken } = useSpotify();
+  const { accessToken } = useSpotify();
   const [songPosition, setSongPosition] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 

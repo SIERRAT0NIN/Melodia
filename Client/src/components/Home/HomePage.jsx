@@ -17,11 +17,11 @@ function HomePage() {
         <NavBar />
       </div>
 
-      <div className="saved-song-table-container">
+      <div className="saved-song-table-container glassmorphism">
         <br />
         <CurrentlyPlayingCard accessToken={accessToken} />
         <br />
-        <SavedSongTable />
+        <SavedSongTable className="glassmorphism" />
         <br />
         {/* <CreatePlaylist /> */}
         {/* <SavedPlaylist /> */}
