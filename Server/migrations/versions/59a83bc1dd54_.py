@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 17ee97ea1755
+Revision ID: 59a83bc1dd54
 Revises: 
-Create Date: 2023-12-21 22:28:20.693898
+Create Date: 2023-12-26 13:07:38.503996
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '17ee97ea1755'
+revision = '59a83bc1dd54'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -28,17 +28,7 @@ def upgrade():
     op.create_table('refresh_tokens',
     sa.Column('user_id', sa.String(), nullable=False),
     sa.Column('refresh_token', sa.String(), nullable=False),
-    sa.Column('access_token', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('user_id')
-    )
-    op.create_table('user_tokens',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('access_token', sa.String(length=255), nullable=False),
-    sa.Column('refresh_token', sa.String(length=255), nullable=True),
-    sa.Column('expires_at', sa.DateTime(), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('user_id')
     )
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -59,6 +49,17 @@ def upgrade():
     sa.Column('public', sa.Boolean(), nullable=True),
     sa.Column('artist_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['artist_id'], ['artists.id'], name=op.f('fk_albums_artist_id_artists')),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('tokens',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('access_token', sa.String(), nullable=False),
+    sa.Column('refresh_token', sa.String(), nullable=False),
+    sa.Column('access_token_expires_at', sa.DateTime(), nullable=True),
+    sa.Column('refresh_token_expires_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_tokens_user_id_users')),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('tracks',
@@ -114,9 +115,9 @@ def downgrade():
     op.drop_table('playlists')
     op.drop_table('liked_songs')
     op.drop_table('tracks')
+    op.drop_table('tokens')
     op.drop_table('albums')
     op.drop_table('users')
-    op.drop_table('user_tokens')
     op.drop_table('refresh_tokens')
     op.drop_table('artists')
     # ### end Alembic commands ###

@@ -71,7 +71,7 @@ const SongModal = ({ isOpen, onClose, song }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} backdrop="blur">
       <ModalContent>
-        <ModalHeader className="flex flex-col gap-1">
+        <ModalHeader className="flex flex-col justify-center items-center gap-1">
           <Image
             isBlurred
             src={song.album.images[1].url}

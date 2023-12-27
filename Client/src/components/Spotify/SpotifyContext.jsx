@@ -14,9 +14,8 @@ export const SpotifyProvider = ({ children }) => {
   const [displayName, setDisplayName] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
   const [userImg, setUserImg] = useState(null);
-
-  console.log("user id:", userId);
-  console.log("refresh token:", refreshToken);
+  const [accessTokenExpiresAt, setAccessTokenExpiresAt] = useState(null);
+  const [refreshTokenExpiresAt, setRefreshTokenExpiresAt] = useState(null);
 
   useEffect(() => {
     if (!refreshToken) return;
@@ -47,7 +46,63 @@ export const SpotifyProvider = ({ children }) => {
 
     storeRefreshTokenInBackend();
   }, [userId, refreshToken]);
+  // useEffect(() => {
+  //   if (!accessToken) return;
 
+  //   const storeTokensInBackend = async () => {
+  //     try {
+  //       const response = await fetch("http://localhost:5556/store_tokens", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           user_id: userId,
+  //           access_token: accessToken,
+  //           refresh_token: refreshToken,
+  //         }),
+  //       });
+
+  //       const data = await response.json();
+  //       console.log("SRTIB: ", response);
+  //       console.log("Response from backend:", data);
+  //     } catch (error) {
+  //       console.error("Error storing refresh token:", error);
+  //     }
+  //   };
+
+  //   storeTokensInBackend();
+  // }, [userId, accessToken, refreshToken]);
+
+  // useEffect(() => {
+  //   if (!accessToken) return;
+
+  //   const storeAccessTokenInBackend = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         "http://localhost:5556/store_tokens", // Update this URL as needed
+  //         {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //           body: JSON.stringify({
+  //             user_id: userId,
+  //             access_token: accessToken,
+  //           }),
+  //         }
+  //       );
+
+  //       const data = await response.json();
+  //       console.log("Store AccessToken in Backend: ", response);
+  //       console.log("Response from backend:", data);
+  //     } catch (error) {
+  //       console.error("Error storing access token:", error);
+  //     }
+  //   };
+
+  //   storeAccessTokenInBackend();
+  // }, [userId, accessToken]);
   return (
     <SpotifyContext.Provider
       value={{
@@ -69,6 +124,10 @@ export const SpotifyProvider = ({ children }) => {
         setDisplayName,
         setUserEmail,
         setUserImg,
+        accessTokenExpiresAt,
+        setAccessTokenExpiresAt,
+        refreshTokenExpiresAt,
+        setRefreshTokenExpiresAt,
       }}
     >
       {children}

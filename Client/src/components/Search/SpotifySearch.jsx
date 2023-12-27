@@ -61,7 +61,10 @@ const SpotifySearch = () => {
 
   return (
     <div>
-      <form onSubmit={handleSearch}>
+      <form
+        onSubmit={handleSearch}
+        style={{ display: "flex", alignItems: "center" }}
+      >
         <Input
           type="text"
           value={searchQuery}
@@ -75,6 +78,7 @@ const SpotifySearch = () => {
         <p>Loading...</p>
       ) : (
         <SearchResults
+          accessToken={accessToken}
           searchData={searchResults}
           onSongClick={handleSongClick}
           onArtistClick={handleArtistClick}

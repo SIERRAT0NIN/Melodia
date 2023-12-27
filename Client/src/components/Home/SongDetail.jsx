@@ -10,45 +10,37 @@ import {
   PopoverContent,
   Image,
 } from "@nextui-org/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSpotify } from "../Spotify/SpotifyContext";
 
 const SongModal = ({ isOpen, onClose, songData }) => {
   const [popoverMessage, setPopoverMessage] = useState("");
-  const [isLiked, setIsLiked] = useState(true);
+  const [isLiked, setIsLiked] = useState(false); // Default to false, assuming not liked initially
   const { accessToken } = useSpotify();
 
   if (!songData) return null;
 
-  const handleLikeUnlikeClick = () => {
-    likeUnlikeSong(songData.id, isLiked)
-      .then(() => {
-        setIsLiked(!isLiked);
-        setPopoverMessage("Song has been liked!");
-      })
-      .catch((error) => console.error(error));
+  const handleLikeUnlikeClick = async () => {
+    try {
+      const newIsLiked = !isLiked;
+      await likeUnlikeSong(songData.id, newIsLiked);
+      setIsLiked(newIsLiked); // Update the like state
+      setPopoverMessage(
+        newIsLiked ? "Song has been liked!" : "Song has been unliked!"
+      );
+    } catch (error) {
+      console.error("Error in like/unlike action:", error);
+    }
   };
 
-  const handleAddToPlaylistClick = () => {
-    setPopoverMessage("Song added to playlist.");
-  };
-
-  const popoverContent = (
-    <PopoverContent>
-      <div className="px-1 py-2">
-        <div className="text-small font-bold">{popoverMessage}</div>
-      </div>
-    </PopoverContent>
-  );
-
-  const likeUnlikeSong = async (songId, isLiked) => {
+  const likeUnlikeSong = async (songId, shouldBeLiked) => {
     if (!accessToken) {
       console.error("Access Token is not available.");
       return;
     }
 
     const requestOptions = {
-      method: isLiked ? "DELETE" : "PUT",
+      method: shouldBeLiked ? "PUT" : "DELETE",
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
@@ -70,10 +62,46 @@ const SongModal = ({ isOpen, onClose, songData }) => {
     }
   };
 
+  const handleAddToPlaylistClick = () => {
+    setPopoverMessage("Song added to playlist.");
+  };
+
+  const popoverContent = (
+    <PopoverContent>
+      <div className="px-1 py-2">
+        <div className="text-small font-bold">{popoverMessage}</div>
+      </div>
+    </PopoverContent>
+  );
+
+  useEffect(() => {
+    const checkIfSongIsLiked = async () => {
+      if (!songData || !accessToken) return;
+
+      const url = `https://api.spotify.com/v1/me/tracks/contains?ids=${songData.id}`;
+      try {
+        const response = await fetch(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+        const isLikedArray = await response.json();
+        if (isLikedArray.length > 0) {
+          setIsLiked(isLikedArray[0]); // Assuming the response is an array with one element
+        }
+      } catch (error) {
+        console.error("Error checking if song is liked:", error);
+      }
+    };
+
+    checkIfSongIsLiked();
+  }, [songData, accessToken]);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} backdrop="blur">
       <ModalContent>
-        <ModalHeader className="flex flex-col gap-1">
+        <ModalHeader className="flex flex-col justify-center items-center gap-1">
           <Image
             isBlurred
             src={songData.album.images[1].url}
@@ -89,7 +117,7 @@ const SongModal = ({ isOpen, onClose, songData }) => {
           <p>Release Date: {songData.album.release_date}</p>
           <p>Popularity: {songData.popularity}</p>
         </ModalBody>
-        <ModalFooter>
+        <ModalFooter className="flex justify-center items-center">
           <Popover placement="top" color={"default"}>
             <PopoverTrigger>
               <Button className="bn30" onClick={handleAddToPlaylistClick}>

@@ -5,8 +5,7 @@ from flask_cors import CORS
 from sqlalchemy import MetaData
 from app_config import db, app, sp
 from all_models import *
-from flask import Flask, request, url_for, session, redirect, make_response, jsonify
-from spotipy import util
+from flask import request, url_for, session, redirect, make_response, jsonify
 import time
 import base64
 from datetime import datetime, timedelta
@@ -43,10 +42,10 @@ CORS(app, resources={
 # Working
 def create_spotify_oauth():
     return SpotifyOAuth(
-        client_id,
-        client_secret,
+        client_id=client_id,
+        client_secret= client_secret,
         redirect_uri = redirect_uri, 
-        scope='user-top-read user-library-read user-library-modify user-read-private user-read-email user-read-currently-playing app-remote-control streaming playlist-read-private user-modify-playback-state playlist-modify-public playlist-modify-private',
+        scope='user-read-playback-position user-read-playback-state user-top-read user-library-read user-library-modify user-read-private user-read-email user-read-currently-playing app-remote-control streaming playlist-read-private user-modify-playback-state playlist-modify-public playlist-modify-private',
         cache_path=".cache", 
     )    
 
@@ -244,6 +243,7 @@ def get_all_user_playlists(sp, limit=50):
         offset += limit
 
     return playlists
+
 
 class Home(Resource):
     def get(self):
@@ -723,12 +723,47 @@ class AccessTokenResource(Resource):
         else:
             return {'message': 'Token not found'}, 404
         
+class StoreTokens(Resource):
+    def post(self):
+        try:
+            # Parsing data from the request's JSON body
+            data = request.json
+            user_id = data.get('user_id')
+            access_token = data.get('access_token')
+
+            # Check if both user_id and access_token are provided
+            if not user_id or not access_token:
+                return {'message': 'Missing user_id or access token'}, 400
+
+            # Retrieve the user record from the database
+            user = User.query.filter_by(user_id=user_id).first()
+
+            # If user exists, update the access token
+            if user:
+                user.access_token = access_token
+            else:
+                # Optionally, create a new user record if it doesn't exist
+                # user = User(user_id=user_id, access_token=access_token)
+                # db.session.add(user)
+                return {'error': 'User not found'}, 404
+
+            # Save changes to the database
+            db.session.commit()
+
+            return {'message': 'Access token updated successfully'}, 200
+
+        except Exception as e:
+            # Handle any unexpected exceptions
+            return {'message': str(e)}, 500
+
+
+        
 class RefreshTokenResource(Resource):
     def post(self):
         try:
             data = request.json
-            # user_id = data.get('user_id') 
-            user_id = 'alberto_sierra'  
+            user_id = data.get('user_id') 
+            # user_id = 'alberto_sierra'  
             refresh_token = data.get('refresh_token')
 
             if not user_id or not refresh_token:
@@ -783,11 +818,96 @@ class Refresh(Resource):
      #Return the new access token
         return {'access_token': token_info['access_token']}, 200
 
+
+
     
     
+class StoreUser(Resource):
+    def post(self):
+        data = request.get_json()
+
+        # Validate data
+        required_fields = ['email', 'name', 'userId', ]
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return {'error': f'Missing fields: {", ".join(missing_fields)}'}, 400
+
+        # Create a new user with safe data access
+        new_user = User(
+            email=data.get('email'),
+            name=data.get('name'),
+            username=data.get('userId'),
+            profile_pic=data.get('userImage', 'default_image.jpg')
+        )
+        db.session.add(new_user)
+
+        # Commit to the database with error handling
+        try:
+            db.session.commit()
+            return {'message': 'User created successfully'}, 201
+        except Exception as e:
+            db.session.rollback()
+            return {'error': str(e)}, 500
+
+    def options(self):
+        return {'message': 'OK'}, 200
+
     
-    
-    
+# class StoreTokensResource(Resource):
+#     def post(self):
+#         try:
+#             data = request.get_json()
+#             print(data,"DATA")
+#             access_token_expires_at = datetime.fromtimestamp(data['access_token_expires_at'])
+#             refresh_token_expires_at = datetime.fromtimestamp(data['refresh_token_expires_at'])
+
+
+#             new_token = Token(
+#                 user_id=data['user_id'],
+#                 access_token=data['access_token'],
+#                 refresh_token=data['refresh_token'],
+#                 access_token_expires_at=access_token_expires_at,
+#                 refresh_token_expires_at=refresh_token_expires_at
+#             )
+
+#             db.session.add(new_token)
+#             db.session.commit()
+#             return {'message': 'Token stored successfully'}, 201
+#         except Exception as e:
+#             return {'error': str(e)}, 500
+
+
+class StoreTokensResource(Resource):
+    def post(self):
+        try:
+            data = request.get_json()
+            print("Received data:", data)
+
+            if 'access_token_expires_at' not in data or 'refresh_token_expires_at' not in data:
+                return {'error': 'Missing access_token_expires_at or refresh_token_expires_at'}, 400
+
+            access_token_expires_at = datetime.fromtimestamp(data['access_token_expires_at'])
+            refresh_token_expires_at = datetime.fromtimestamp(data['refresh_token_expires_at'])
+
+            new_token = Token(
+                user_id=data['user_id'],
+                access_token=data['access_token'],
+                refresh_token=data['refresh_token'],
+                access_token_expires_at=access_token_expires_at,
+                refresh_token_expires_at=refresh_token_expires_at
+            )
+
+            db.session.add(new_token)
+            db.session.commit()
+            return {'message': 'Token stored successfully'}, 201
+        except KeyError as e:
+            return {'error': f'Missing key in request data: {str(e)}'}, 400
+        except Exception as e:
+            return {'error': str(e)}, 500
+
+
+# Add the new Resource to the API
+
     
     
     
@@ -834,44 +954,16 @@ class Refresh(Resource):
     #         # Token is still valid, return the current access token
     #         return {'access_token': user_token.access_token}
 
-class StoreUser(Resource):
-    def post(self):
-        data = request.get_json()
-
-        # Validate data
-        required_fields = ['email', 'name', 'userId', ]
-        missing_fields = [field for field in required_fields if field not in data]
-        if missing_fields:
-            return {'error': f'Missing fields: {", ".join(missing_fields)}'}, 400
-
-        # Create a new user with safe data access
-        new_user = User(
-            email=data.get('email'),
-            name=data.get('name'),
-            username=data.get('userId'),
-            profile_pic=data.get('userImage', 'default_image.jpg')
-        )
-        db.session.add(new_user)
-
-        # Commit to the database with error handling
-        try:
-            db.session.commit()
-            return {'message': 'User created successfully'}, 201
-        except Exception as e:
-            db.session.rollback()
-            return {'error': str(e)}, 500
-
-    def options(self):
-        return {'message': 'OK'}, 200
 
     
 api.add_resource(Home, '/home')
 api.add_resource(TokenExchange, '/token-exchange')
 api.add_resource(AccessTokenResource, '/access_token')
+api.add_resource(StoreTokensResource, '/store_tokens')
 api.add_resource(Redirect, '/redirect')
 api.add_resource(Refresh, '/refresh_token')
-api.add_resource(RefreshTokenResource, '/store_refresh_token')
-api.add_resource(StoreUser, '/store_user')
+api.add_resource(RefreshTokenResource, '/store_refresh_token') #Working
+api.add_resource(StoreUser, '/store_user') #Working
 #Routes
 api.add_resource(CurrentUser, '/current_user')
 api.add_resource(SavedSongs, '/user_saved_tracks')

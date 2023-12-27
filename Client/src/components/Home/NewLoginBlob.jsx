@@ -1,7 +1,7 @@
 const Blob = () => {
   const blobContent = [
     {
-      name: "Melody",
+      name: "Melodía",
       description: "Your personal music app",
       url: "http://127.0.0.1:5556/home",
       username: "Sign in with Spotify!",

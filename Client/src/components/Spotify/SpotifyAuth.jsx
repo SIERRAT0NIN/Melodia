@@ -21,18 +21,30 @@ const SpotifyAuth = ({
     userEmail,
     userImg,
     userId,
+    accessTokenExpiresAt,
+    setAccessTokenExpiresAt,
+    refreshTokenExpiresAt,
+    setRefreshTokenExpiresAt,
   } = useSpotify();
-
   const client_secret = "2fb5a9bb603a48aeadc6dfb28eeb00a0";
   const client_id = "6abb9eac788d42e08c2a50e3f5ff4e53";
   const redirect_uri = "http://localhost:5555/home";
 
-  const scopes = [
-    "playlist-modify-public",
-    "playlist-modify-private",
-    "user-read-private",
-    "user-read-email",
-  ].join(" ");
+  // const client_secret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
+  // const client_id = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+  // const redirect_uri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
+
+  const calculateAccessTokenExpiration = () => {
+    const currentTime = new Date();
+    const expiresIn = 3600;
+    return new Date(currentTime.getTime() + expiresIn * 1000);
+  };
+
+  const calculateRefreshTokenExpiration = () => {
+    const currentTime = new Date();
+    const expiresIn = 604800;
+    return new Date(currentTime.getTime() + expiresIn * 1000);
+  };
 
   //! Getting the Auth Code
   //* Working
@@ -46,7 +58,6 @@ const SpotifyAuth = ({
     //* Working
     const fetchAccessToken = async () => {
       const authorizationCode = getAuthorizationCode();
-      console.log("Creating authorization code: ", authorizationCode);
       if (!authorizationCode) {
         console.error("No authorization code found");
         return;
@@ -72,16 +83,15 @@ const SpotifyAuth = ({
           authOptions
         );
         const data = await response.json();
-        console.log("exchange token: ", data);
 
         if (response.ok) {
           setAccessToken(data.access_token);
           setRefreshToken(data.refresh_token);
+          setAccessTokenExpiresAt(calculateAccessTokenExpiration());
+          setRefreshTokenExpiresAt(calculateRefreshTokenExpiration());
           const expiryTime = new Date(
             new Date().getTime() + data.expires_in * 1000
           );
-
-          console.log("Token expires at:", expiryTime);
 
           if (onAccessTokenChange) onAccessTokenChange(data.access_token);
         } else {
@@ -90,8 +100,8 @@ const SpotifyAuth = ({
       } catch (error) {
         console.error("Error exchanging authorization code:", error);
       }
-      //! Refresh Access
 
+      //! Refresh Access
       async function refreshAccessToken() {
         const refresh_token = refreshToken;
 
@@ -115,12 +125,6 @@ const SpotifyAuth = ({
           if (response.ok) {
             setAccessToken(data.access_token);
             setRefreshToken(data.refresh_token);
-            console.log(
-              "*refreshAccessToken function-- Access Token: ",
-              accessToken,
-              "Refresh Token: ",
-              refreshToken
-            );
           } else {
             throw new Error(`Error refreshing token: ${data.error}`);
           }
@@ -129,12 +133,8 @@ const SpotifyAuth = ({
         }
       }
     };
-    //Gets another access token
     fetchAccessToken();
   }, []);
-
-  console.log("Access:", accessToken);
-  console.log("Refresh:", refreshToken);
 
   //! User Profile {userId}
   //* Working
@@ -153,7 +153,7 @@ const SpotifyAuth = ({
 
         if (response.ok) {
           const data = await response.json();
-          console.log("User Images:", data.images[0].url);
+
           setUserId(data.id);
           setDisplayName(data.display_name);
           setUserEmail(data.email);
@@ -247,6 +247,11 @@ const SpotifyAuth = ({
     userImage: userImg,
   };
 
+  const tokenInformation = {
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+  };
+
   useEffect(() => {
     // Ensure all required user information is available
     if (!userId || !displayName || !userEmail || !userImg) return;
@@ -271,7 +276,117 @@ const SpotifyAuth = ({
       .then((data) => console.log("Success:", data))
       .catch((error) => console.error("Error:", error));
   }, [userId, displayName, userEmail, userImg]);
+
+  async function storeTokens(userData) {
+    const url = "http://127.0.0.1:5556/store_tokens";
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Response:", data);
+      return data;
+    } catch (error) {
+      console.error("Error:", error);
+    }
+    storeTokens();
+  }
+  useEffect(() => {
+    if (
+      !accessToken ||
+      !refreshToken ||
+      !userId ||
+      !accessTokenExpiresAt ||
+      !refreshTokenExpiresAt
+    )
+      return;
+
+    const storeTokensInBackend = async () => {
+      try {
+        const response = await fetch("http://localhost:5556/store_tokens", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            access_token_expires_at: Math.floor(
+              accessTokenExpiresAt.getTime() / 1000
+            ), // Convert to seconds
+            refresh_token_expires_at: Math.floor(
+              refreshTokenExpiresAt.getTime() / 1000
+            ), // Convert to timestamp
+          }),
+        });
+
+        const data = await response.json();
+        console.log("SRTIB: ", response);
+        console.log("Response from backend:", data);
+      } catch (error) {
+        console.error("Error storing refresh token:", error);
+      }
+    };
+
+    storeTokensInBackend();
+  }, [
+    userId,
+    accessToken,
+    refreshToken,
+    accessTokenExpiresAt,
+    refreshTokenExpiresAt,
+  ]);
+
   return <div></div>;
+
+  // async function storeTokens(
+  //   userId,
+  //   accessToken,
+  //   refreshToken,
+  //   accessTokenExpiresAt,
+  //   refreshTokenExpiresAt
+  // ) {
+  //   const url = "http://localhost:5556/store_tokens";
+  //   const data = {
+  //     user_id: userId,
+  //     access_token: accessToken,
+  //     refresh_token: refreshToken,
+  //     access_token_expires_at: accessTokenExpiresAt,
+  //     refresh_token_expires_at: refreshTokenExpiresAt,
+  //   };
+
+  //   try {
+  //     const response = await fetch(url, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(data),
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+
+  //     const result = await response.json();
+  //     console.log("Response:", result);
+  //   } catch (error) {
+  //     console.error("Error storing tokens:", error);
+  //   }
+  //   storeTokens(data);
+  // }
 };
 
 export default SpotifyAuth;

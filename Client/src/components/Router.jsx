@@ -1,8 +1,8 @@
 import { Route, Routes } from "react-router-dom";
-// import Account from "./Home/Account";
+import Account from "./Home/Account";
 import CreatePlaylist from "./Playlist/CreatePlaylist";
 import HomePage from "./Home/HomePage";
-// import LoginBlob from "./Home/-Legacy-LoginBlob";
+
 import Logout from "./Home/Logout";
 import SavedPlaylist from "./Playlist/SavedPlaylist";
 import SavedSongTable from "./Home/SavedSongTable";
@@ -14,8 +14,6 @@ import Blob from "./Home/NewLoginBlob";
 import { BrowserRouter as Router } from "react-router-dom";
 import SearchResults from "./Search/SearchResults";
 import BasketCollection from "./SongBasket/BasketCollection";
-// import App from "./App";
-// import "./index.css";
 
 function App() {
   const is_logged_in = true;
@@ -27,6 +25,7 @@ function App() {
           <>
             <Route path="/home" element={<HomePage />} />
             <Route path="/saved_songs" element={<SavedSongTable />} />
+            <Route path="/account" element={<Account />} />
             <Route
               path="/currently_playing"
               element={<CurrentlyPlayingCard />}

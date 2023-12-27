@@ -69,11 +69,11 @@ const SongModal = ({ isOpen, onClose, songData }) => {
       console.error("Error:", error);
     }
   };
-
+  console.log(songData);
   return (
     <Modal isOpen={isOpen} onClose={onClose} backdrop="blur">
       <ModalContent>
-        <ModalHeader className="flex flex-col gap-1">
+        <ModalHeader className="flex flex-col justify-center items-center gap-1">
           <Image
             isBlurred
             src={songData.album.images[1].url}
@@ -89,7 +89,7 @@ const SongModal = ({ isOpen, onClose, songData }) => {
           <p>Release Date: {songData.album.release_date}</p>
           <p>Popularity: {songData.popularity}</p>
         </ModalBody>
-        <ModalFooter>
+        <ModalFooter className="flex justify-center items-center">
           <Popover placement="top" color={"default"}>
             <PopoverTrigger>
               <Button className="bn30" onClick={handleAddToPlaylistClick}>

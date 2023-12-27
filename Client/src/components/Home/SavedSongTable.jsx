@@ -36,30 +36,32 @@ const SavedSongs = () => {
         onSavedTracksChange={handleSavedTracksChange}
         onPlaylistsChange={handlePlaylistsChange}
       />
-      <Table color="default" aria-label="Saved Songs Table">
-        <TableHeader>
-          <TableColumn>Song Title</TableColumn>
-          <TableColumn>Artist</TableColumn>
-          <TableColumn>Album</TableColumn>
-        </TableHeader>
-        <TableBody>
-          {savedTracks.map((track, index) => (
-            <TableRow
-              css={{ cursor: "pointer" }}
-              key={track.id || index}
-              onClick={() => onSongClick(track)}
-            >
-              <TableCell>{track.name || "N/A"}</TableCell>
-              <TableCell>
-                {(track.artists && track.artists[0].name) || "N/A"}
-              </TableCell>
-              <TableCell>
-                {(track.album && track.album.name) || "N/A"}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <div>
+        <Table color="default" aria-label="Saved Songs Table">
+          <TableHeader>
+            <TableColumn>Song Title</TableColumn>
+            <TableColumn>Artist</TableColumn>
+            <TableColumn>Album</TableColumn>
+          </TableHeader>
+          <TableBody>
+            {savedTracks.map((track, index) => (
+              <TableRow
+                css={{ cursor: "pointer" }}
+                key={track.id || index}
+                onClick={() => onSongClick(track)}
+              >
+                <TableCell>{track.name || "N/A"}</TableCell>
+                <TableCell>
+                  {(track.artists && track.artists[0].name) || "N/A"}
+                </TableCell>
+                <TableCell>
+                  {(track.album && track.album.name) || "N/A"}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
       <br />
       <SavedPlaylist playlists={playlists} setPlaylists={setPlaylists} />
       {selectedSong && (
