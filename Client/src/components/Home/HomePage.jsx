@@ -19,12 +19,11 @@ function HomePage() {
 
       <div className="saved-song-table-container glassmorphism">
         <br />
-        <CurrentlyPlayingCard accessToken={accessToken} />
+        {/* <CurrentlyPlayingCard accessToken={accessToken} /> */}
+        <CurrentlyPlayingCard />
         <br />
         <SavedSongTable className="glassmorphism" />
         <br />
-        {/* <CreatePlaylist /> */}
-        {/* <SavedPlaylist /> */}
       </div>
       <Footer />
     </Container>

@@ -38,27 +38,43 @@ class RefreshToken(db.Model):
     __tablename__ = 'refresh_tokens'
     user_id = db.Column(db.String, primary_key=True)
     refresh_token = db.Column(db.String, nullable=False)
-    access_token = db.Column(db.String) 
-    
 
-def save_to_database(user_id, refresh_token):
-    # Check if a token already exists for the user
-    existing_token = RefreshToken.query.filter_by(user_id=user_id).first()
-    
-    if existing_token:
-        # Update the existing token
-        existing_token.refresh_token = refresh_token
-    else:
-        # Create a new token record
-        new_token = RefreshToken()
-        new_token.user_id = user_id
-        new_token.refresh_token = refresh_token
-        db.session.add(new_token)
 
-    # Commit the session
-    db.session.commit()
+# class UserToken(db.Model):
+#     __tablename__ = 'user_tokens'
 
-    
+#     id = db.Column(db.Integer, primary_key=True)
+#     user_id = db.Column(db.Integer, nullable=False, unique=True)
+#     access_token = db.Column(db.String(255), nullable=False)
+#     refresh_token = db.Column(db.String(255), nullable=True)
+#     expires_at = db.Column(db.DateTime, nullable=False)
+
+#     def __init__(self, user_id, access_token, refresh_token, expires_at):
+#         self.user_id = user_id
+#         self.access_token = access_token
+#         self.refresh_token = refresh_token
+#         self.expires_at = expires_at
+
+#     def __repr__(self):
+#         return f'<UserToken {self.user_id}>'
+
+
+#     def is_token_expired(self):
+#         return datetime.utcnow() > self.expires_at
+        
+class Token(db.Model):
+    __tablename__ = 'tokens'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    access_token = db.Column(db.String, nullable=False)
+    refresh_token = db.Column(db.String, nullable=False)
+    access_token_expires_at = db.Column(db.DateTime)
+    refresh_token_expires_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Token user_id={self.user_id}>'
+
 
 class Liked_Song(db.Model):
     __tablename__ = 'liked_songs'
@@ -149,66 +165,73 @@ class PlaylistSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Playlist
         
-class UserToken(db.Model):
-    __tablename__ = 'user_tokens'
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False, unique=True)
-    access_token = db.Column(db.String(255), nullable=False)
-    refresh_token = db.Column(db.String(255), nullable=True)
-    expires_at = db.Column(db.DateTime, nullable=False)
+def save_to_database(user_id, refresh_token):
+    # Check if a token already exists for the user
+    existing_token = RefreshToken.query.filter_by(user_id=user_id).first()
+    
+    if existing_token:
+        # Update the existing token
+        existing_token.refresh_token = refresh_token
+    else:
+        # Create a new token record
+        new_token = RefreshToken()
+        new_token.user_id = user_id
+        new_token.refresh_token = refresh_token
+        db.session.add(new_token)
 
-    def __init__(self, user_id, access_token, refresh_token, expires_at):
-        self.user_id = user_id
-        self.access_token = access_token
-        self.refresh_token = refresh_token
-        self.expires_at = expires_at
-
-    def __repr__(self):
-        return f'<UserToken {self.user_id}>'
-
-    # Optionally, add a method to check if the token is expired
-    def is_token_expired(self):
-        return datetime.utcnow() > self.expires_at
-        
-        
+    # Commit the session
+    db.session.commit()
 
 
 
 #Relationships
 
-# Liked_Song.track = db.relationship('Track', backref='liked_song_track', foreign_keys='[Liked_Song.track_id]')
-# Liked_Song.user = db.relationship('User', backref='liked_song_user')
 
 track = db.relationship('Track', back_populates='liked_songs', foreign_keys='[Liked_Song.track_id]')
 user = db.relationship('User', backref='liked_songs')
 
 
-# Artist.tracks = db.relationship('Track', backref='artist_tracks', foreign_keys='[Track.artist_id]')
-# Artist.albums = db.relationship('Album', backref='artist_albums')
 
 tracks = db.relationship('Track', back_populates='artist', foreign_keys='[Track.artist_id]')
 albums = db.relationship('Album', back_populates='artist', foreign_keys='[Album.artist_id]')
 
 
-# Album.artist = db.relationship('Artist', backref='albums_relationship', foreign_keys='[Album.artist_id]')
-# Album.liked_songs = db.relationship('Liked_Song', backref='album')
-
 artist = db.relationship('Artist', back_populates='albums', foreign_keys='[Album.artist_id]')
 liked_songs = db.relationship('Liked_Song', back_populates='album')
 
-
-# Track.artist = db.relationship('Artist', backref='track_artist', foreign_keys='[Track.artist_id]')
-# Track.album = db.relationship('Album', backref='tracks', foreign_keys='[Track.album_id]')
-# Track.liked_songs = db.relationship('Liked_Song', backref='track_liked_songs')
 
 artist = db.relationship('Artist', back_populates='tracks', foreign_keys='[Track.artist_id]')
 album = db.relationship('Album', back_populates='tracks', foreign_keys='[Track.album_id]')
 liked_songs = db.relationship('Liked_Song', back_populates='track')
 
 
+tracks = db.relationship('Track', secondary='playlist_tracks', back_populates='playlists')
+playlists = db.relationship('Playlist', secondary='playlist_tracks', back_populates='tracks')
+
+
+
+
+
+
+# Liked_Song.track = db.relationship('Track', backref='liked_song_track', foreign_keys='[Liked_Song.track_id]')
+# Liked_Song.user = db.relationship('User', backref='liked_song_user')
+
+
+# Album.artist = db.relationship('Artist', backref='albums_relationship', foreign_keys='[Album.artist_id]')
+# Album.liked_songs = db.relationship('Liked_Song', backref='album')
+
+
+
+# Artist.tracks = db.relationship('Track', backref='artist_tracks', foreign_keys='[Track.artist_id]')
+# Artist.albums = db.relationship('Album', backref='artist_albums')
+
+
+# Track.artist = db.relationship('Artist', backref='track_artist', foreign_keys='[Track.artist_id]')
+# Track.album = db.relationship('Album', backref='tracks', foreign_keys='[Track.album_id]')
+# Track.liked_songs = db.relationship('Liked_Song', backref='track_liked_songs')
+
+
 # Playlist.track = db.relationship('Track', backref='track_playlists')
 # Playlist.user = db.relationship('User', backref='user_playlists')
 # Playlist.playlist_tracks = db.relationship('Playlist_Track', backref='playlist_playlist_track')
-tracks = db.relationship('Track', secondary='playlist_tracks', back_populates='playlists')
-playlists = db.relationship('Playlist', secondary='playlist_tracks', back_populates='tracks')

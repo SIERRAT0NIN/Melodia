@@ -76,7 +76,7 @@ const SongModal = ({ isOpen, onClose, songData }) => {
         <ModalHeader className="flex flex-col justify-center items-center gap-1">
           <Image
             isBlurred
-            src={songData.album.images[1].url}
+            src={songData.album.image[1].url}
             sizes="lg"
             alt={songData.name}
           />
