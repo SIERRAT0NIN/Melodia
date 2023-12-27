@@ -6,9 +6,9 @@ import {
   TableColumn,
   TableBody,
 } from "@nextui-org/react";
-import SongModal from "../Home/SongDetail";
+import SongModal from "./SearchDetailsModal";
 // import { useState } from "react";
-// import { useSpotify } from "../Spotify/SpotifyContext";
+import { useSpotify } from "../Spotify/SpotifyContext";
 
 function SearchResults({
   searchData,
@@ -18,7 +18,7 @@ function SearchResults({
 }) {
   // const { accessToken, setSelectedSong, selectedSong } = useSpotify();
   // const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-
+  console.log(searchData, "Search Data");
   const renderTableRows = () => {
     const rows = [];
     if (searchData.tracks && searchData.tracks.items.length > 0) {

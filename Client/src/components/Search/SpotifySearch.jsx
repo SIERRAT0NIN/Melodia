@@ -78,6 +78,7 @@ const SpotifySearch = () => {
         <p>Loading...</p>
       ) : (
         <SearchResults
+          accessToken={accessToken}
           searchData={searchResults}
           onSongClick={handleSongClick}
           onArtistClick={handleArtistClick}

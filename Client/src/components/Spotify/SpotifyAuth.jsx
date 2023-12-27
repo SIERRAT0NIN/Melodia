@@ -21,6 +21,10 @@ const SpotifyAuth = ({
     userEmail,
     userImg,
     userId,
+    accessTokenExpiresAt,
+    setAccessTokenExpiresAt,
+    refreshTokenExpiresAt,
+    setRefreshTokenExpiresAt,
   } = useSpotify();
   const client_secret = "2fb5a9bb603a48aeadc6dfb28eeb00a0";
   const client_id = "6abb9eac788d42e08c2a50e3f5ff4e53";
@@ -32,13 +36,13 @@ const SpotifyAuth = ({
 
   const calculateAccessTokenExpiration = () => {
     const currentTime = new Date();
-    const expiresIn = 3600; // Access token lifespan in seconds (1 hour)
+    const expiresIn = 3600;
     return new Date(currentTime.getTime() + expiresIn * 1000);
   };
 
   const calculateRefreshTokenExpiration = () => {
     const currentTime = new Date();
-    const expiresIn = 604800; // Refresh token lifespan in seconds (7 days, as an example)
+    const expiresIn = 604800;
     return new Date(currentTime.getTime() + expiresIn * 1000);
   };
 
@@ -83,6 +87,8 @@ const SpotifyAuth = ({
         if (response.ok) {
           setAccessToken(data.access_token);
           setRefreshToken(data.refresh_token);
+          setAccessTokenExpiresAt(calculateAccessTokenExpiration());
+          setRefreshTokenExpiresAt(calculateRefreshTokenExpiration());
           const expiryTime = new Date(
             new Date().getTime() + data.expires_in * 1000
           );
@@ -297,7 +303,14 @@ const SpotifyAuth = ({
     storeTokens();
   }
   useEffect(() => {
-    if (!accessToken || !refreshToken || !userId) return;
+    if (
+      !accessToken ||
+      !refreshToken ||
+      !userId ||
+      !accessTokenExpiresAt ||
+      !refreshTokenExpiresAt
+    )
+      return;
 
     const storeTokensInBackend = async () => {
       try {
@@ -310,6 +323,12 @@ const SpotifyAuth = ({
             user_id: userId,
             access_token: accessToken,
             refresh_token: refreshToken,
+            access_token_expires_at: Math.floor(
+              accessTokenExpiresAt.getTime() / 1000
+            ), // Convert to seconds
+            refresh_token_expires_at: Math.floor(
+              refreshTokenExpiresAt.getTime() / 1000
+            ), // Convert to timestamp
           }),
         });
 
@@ -322,7 +341,13 @@ const SpotifyAuth = ({
     };
 
     storeTokensInBackend();
-  }, [userId, accessToken, refreshToken]);
+  }, [
+    userId,
+    accessToken,
+    refreshToken,
+    accessTokenExpiresAt,
+    refreshTokenExpiresAt,
+  ]);
 
   return <div></div>;
 

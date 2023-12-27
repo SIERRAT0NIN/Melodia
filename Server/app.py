@@ -853,26 +853,59 @@ class StoreUser(Resource):
         return {'message': 'OK'}, 200
 
     
+# class StoreTokensResource(Resource):
+#     def post(self):
+#         try:
+#             data = request.get_json()
+#             print(data,"DATA")
+#             access_token_expires_at = datetime.fromtimestamp(data['access_token_expires_at'])
+#             refresh_token_expires_at = datetime.fromtimestamp(data['refresh_token_expires_at'])
+
+
+#             new_token = Token(
+#                 user_id=data['user_id'],
+#                 access_token=data['access_token'],
+#                 refresh_token=data['refresh_token'],
+#                 access_token_expires_at=access_token_expires_at,
+#                 refresh_token_expires_at=refresh_token_expires_at
+#             )
+
+#             db.session.add(new_token)
+#             db.session.commit()
+#             return {'message': 'Token stored successfully'}, 201
+#         except Exception as e:
+#             return {'error': str(e)}, 500
+
+
 class StoreTokensResource(Resource):
     def post(self):
         try:
             data = request.get_json()
-            # access_token_expires_at = (data['access_token_expires_at'])
-            # refresh_token_expires_at = (data['refresh_token_expires_at'])
+            print("Received data:", data)
+
+            if 'access_token_expires_at' not in data or 'refresh_token_expires_at' not in data:
+                return {'error': 'Missing access_token_expires_at or refresh_token_expires_at'}, 400
+
+            access_token_expires_at = datetime.fromtimestamp(data['access_token_expires_at'])
+            refresh_token_expires_at = datetime.fromtimestamp(data['refresh_token_expires_at'])
 
             new_token = Token(
                 user_id=data['user_id'],
                 access_token=data['access_token'],
                 refresh_token=data['refresh_token'],
-                # access_token_expires_at=access_token_expires_at,
-                # refresh_token_expires_at=refresh_token_expires_at
+                access_token_expires_at=access_token_expires_at,
+                refresh_token_expires_at=refresh_token_expires_at
             )
 
             db.session.add(new_token)
             db.session.commit()
             return {'message': 'Token stored successfully'}, 201
+        except KeyError as e:
+            return {'error': f'Missing key in request data: {str(e)}'}, 400
         except Exception as e:
             return {'error': str(e)}, 500
+
+
 # Add the new Resource to the API
 
     
