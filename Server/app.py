@@ -853,30 +853,6 @@ class StoreUser(Resource):
     def options(self):
         return {'message': 'OK'}, 200
 
-    
-# class StoreTokensResource(Resource):
-#     def post(self):
-#         try:
-#             data = request.get_json()
-#             print(data,"DATA")
-#             access_token_expires_at = datetime.fromtimestamp(data['access_token_expires_at'])
-#             refresh_token_expires_at = datetime.fromtimestamp(data['refresh_token_expires_at'])
-
-
-#             new_token = Token(
-#                 user_id=data['user_id'],
-#                 access_token=data['access_token'],
-#                 refresh_token=data['refresh_token'],
-#                 access_token_expires_at=access_token_expires_at,
-#                 refresh_token_expires_at=refresh_token_expires_at
-#             )
-
-#             db.session.add(new_token)
-#             db.session.commit()
-#             return {'message': 'Token stored successfully'}, 201
-#         except Exception as e:
-#             return {'error': str(e)}, 500
-
 
 class StoreTokensResource(Resource):
     def post(self):
@@ -906,57 +882,9 @@ class StoreTokensResource(Resource):
         except Exception as e:
             return {'error': str(e)}, 500
 
-
-# Add the new Resource to the API
-
-    
-    
-    
-    # def post(self):
-    #     user_id = request.json.get('user_id')
-    #     if not user_id:
-    #         return {'error': 'User ID is missing'}, 400
-
-    #     user_token = User.query.filter_by(user_id=user_id).first()
-    #     if not user_token:
-    #         return {'error': 'User token not found'}, 404
-
-    #     if user_token.is_token_expired():
-    #         # Prepare the data for the token request
-    #         token_data = {
-    #             'grant_type': 'refresh_token',
-    #             'refresh_token': user_token.refresh_token,
-    #         }
-
-    #         token_headers = {
-    #             'Authorization': f'Basic {encode_client_credentials(client_id, client_secret)}',
-    #         }
-
-    #         # Spotify token endpoint
-    #         token_url = "https://accounts.spotify.com/api/token"
-
-    #         # Send the request
-    #         response = requests.post(token_url, data=token_data, headers=token_headers)
-
-    #         # Handle the response
-    #         if response.status_code == 200:
-    #             new_token_info = response.json()
-    #             # Update the access token in your database
-    #             user_token.access_token = new_token_info['access_token']
-    #             user_token.expires_at = datetime.utcnow() + timedelta(seconds=new_token_info['expires_in'])
-
-    #             # Commit changes to the database
-    #             db.session.commit()
-
-    #             return {'access_token': new_token_info['access_token']}
-    #         else:
-    #             return {'error': 'Failed to refresh token'}, response.status_code
-    #     else:
-    #         # Token is still valid, return the current access token
-    #         return {'access_token': user_token.access_token}
 def decode_jwt(token):
     try:
-        # Decoding the token
+
         decoded_token = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         return decoded_token
     except jwt.ExpiredSignatureError:
@@ -979,19 +907,18 @@ class VerifyToken(Resource):
 
         return {'message': "Token is valid!", 'data': decoded}, 200
 
-api.add_resource(VerifyToken, '/verify_token')
 
 class RequestJWT(Resource):
     def post(self):
         try:
-            # Extract user data from the request
+
             user_data = request.get_json()
 
-            # Validate user_data
+
             if not user_data or 'user_id' not in user_data:
                 return jsonify({'error': 'user_id is required'}), 400
 
-            # Generate JWT token
+
             token = self.generate_jwt_token(user_data['user_id'])
             return jsonify({'jwt': token})
         except Exception as e:
@@ -1006,10 +933,10 @@ class RequestJWT(Resource):
             'sub': user_id
         }
         return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
-# Add the resource to the API
-api.add_resource(RequestJWT, '/request_jwt')
 
-    
+
+api.add_resource(VerifyToken, '/verify_token')
+api.add_resource(RequestJWT, '/request_jwt')
 api.add_resource(Home, '/home')
 api.add_resource(TokenExchange, '/token-exchangse')
 api.add_resource(AccessTokenResource, '/access_token')

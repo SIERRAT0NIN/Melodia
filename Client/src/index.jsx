@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./components/Router.jsx";
 import "./index.css";
+import { AuthProvider } from "./components/AuthContext.jsx";
 
 import { NextUIProvider } from "@nextui-org/react";
 import { ScrollShadow } from "@nextui-org/react";
@@ -17,9 +18,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <NextUIProvider>
       <ScrollShadow>
         <SpotifyProvider>
-          <div className="w-screen h-screen p-8 flex items-start justify-center text-foreground ">
-            <App />
-          </div>
+          <AuthProvider>
+            <div className="w-screen h-screen p-8 flex items-start justify-center text-foreground ">
+              <App />
+            </div>
+          </AuthProvider>
         </SpotifyProvider>
       </ScrollShadow>
     </NextUIProvider>
