@@ -8,6 +8,8 @@ from all_models import *
 from flask import request, url_for, session, redirect, make_response, jsonify
 import time
 import base64
+import secrets
+
 from datetime import datetime, timedelta
 import jwt
 import logging
@@ -24,7 +26,8 @@ client_secret = os.environ.get('SPOTIPY_CLIENT_SECRET')
 redirect_uri = os.environ.get('REDIRECT_URI') 
 
 TOKEN_INFO = 'token_info'
-
+JWT_SECRET_KEY = 'fkjasjkeoriu234-wefk9w0uri1o24jd'
+JWT_ALGORITHM = "HS256"          
 app.secret_key = 'din12823112390238ub09843209a1234'
 # redirect_uri = 'http://127.0.0.1:5556/token-exchange' 
 # redirect_uri = 'http://127.0.0.1:5556/user_saved_tracks' 
@@ -38,7 +41,37 @@ CORS(app, resources={
         r"/store_user": {"origins": "http://localhost:5555"},
         r"/user_saved_tracks": {"origins": "http://localhost:5555"},
     })    
+# def generate_jwt_secret(length=32):
+#     return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode()
 
+# JWT_SECRET_KEY = generate_jwt_secret()
+# print("jwt secret key",JWT_SECRET_KEY)
+
+
+def generate_jwt_token(user_id):
+    payload = {
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
+        'iat': datetime.datetime.utcnow(),
+        'sub': user_id
+    }
+    print("PAYLOAD:", payload)
+    # return jwt.encode(payload, JWT_SECRET_KEY, algorithm='HS256')
+    return jwt.encode(payload, JWT_SECRET_KEY, algorithm='HS256').decode('utf-8')
+
+def decode_jwt_token(token):
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
+        return payload['sub']
+    except jwt.ExpiredSignatureError:
+        return 'Signature expired. Please log in again.'
+    except jwt.InvalidTokenError as e:
+        # Log the specific error message for debugging
+        print(f"Invalid token error: {str(e)}")
+        return f'Invalid token. Please log in again. Error: {str(e)}'
+    except Exception as e:
+        # Catch any other exceptions that may occur
+        print(f"Unexpected error: {str(e)}")
+        return f'Unexpected error: {str(e)}'
 # Working
 def create_spotify_oauth():
     return SpotifyOAuth(
@@ -269,7 +302,21 @@ class TokenExchange(Resource):
             return redirect('http://localhost:5555/home')  
         else:
             return ({'error': str(e)}), 500
+    def get(self):
+        code = request.args.get('code')
+        if not code:
+            return {'message': 'No code provided'}, 400
 
+        token_info = exchange_code(code)
+        if token_info:
+            # Optionally verify the Spotify access token here
+
+            # Issue JWT
+            jwt_token = generate_jwt_token(user_id=token_info['user_id'])  # Assuming you have a user ID
+            return jsonify(access_token=jwt_token, token_type="Bearer"), 200
+        else:
+            return {'error': 'Failed to exchange code'}, 500
+    
     def post(self):
         data = request.get_json()
         code = data.get('code')
@@ -329,52 +376,6 @@ class SavedSongs(Resource):
             })
             logging.debug('This is a debug message')
         return songs
-
-    # def extract_track_info(self, saved_tracks):
-    #     try:
-    #         token_info = get_token()
-    #         sp = spotipy.Spotify(auth=token_info['access_token'])
-
-    #         track_info_list = []
-    #         for item in saved_tracks['items']:
-    #             track = item['track']
-
-    #             # Extracting information about the track
-    #             artist_info = track['artists'][0]
-    #             artist_name = artist_info['name']
-    #             artist_id = artist_info['id']
-    #             artist_uri = artist_info['uri']
-
-    #             # Retrieve artist details to get genres
-    #             artist_details = sp.artist(artist_id)
-    #             genres = artist_details['genres'] if 'genres' in artist_details else []
-
-    #             album_info = track['album']
-    #             album_name = album_info['name']
-    #             album_images = album_info['images'] if 'images' in album_info else []
-    #             album_image_urls = [image['url'] for image in album_images]
-    #             release_date = album_info.get('release_date', None)
-    #             track_title = track['name']
-
-    #             # Creating a dictionary with the extracted information
-    #             track_info = {
-    #                 'artist_name': artist_name,
-    #                 'artist_id': artist_id,
-    #                 'artist_uri': artist_uri,
-    #                 'genres': genres,
-    #                 'album_name': album_name,
-    #                 'album_images': album_image_urls,
-    #                 'release_date': release_date,
-    #                 'track_title': track_title
-    #             }
-
-    #             track_info_list.append(track_info)
-
-    #         return {'tracks': track_info_list}
-
-    #     except Exception as e:
-    #         print(f"Error: {str(e)}")
-    #         return {'message': 'Error retrieving user saved tracks'}
 
 class SearchArtist(Resource):
     def get(self, artist_name):
@@ -881,7 +882,7 @@ class StoreTokensResource(Resource):
     def post(self):
         try:
             data = request.get_json()
-            print("Received data:", data)
+
 
             if 'access_token_expires_at' not in data or 'refresh_token_expires_at' not in data:
                 return {'error': 'Missing access_token_expires_at or refresh_token_expires_at'}, 400
@@ -953,11 +954,64 @@ class StoreTokensResource(Resource):
     #     else:
     #         # Token is still valid, return the current access token
     #         return {'access_token': user_token.access_token}
+def decode_jwt(token):
+    try:
+        # Decoding the token
+        decoded_token = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        return decoded_token
+    except jwt.ExpiredSignatureError:
+        return {'error': 'Signature expired. Please log in again.', 'status': 'expired'}
+    except jwt.InvalidTokenError as e:
+        return {'error': f'Invalid token. Please log in again. Detail: {str(e)}', 'status': 'invalid'}
+    except Exception as e:
+        return {'error': f'An error occurred: {str(e)}', 'status': 'error'}
 
+class VerifyToken(Resource):
+    def post(self):
+        token = request.json.get('token', None)
+
+        if not token:
+            return {'message': 'Token is missing!'}, 400
+        print('this is the token:',token)
+        decoded = decode_jwt(token)
+        if 'error' in decoded:
+            return {'message': decoded['error']}, 401
+
+        return {'message': "Token is valid!", 'data': decoded}, 200
+
+api.add_resource(VerifyToken, '/verify_token')
+
+class RequestJWT(Resource):
+    def post(self):
+        try:
+            # Extract user data from the request
+            user_data = request.get_json()
+
+            # Validate user_data
+            if not user_data or 'user_id' not in user_data:
+                return jsonify({'error': 'user_id is required'}), 400
+
+            # Generate JWT token
+            token = self.generate_jwt_token(user_data['user_id'])
+            return jsonify({'jwt': token})
+        except Exception as e:
+            logging.error(f"Error in generating JWT: {str(e)}")
+            return jsonify({'error': 'Internal server error'}), 500
+
+    @staticmethod
+    def generate_jwt_token(user_id):
+        payload = {
+            'exp': datetime.utcnow() + timedelta(days=1),
+            'iat': datetime.utcnow(),
+            'sub': user_id
+        }
+        return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+# Add the resource to the API
+api.add_resource(RequestJWT, '/request_jwt')
 
     
 api.add_resource(Home, '/home')
-api.add_resource(TokenExchange, '/token-exchange')
+api.add_resource(TokenExchange, '/token-exchangse')
 api.add_resource(AccessTokenResource, '/access_token')
 api.add_resource(StoreTokensResource, '/store_tokens')
 api.add_resource(Redirect, '/redirect')

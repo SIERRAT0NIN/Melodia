@@ -16,36 +16,38 @@ export const SpotifyProvider = ({ children }) => {
   const [userImg, setUserImg] = useState(null);
   const [accessTokenExpiresAt, setAccessTokenExpiresAt] = useState(null);
   const [refreshTokenExpiresAt, setRefreshTokenExpiresAt] = useState(null);
+  const [tokenStatus, setTokenStatus] = useState(null);
+  const [jwt, setJwt] = useState(null);
 
-  useEffect(() => {
-    if (!refreshToken) return;
+  // useEffect(() => {
+  //   if (!refreshToken) return;
 
-    const storeRefreshTokenInBackend = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5556/store_refresh_token",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              user_id: userId,
-              refresh_token: refreshToken,
-            }),
-          }
-        );
+  //   const storeRefreshTokenInBackend = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         "http://localhost:5556/store_refresh_token",
+  //         {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //           body: JSON.stringify({
+  //             user_id: userId,
+  //             refresh_token: refreshToken,
+  //           }),
+  //         }
+  //       );
 
-        const data = await response.json();
-        console.log("SRTIB: ", response);
-        console.log("Response from backend:", data);
-      } catch (error) {
-        console.error("Error storing refresh token:", error);
-      }
-    };
+  //       const data = await response.json();
+  //       console.log("SRTIB: ", response);
+  //       console.log("Response from backend:", data);
+  //     } catch (error) {
+  //       console.error("Error storing refresh token:", error);
+  //     }
+  //   };
 
-    storeRefreshTokenInBackend();
-  }, [userId, refreshToken]);
+  //   storeRefreshTokenInBackend();
+  // }, [userId, refreshToken]);
   // useEffect(() => {
   //   if (!accessToken) return;
 
@@ -128,6 +130,10 @@ export const SpotifyProvider = ({ children }) => {
         setAccessTokenExpiresAt,
         refreshTokenExpiresAt,
         setRefreshTokenExpiresAt,
+        tokenStatus,
+        setTokenStatus,
+        jwt,
+        setJwt,
       }}
     >
       {children}

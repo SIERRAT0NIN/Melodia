@@ -13,6 +13,16 @@ from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+import os
+# JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')  
+
+
+
+
+
+
+
+
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -34,10 +44,10 @@ class UserSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = User
         
-class RefreshToken(db.Model):
-    __tablename__ = 'refresh_tokens'
-    user_id = db.Column(db.String, primary_key=True)
-    refresh_token = db.Column(db.String, nullable=False)
+# class RefreshToken(db.Model):
+#     __tablename__ = 'refresh_tokens'
+#     user_id = db.Column(db.String, primary_key=True)
+#     refresh_token = db.Column(db.String, nullable=False)
 
 
 # class UserToken(db.Model):
@@ -65,9 +75,9 @@ class RefreshToken(db.Model):
 class Token(db.Model):
     __tablename__ = 'tokens'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    access_token = db.Column(db.String, nullable=False)
-    refresh_token = db.Column(db.String, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    access_token = db.Column(db.String, nullable=False, unique=True)
+    refresh_token = db.Column(db.String, nullable=False, unique=True)
     access_token_expires_at = db.Column(db.DateTime)
     refresh_token_expires_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -117,7 +127,6 @@ class Album(db.Model):
     def __repr__(self):
         return f'<Album {self.id, self.name, self.released_date, self.public}>'
 class AlbumSchema(SQLAlchemyAutoSchema):
-
     class Meta:
         model = Album
 
@@ -184,6 +193,23 @@ def save_to_database(user_id, refresh_token):
     db.session.commit()
 
 
+
+
+#Many to many-- Many baskets can have many songs and many songs can belong to many baskets.
+# class SongBasket(db.Model):
+#     __tablename__ = 'song_baskets'
+    
+#     id = db.Column(db.Integer, primary_key=True
+#     user_id = db.Column(db.String, db.ForeignKey('users.id'))
+#     track_id =db.Column(db.String, db.ForeignKey('track.id'))
+#     playlist_id= db.Column(db.String, db.ForeignKey('playlist.id'))
+    
+#     def __repr__(self)
+#         return f'<SongBasket {self.id}>'
+        
+#     class Meta:
+#         model = SongBasket
+        
 
 #Relationships
 
