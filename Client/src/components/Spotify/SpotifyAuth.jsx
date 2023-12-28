@@ -351,13 +351,13 @@ const SpotifyAuth = ({
   ]);
 
   //! Function to verify JWT token
-  const verifyToken = (jwtToken) => {
+  const verifyToken = (jwt) => {
     fetch("http://localhost:5556/verify_token", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ token: jwtToken }),
+      body: JSON.stringify({ token: jwt }),
     })
       .then((response) => response.json())
       .then((data) => {
@@ -387,8 +387,8 @@ const SpotifyAuth = ({
 
       if (response.ok) {
         const data = await response.json();
-        setJwt(data.jwt); // Store the JWT in state
-        // JWT will be logged when it's updated in the state
+        setJwt(data.jwt);
+        verifyToken(data.jwt);
       } else {
         console.error("Error fetching JWT:", response.statusText);
       }
@@ -403,7 +403,8 @@ const SpotifyAuth = ({
       fetchJwt(userId);
     }
   }, [userId]);
-  console.log(jwt);
+  console.log("JWT: ", jwt);
+
   return <div></div>;
 };
 
