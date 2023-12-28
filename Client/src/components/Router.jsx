@@ -6,14 +6,14 @@ import HomePage from "./Home/HomePage";
 import Logout from "./Home/Logout";
 import SavedPlaylist from "./Playlist/SavedPlaylist";
 import SavedSongTable from "./Home/SavedSongTable";
-import SongBasket from "./SongBasket/SongBasket";
+// import SongBasket from "./SongBasket/SongBasket";
 import NotFound from "./Home/NotFound";
 import CurrentlyPlayingCard from "./MusicPlayer/CurrentlyPlayingCard";
 
 import Blob from "./Home/NewLoginBlob";
 import { BrowserRouter as Router } from "react-router-dom";
 import SearchResults from "./Search/SearchResults";
-import BasketCollection from "./SongBasket/BasketCollection";
+import BasketCollection from "./Search/SongBasket/BasketCollection";
 
 function App() {
   const is_logged_in = true;

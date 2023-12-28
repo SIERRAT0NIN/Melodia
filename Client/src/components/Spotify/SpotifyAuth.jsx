@@ -25,6 +25,10 @@ const SpotifyAuth = ({
     setAccessTokenExpiresAt,
     refreshTokenExpiresAt,
     setRefreshTokenExpiresAt,
+    tokenStatus,
+    setTokenStatus,
+    jwt,
+    setJwt,
   } = useSpotify();
   const client_secret = "2fb5a9bb603a48aeadc6dfb28eeb00a0";
   const client_id = "6abb9eac788d42e08c2a50e3f5ff4e53";
@@ -33,6 +37,7 @@ const SpotifyAuth = ({
   // const client_secret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
   // const client_id = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
   // const redirect_uri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
+  // const jwtToken = localStorage.getItem("jwtToken"); // Retrieve JWT token from localStorage
 
   const calculateAccessTokenExpiration = () => {
     const currentTime = new Date();
@@ -89,9 +94,6 @@ const SpotifyAuth = ({
           setRefreshToken(data.refresh_token);
           setAccessTokenExpiresAt(calculateAccessTokenExpiration());
           setRefreshTokenExpiresAt(calculateRefreshTokenExpiration());
-          const expiryTime = new Date(
-            new Date().getTime() + data.expires_in * 1000
-          );
 
           if (onAccessTokenChange) onAccessTokenChange(data.access_token);
         } else {
@@ -333,7 +335,6 @@ const SpotifyAuth = ({
         });
 
         const data = await response.json();
-        console.log("SRTIB: ", response);
         console.log("Response from backend:", data);
       } catch (error) {
         console.error("Error storing refresh token:", error);
@@ -349,44 +350,62 @@ const SpotifyAuth = ({
     refreshTokenExpiresAt,
   ]);
 
+  //! Function to verify JWT token
+  const verifyToken = (jwt) => {
+    fetch("http://localhost:5556/verify_token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token: jwt }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message === "Token is valid!") {
+          console.log("Token verified:", data.data);
+          setTokenStatus("valid");
+        } else {
+          console.error("Token verification failed:", data.message);
+          setTokenStatus("invalid");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setTokenStatus("error");
+      });
+  };
+
+  const fetchJwt = async (userId) => {
+    try {
+      const response = await fetch("http://localhost:5556/request_jwt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_id: userId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setJwt(data.jwt);
+        verifyToken(data.jwt);
+      } else {
+        console.error("Error fetching JWT:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching JWT:", error);
+    }
+  };
+
+  // Add this useEffect to log the JWT when it's updated
+  useEffect(() => {
+    if (userId) {
+      fetchJwt(userId);
+    }
+  }, [userId]);
+  console.log("JWT: ", jwt);
+
   return <div></div>;
-
-  // async function storeTokens(
-  //   userId,
-  //   accessToken,
-  //   refreshToken,
-  //   accessTokenExpiresAt,
-  //   refreshTokenExpiresAt
-  // ) {
-  //   const url = "http://localhost:5556/store_tokens";
-  //   const data = {
-  //     user_id: userId,
-  //     access_token: accessToken,
-  //     refresh_token: refreshToken,
-  //     access_token_expires_at: accessTokenExpiresAt,
-  //     refresh_token_expires_at: refreshTokenExpiresAt,
-  //   };
-
-  //   try {
-  //     const response = await fetch(url, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(data),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-
-  //     const result = await response.json();
-  //     console.log("Response:", result);
-  //   } catch (error) {
-  //     console.error("Error storing tokens:", error);
-  //   }
-  //   storeTokens(data);
-  // }
 };
 
 export default SpotifyAuth;
