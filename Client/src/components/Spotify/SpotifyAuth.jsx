@@ -430,7 +430,7 @@ const SpotifyAuth = ({
 
     // Merge the Authorization header with any existing headers in the options
     const headersWithAuth = {
-      ...options.headers,
+      ...(options.headers || {}),
       Authorization: `Bearer ${jwtToken}`,
     };
 

@@ -24,7 +24,9 @@ const SongModal = ({ isOpen, onClose, songData }) => {
     likeUnlikeSong(songData.id, isLiked)
       .then(() => {
         setIsLiked(!isLiked);
-        setPopoverMessage("Song has been liked!");
+        setPopoverMessage(
+          isLiked ? "Song has been unliked!" : "Song has been liked!"
+        );
       })
       .catch((error) => console.error(error));
   };
@@ -69,24 +71,24 @@ const SongModal = ({ isOpen, onClose, songData }) => {
       console.error("Error:", error);
     }
   };
-  console.log(songData);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} backdrop="blur">
       <ModalContent>
         <ModalHeader className="flex flex-col justify-center items-center gap-1">
           <Image
             isBlurred
-            src={songData.album.images[1].url}
+            src={songData.images[1].url}
             sizes="lg"
             alt={songData.name}
           />
 
           <h2>{songData.name}</h2>
           <h4>{songData.artists.map((artist) => artist.name).join(", ")}</h4>
-          <h4>{songData.album.name}</h4>
+          {/* <h4>{songData.album.name}</h4> */}
         </ModalHeader>
         <ModalBody>
-          <p>Release Date: {songData.album.release_date}</p>
+          <p>Release Date: {songData.release_date}</p>
           <p>Popularity: {songData.popularity}</p>
         </ModalBody>
         <ModalFooter className="flex justify-center items-center">

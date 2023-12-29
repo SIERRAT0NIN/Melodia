@@ -43,7 +43,7 @@ export default function NavBar() {
           </ButtonGroup>
         </div>
       </Navbar>
-      <SpotifySearch />
+      {/* <SpotifySearch /> */}
     </>
   );
 }

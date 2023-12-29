@@ -11,10 +11,13 @@ import SpotifyAuth from "../Spotify/SpotifyAuth";
 import SavedPlaylist from "../Playlist/SavedPlaylist";
 import SongModal from "./SongDetail";
 import { useSpotify } from "../Spotify/SpotifyContext";
+import UserPlaylistModal from "../Playlist/UserPlaylistModal";
 const SavedSongs = () => {
   const [savedTracks, setSavedTracks] = useState([]);
   const [playlists, setPlaylists] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
+
   // const [selectedSong, setSelectedSong] = useState(null);
   const { selectedSong, setSelectedSong } = useSpotify();
   const handleSavedTracksChange = (tracks) => {
@@ -23,6 +26,9 @@ const SavedSongs = () => {
 
   const handlePlaylistsChange = (playlists) => {
     setPlaylists(playlists);
+  };
+  const handleAddToPlaylist = () => {
+    setIsPlaylistModalOpen(true);
   };
 
   const onSongClick = (song) => {
@@ -69,8 +75,14 @@ const SavedSongs = () => {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           songData={selectedSong}
+          onAddToPlaylist={handleAddToPlaylist}
         />
       )}
+      <UserPlaylistModal
+        isOpen={isPlaylistModalOpen}
+        onClose={() => setIsPlaylistModalOpen(false)}
+        playlists={playlists}
+      />
     </div>
   );
 };

@@ -40,6 +40,7 @@ CORS(app, resources={
         r"/current_user": {"origins": "http://localhost:5555"},
         r"/store_user": {"origins": "http://localhost:5555"},
         r"/user_saved_tracks": {"origins": "http://localhost:5555"},
+        r"/baskets": {"origins": "http://localhost:5555"},
     })    
 # def generate_jwt_secret(length=32):
 #     return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode()
@@ -334,23 +335,29 @@ class TokenExchange(Resource):
             return ({'error': str(e)}), 500     
  
 class SavedSongs(Resource):
-    def get(self):
-        code = request.args.get('code')
-        if not code:
-            return {'message': 'No code provided'}, 400
-        access_token = self.get_access_token_from_request()        
-        token_info = exchange_code(code)
-        if token_info:
-            session['token_info'] = token_info
-            return redirect('http://127.0.0.1:5556/user_saved_tracks')  
-        else:
-            return ({'error': str(e)}), 500
-            # results = sp.current_user_saved_tracks()
-            # songs = self.extract_songs(results)
+    # def get(self):
+    #     code = request.args.get('code')
+    #     if not code:
+    #         return {'message': 'No code provided'}, 400
+    #     access_token = self.get_access_token_from_request()        
+    #     token_info = exchange_code(code)
+    #     if token_info:
+    #         session['token_info'] = token_info
+    #         return redirect('http://127.0.0.1:5556/user_saved_tracks')  
+    #     else:
+    #         return ({'error': str(e)}), 500
+    #         # results = sp.current_user_saved_tracks()
+    #         # songs = self.extract_songs(results)
             
-            # return ({'songs': songs}), 200
-            # except Exception as e:
-            # return ({"error": str(e)}), 500
+    #         # return ({'songs': songs}), 200
+    #         # except Exception as e:
+    #         # return ({"error": str(e)}), 500
+    def get(self):
+        access_token = self.get_access_token_from_request()
+        if not access_token:
+            return {'message': 'Access token is missing or invalid'}, 401
+        return {'message': 'Successfully authenticated with JWT'}, 200
+
     def get_access_token_from_request(self):
         """
         The function `get_access_token_from_request` extracts the access token from the Authorization header
@@ -933,6 +940,69 @@ class RequestJWT(Resource):
             'sub': user_id
         }
         return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+
+
+# @app.route('/songbasket', methods=['POST'])
+# def add_song_to_basket():
+#     data = request.json
+
+#     # Validate incoming data
+#     if not all(k in data for k in ("user_id", "track_id", "playlist_id")):
+#         return jsonify({"error": "Missing data"}), 400
+
+#     user_id = data['user_id']
+#     track_id = data['track_id']
+#     playlist_id = data['playlist_id']
+
+#     # Create a new SongBasket instance
+#     new_song_basket = SongBasket(user_id=user_id, track_id=track_id, playlist_id=playlist_id)
+
+#     # Add to the database
+#     try:
+#         db.session.add(new_song_basket)
+#         db.session.commit()
+#         return jsonify({"message": "Song added to basket successfully"}), 201
+#     except Exception as e:
+#         db.session.rollback()
+#         return jsonify({"error": str(e)}), 500@app.route('/songbasket', methods=['POST'])
+def add_song_to_basket():
+    data = request.json
+
+    # Expecting data to be a list of songs
+    if not isinstance(data, list):
+        return jsonify({"error": "Invalid data format"}), 400
+
+    added_songs = []
+    errors = []
+
+    for song_data in data:
+        # Validate each song data
+        if not all(k in song_data for k in ("user_id", "track_id", "playlist_id")):
+            errors.append({"error": "Missing data", "song": song_data})
+            continue
+
+        user_id = song_data['user_id']
+        track_id = song_data['track_id']
+        playlist_id = song_data['playlist_id']
+
+        # Create a new SongBasket instance
+        new_song_basket = SongBasket(user_id=user_id, track_id=track_id, playlist_id=playlist_id)
+
+        # Add to the database
+        try:
+            db.session.add(new_song_basket)
+            db.session.flush()  # Flush to get the ID of the new song basket
+            added_songs.append({"id": new_song_basket.id, "track_id": track_id})
+        except Exception as e:
+            db.session.rollback()
+            errors.append({"error": str(e), "song": song_data})
+
+    db.session.commit()  # Commit at the end if there were no critical errors
+
+    if errors:
+        return jsonify({"added_songs": added_songs, "errors": errors}), 207  # HTTP 207 for Multi-Status
+    else:
+        return jsonify({"added_songs": added_songs}), 201
 
 
 api.add_resource(VerifyToken, '/verify_token')

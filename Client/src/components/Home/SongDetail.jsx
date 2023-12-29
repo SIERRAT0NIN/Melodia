@@ -13,7 +13,7 @@ import {
 import { useState, useEffect } from "react";
 import { useSpotify } from "../Spotify/SpotifyContext";
 
-const SongModal = ({ isOpen, onClose, songData }) => {
+const SongModal = ({ isOpen, onClose, songData, onAddToPlaylist }) => {
   const [popoverMessage, setPopoverMessage] = useState("");
   const [isLiked, setIsLiked] = useState(false); // Default to false, assuming not liked initially
   const { accessToken } = useSpotify();
@@ -63,7 +63,8 @@ const SongModal = ({ isOpen, onClose, songData }) => {
   };
 
   const handleAddToPlaylistClick = () => {
-    setPopoverMessage("Song added to playlist.");
+    onAddToPlaylist(); // Call the passed callback function
+    setPopoverMessage("Choose a playlist");
   };
 
   const popoverContent = (

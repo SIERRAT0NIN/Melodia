@@ -1,66 +1,58 @@
-import React, { useState } from "react";
-import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  useDisclosure,
-  Select,
-  SelectItem,
-} from "@nextui-org/react";
-import PlaylistDetails from "./PlaylistDetails"; // Ensure this is the correct path
+import React, { useState, useEffect } from "react";
+import { Modal, Table, Button, Spinner } from "@nextui-org/react";
+import UserPlaylistModal from "./UserPlaylistModal";
+import { useSpotify } from "../Spotify/SpotifyContext";
 
-export default function UserPlaylists({ playlists, setPlaylists }) {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+function UserPlaylist({ isOpen, onClose }) {
+  const [playlists, setPlaylists] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { userId, accessToken } = useSpotify();
 
-  const openModalWithPlaylist = (playlist) => {
-    setSelectedPlaylist(playlist);
-    onOpen();
-  };
+  useEffect(() => {
+    if (!userId || !accessToken) {
+      console.error("User ID or Access Token is missing");
+      setLoading(false);
+      return;
+    }
 
-  // Check if playlists is an array and has items
-  if (!Array.isArray(playlists) || playlists.length === 0) {
-    return <p>No playlists available.</p>;
-  }
+    const fetchPlaylists = async () => {
+      try {
+        const response = await fetch(
+          `https://api.spotify.com/v1/users/${userId}/playlists`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+        if (!response.ok) throw new Error("Failed to fetch playlists");
 
+        const data = await response.json();
+        setPlaylists(
+          data.items.filter((playlist) => playlist.owner.id === userId)
+        );
+      } catch (error) {
+        console.error("Error:", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlaylists();
+  }, [userId, accessToken]);
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
   return (
-    <>
-      <Table aria-label="User Playlists">
-        <TableHeader>
-          <TableColumn>Playlist Name</TableColumn>
-        </TableHeader>
-        <TableBody>
-          <Select
-            items={animals}
-            label="Favorite Animal"
-            placeholder="Select an animal"
-            className="max-w-xs"
-          >
-            {(animal) => (
-              <SelectItem key={animal.value}>{animal.label}</SelectItem>
-            )}
-          </Select>
-          {playlists.map((playlist) => (
-            <TableRow
-              key={playlist.id}
-              onClick={() => openModalWithPlaylist(playlist)}
-              css={{ cursor: "pointer" }}
-            >
-              <TableCell>{playlist.name || "N/A"}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      <PlaylistDetails
-        playlist={selectedPlaylist}
-        isOpen={isOpen}
-        onClose={onOpenChange}
-        setPlaylists={setPlaylists}
+    <div>
+      <Button onClick={openModal}>View Playlists</Button>
+      <UserPlaylistModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        playlists={playlists}
       />
-    </>
+    </div>
   );
 }
+
+export default UserPlaylist;

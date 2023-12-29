@@ -196,19 +196,20 @@ def save_to_database(user_id, refresh_token):
 
 
 #Many to many-- Many baskets can have many songs and many songs can belong to many baskets.
-# class SongBasket(db.Model):
-#     __tablename__ = 'song_baskets'
+class SongBasket(db.Model):
+    __tablename__ = 'song_baskets'
     
-#     id = db.Column(db.Integer, primary_key=True
-#     user_id = db.Column(db.String, db.ForeignKey('users.id'))
-#     track_id =db.Column(db.String, db.ForeignKey('track.id'))
-#     playlist_id= db.Column(db.String, db.ForeignKey('playlist.id'))
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String, db.ForeignKey('users.id'))
+    track_id =db.Column(db.String, db.ForeignKey('tracks.id'))
+    playlist_id= db.Column(db.String, db.ForeignKey('playlists.id'))
     
-#     def __repr__(self)
-#         return f'<SongBasket {self.id}>'
-        
-#     class Meta:
-#         model = SongBasket
+    def __repr__(self):
+        return f'<SongBasket {self.id}>'
+    
+class SongBasketSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = SongBasket
         
 
 #Relationships

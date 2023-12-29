@@ -15,8 +15,11 @@ const client_id = "6abb9eac788d42e08c2a50e3f5ff4e53";
 export default function CreatePlaylist() {
   const [playlistName, setPlaylistName] = useState("");
   const [playlistDescription, setPlaylistDescription] = useState("");
-  const { accessToken, userId, refreshToken, setAccessToken } = useSpotify();
+  const { userId, refreshToken, setAccessToken } = useSpotify();
   const [popoverMessage, setPopoverMessage] = useState("");
+
+  // Retrieve the accessToken from localStorage
+  const storedAccessToken = localStorage.getItem("accessToken");
 
   const refreshAccessToken = async () => {
     const refresh_token = refreshToken;
@@ -43,6 +46,7 @@ export default function CreatePlaylist() {
       const data = await response.json();
       const { access_token } = data;
       setAccessToken(access_token);
+      localStorage.setItem("accessToken", access_token); // Update localStorage
 
       return access_token;
     } catch (error) {
@@ -52,12 +56,12 @@ export default function CreatePlaylist() {
   };
 
   const createPlaylist = async () => {
-    if (!accessToken || !userId) {
+    if (!storedAccessToken || !userId) {
       console.error("Access Token or User ID is missing");
       return;
     }
 
-    let response = await makePlaylistRequest(accessToken);
+    let response = await makePlaylistRequest(storedAccessToken);
 
     if (!response.ok && response.status === 401) {
       const newAccessToken = await refreshAccessToken();

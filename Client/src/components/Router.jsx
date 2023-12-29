@@ -13,7 +13,7 @@ import CurrentlyPlayingCard from "./MusicPlayer/CurrentlyPlayingCard";
 import Blob from "./Home/NewLoginBlob";
 import { BrowserRouter as Router } from "react-router-dom";
 import SearchResults from "./Search/SearchResults";
-import BasketCollection from "./Search/SongBasket/BasketCollection";
+import BasketCollection from "./SongBasket/BasketCollection";
 
 function App() {
   const is_logged_in = true;
