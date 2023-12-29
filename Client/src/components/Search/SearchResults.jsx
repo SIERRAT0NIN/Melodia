@@ -9,8 +9,9 @@ import {
 import SongModal from "./SearchDetailsModal";
 import { useState } from "react";
 import SearchArtistModal from "./SearchArtistModal";
-// import SeachAlbumModal from "./SeachAlbumModal";
+import SeachAlbumModal from "./SearchAlbumModal";
 import { useSpotify } from "../Spotify/SpotifyContext";
+import SearchAlbumModal from "./SearchAlbumModal";
 function SearchResults({
   searchData,
   onSongClick,
@@ -25,17 +26,18 @@ function SearchResults({
   const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
 
   const handleItemClick = (item) => {
-    setSelectedItem(item);
-    setIsModalOpen(true);
-
     if (item.type === "track") {
+      setSelectedItem(item);
+      setIsModalOpen(true);
       onSongClick(item);
     } else if (item.type === "artist") {
       setSelectedArtist(item);
       setIsArtistModalOpen(true);
+      onArtistClick(item);
     } else if (item.type === "album") {
       setSelectedAlbum(item);
       setIsAlbumModalOpen(true);
+      onAlbumClick(item);
     }
   };
 
@@ -98,10 +100,36 @@ function SearchResults({
       });
     }
   };
-
+  const handleArtistItemClick = (artist) => {
+    setSelectedArtist(artist);
+    setIsArtistModalOpen(true);
+    onArtistClick(artist);
+  };
+  const renderArtistTableRows = () => {
+    return searchData.artists.items.map((artist) => (
+      <TableRow
+        key={artist.id}
+        clickable
+        onClick={() => handleArtistItemClick(artist)}
+      >
+        <TableCell>{artist.name}</TableCell>
+        <TableCell>{artist.genres.join(", ")}</TableCell>
+      </TableRow>
+    ));
+  };
+  const renderAlbumTableRows = () => {
+    return searchData.albums.items.map((album) => (
+      <TableRow key={album.id} clickable onClick={() => handleItemClick(album)}>
+        <TableCell>{album.name}</TableCell>
+        <TableCell>
+          {album.artists.map((artist) => artist.name).join(", ")}
+        </TableCell>
+      </TableRow>
+    ));
+  };
   return (
     <div style={{ maxHeight: "500px", overflowY: "auto" }}>
-      <Table aria-label="Search results">
+      <Table aria-label="Search results" selectionMode="multiple">
         <TableHeader>
           <TableColumn>Songs</TableColumn>
           <TableColumn>Artist</TableColumn>
@@ -109,6 +137,24 @@ function SearchResults({
         </TableHeader>
         <TableBody>{renderTableRows()}</TableBody>
       </Table>
+      {searchData.artists && searchData.artists.items.length > 0 && (
+        <Table aria-label="Artist results">
+          <TableHeader>
+            <TableColumn>Artist Name</TableColumn>
+            <TableColumn>Genres</TableColumn>
+          </TableHeader>
+          <TableBody>{renderArtistTableRows()}</TableBody>
+        </Table>
+      )}
+      {searchData.albums && searchData.albums.items.length > 0 && (
+        <Table aria-label="Album results">
+          <TableHeader>
+            <TableColumn>Album Name</TableColumn>
+            <TableColumn>Artists</TableColumn>
+          </TableHeader>
+          <TableBody>{renderAlbumTableRows()}</TableBody>
+        </Table>
+      )}
       {isArtistModalOpen && (
         <SearchArtistModal
           isOpen={isArtistModalOpen}

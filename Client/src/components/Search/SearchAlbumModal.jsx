@@ -13,8 +13,8 @@ import {
 import { useState } from "react";
 import { useSpotify } from "../Spotify/SpotifyContext";
 
-const SearchAlbumModal = ({ isOpen, onClose, songData, scrollBehavior }) => {
-  if (!songData) return null;
+const SearchAlbumModal = ({ isOpen, onClose, albumData, scrollBehavior }) => {
+  if (!albumData) return null;
 
   return (
     <Modal
@@ -27,17 +27,17 @@ const SearchAlbumModal = ({ isOpen, onClose, songData, scrollBehavior }) => {
         <ModalHeader className="flex flex-col justify-center items-center gap-1">
           <Image
             isBlurred
-            src={songData.images[0].url}
+            src={albumData.images[0].url}
             sizes="lg"
-            alt={songData.name}
+            alt={albumData.name}
           />
 
-          <h4>{songData.name}</h4>
+          <h4>{albumData.name}</h4>
         </ModalHeader>
         <ModalBody className="modal-body-content">
-          <p>Release Date: {songData.release_date}</p>
-          <p>Popularity: {songData.popularity}</p>
-          <p>Genres: {songData.genre}</p>
+          <p> {albumData.type}</p>
+          <p>Release Date: {albumData.release_date}</p>
+          <p>Total Tracks: {albumData.total_tracks}</p>
         </ModalBody>
         <ModalFooter className="flex justify-center items-center"></ModalFooter>
       </ModalContent>
@@ -45,4 +45,4 @@ const SearchAlbumModal = ({ isOpen, onClose, songData, scrollBehavior }) => {
   );
 };
 
-export default SongModal;
+export default SearchAlbumModal;
