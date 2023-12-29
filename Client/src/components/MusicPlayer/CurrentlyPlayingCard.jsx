@@ -18,7 +18,7 @@ import { useSpotify } from "../Spotify/SpotifyContext";
 
 export default function CurrentlyPlayingCard() {
   const [liked, setLiked] = useState(false);
-  const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
+  const [currentlyPlaying, setCurrentlyPlaying] = useState();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { setAccessToken } = useSpotify();
@@ -125,11 +125,11 @@ export default function CurrentlyPlayingCard() {
   return (
     <Card
       isBlurred
-      className="border-none bg-background/60 dark:bg-default-100/50 max-w-[610px]"
+      className="border-none bg-background/60 dark:bg-default-100/50 max-w-[610px] "
       shadow="sm"
     >
       <CardBody>
-        <div className="grid grid-cols-6 md:grid-cols-12 gap-6 md:gap-4 items-center justify-center">
+        <div className="grid grid-cols-6 md:grid-cols-12 gap-6 md:gap-4 items-center justify-center ">
           <div className="relative col-span-6 md:col-span-4">
             <Image
               alt="Album cover"

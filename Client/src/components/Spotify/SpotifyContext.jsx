@@ -18,6 +18,7 @@ export const SpotifyProvider = ({ children }) => {
   const [refreshTokenExpiresAt, setRefreshTokenExpiresAt] = useState(null);
   const [tokenStatus, setTokenStatus] = useState(null);
   const [jwt, setJwt] = useState(null);
+  const [selectedArtist, setSelectedArtist] = useState(null);
 
   const sendSelectedSongToBackend = async (song) => {
     const songData = {
@@ -163,6 +164,8 @@ export const SpotifyProvider = ({ children }) => {
         setTokenStatus,
         jwt,
         setJwt,
+        setSelectedArtist,
+        selectedArtist,
       }}
     >
       {children}

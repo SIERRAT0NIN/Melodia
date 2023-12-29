@@ -12,8 +12,9 @@ import {
 } from "@nextui-org/react";
 import { useState } from "react";
 import { useSpotify } from "../Spotify/SpotifyContext";
+import SearchArtistModal from "./SearchArtistModal";
 
-const SongModal = ({ isOpen, onClose, songData }) => {
+const SongModal = ({ isOpen, onClose, songData, scrollBehavior }) => {
   const [popoverMessage, setPopoverMessage] = useState("");
   const [isLiked, setIsLiked] = useState(true);
   const { accessToken } = useSpotify();
@@ -71,23 +72,26 @@ const SongModal = ({ isOpen, onClose, songData }) => {
       console.error("Error:", error);
     }
   };
-
+  console.log(songData);
   return (
-    <Modal isOpen={isOpen} onClose={onClose} backdrop="blur">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      backdrop="blur"
+      scrollBehavior={scrollBehavior}
+    >
       <ModalContent>
         <ModalHeader className="flex flex-col justify-center items-center gap-1">
           <Image
             isBlurred
-            src={songData.images[1].url}
+            src={songData.album.images[1].url}
             sizes="lg"
             alt={songData.name}
           />
 
-          <h2>{songData.name}</h2>
-          <h4>{songData.artists.map((artist) => artist.name).join(", ")}</h4>
-          {/* <h4>{songData.album.name}</h4> */}
+          <h4>{songData.name}</h4>
         </ModalHeader>
-        <ModalBody>
+        <ModalBody className="modal-body-content">
           <p>Release Date: {songData.release_date}</p>
           <p>Popularity: {songData.popularity}</p>
         </ModalBody>

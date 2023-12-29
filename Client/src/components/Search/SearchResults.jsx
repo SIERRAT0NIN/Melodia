@@ -8,6 +8,9 @@ import {
 } from "@nextui-org/react";
 import SongModal from "./SearchDetailsModal";
 import { useState } from "react";
+import SearchArtistModal from "./SearchArtistModal";
+// import SeachAlbumModal from "./SeachAlbumModal";
+import { useSpotify } from "../Spotify/SpotifyContext";
 function SearchResults({
   searchData,
   onSongClick,
@@ -16,24 +19,28 @@ function SearchResults({
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedArtist, setSelectedArtist] = useState(null);
+  const [selectedAlbum, setSelectedAlbum] = useState(null);
+  const [isArtistModalOpen, setIsArtistModalOpen] = useState(false);
+  const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
 
   const handleItemClick = (item) => {
     setSelectedItem(item);
     setIsModalOpen(true);
 
-    // Move this logic inside the handleItemClick function
     if (item.type === "track") {
       onSongClick(item);
     } else if (item.type === "artist") {
-      onArtistClick(item);
+      setSelectedArtist(item);
+      setIsArtistModalOpen(true);
     } else if (item.type === "album") {
-      onAlbumClick(item);
+      setSelectedAlbum(item);
+      setIsAlbumModalOpen(true);
     }
   };
 
   const renderTableRows = () => {
     const rows = [];
-
     // Adding tracks
     if (searchData.tracks && searchData.tracks.items.length > 0) {
       searchData.tracks.items.forEach((track) => {
@@ -42,6 +49,7 @@ function SearchResults({
             key={track.id}
             clickable
             onClick={() => handleItemClick(track)}
+            scrollBehavior={"inside"}
           >
             <TableCell>{track.name}</TableCell>
             <TableCell>
@@ -51,6 +59,7 @@ function SearchResults({
           </TableRow>
         );
       });
+      return rows;
     }
 
     // Adding artists
@@ -60,7 +69,7 @@ function SearchResults({
           <TableRow
             key={artist.id}
             clickable
-            onClick={() => handleItemClick(artist)}
+            onClick={() => handleArtistItemClick(artist)}
           >
             <TableCell>{artist.name}</TableCell>
             <TableCell>Artist</TableCell>
@@ -88,13 +97,11 @@ function SearchResults({
         );
       });
     }
-
-    return rows;
   };
 
   return (
-    <div>
-      <Table aria-label="Example static collection table">
+    <div style={{ maxHeight: "500px", overflowY: "auto" }}>
+      <Table aria-label="Search results">
         <TableHeader>
           <TableColumn>Songs</TableColumn>
           <TableColumn>Artist</TableColumn>
@@ -102,10 +109,25 @@ function SearchResults({
         </TableHeader>
         <TableBody>{renderTableRows()}</TableBody>
       </Table>
+      {isArtistModalOpen && (
+        <SearchArtistModal
+          isOpen={isArtistModalOpen}
+          onClose={() => setIsArtistModalOpen(false)}
+          artistData={selectedArtist}
+        />
+      )}
+      {isAlbumModalOpen && (
+        <SearchAlbumModal
+          isOpen={isAlbumModalOpen}
+          onClose={() => setIsAlbumModalOpen(false)}
+          albumData={selectedAlbum}
+        />
+      )}
       <SongModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         songData={selectedItem}
+        scrollBehavior={"inside"}
       />
     </div>
   );
