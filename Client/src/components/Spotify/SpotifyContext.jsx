@@ -19,35 +19,58 @@ export const SpotifyProvider = ({ children }) => {
   const [tokenStatus, setTokenStatus] = useState(null);
   const [jwt, setJwt] = useState(null);
   const [selectedArtist, setSelectedArtist] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]); //! Song basket
 
-  const sendSelectedSongToBackend = async (song) => {
-    const songData = {
-      id: song.id,
-      name: song.name,
-      // image: song.images[1].url,
-    };
-    try {
-      const response = await fetch("http://localhost:5556/songbasket", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(songData),
-      });
+  // const sendSelectedSongToBackend = async (selectedItems) => {
+  //   try {
+  //     const response = await fetch("http://localhost:5556/songbasket", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(selectedItems),
+  //     });
 
-      const data = await response.json();
-      console.log("Response from backend:", data);
-    } catch (error) {
-      console.error("Error sending selected song to backend:", error);
-    }
-    console.log(songData, "SONG DATA");
-  };
-  // useEffect hook to call the function when selectedSong changes
-  useEffect(() => {
-    if (selectedSong) {
-      sendSelectedSongToBackend(selectedSong);
-    }
-  }, [selectedSong]);
+  //     const data = await response.json();
+  //     console.log("Response from backend:", data);
+  //   } catch (error) {
+  //     console.error("Error sending selected song to backend:", error);
+  //   }
+  // };
+  // // useEffect hook to call the function when selectedSong changes
+  // useEffect(() => {
+  //   if (selectedSong) {
+  //     sendSelectedSongToBackend(selectedItems);
+  //   }
+  // }, [selectedItems]);
+  // const sendSelectedSongToBackend = async (song) => {
+  //   const songData = {
+  //     id: song.id,
+  //     name: song.name,
+  //     // image: song.images[1].url,
+  //   };
+  //   try {
+  //     const response = await fetch("http://localhost:5556/songbasket", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(songData),
+  //     });
+
+  //     const data = await response.json();
+  //     console.log("Response from backend:", data);
+  //   } catch (error) {
+  //     console.error("Error sending selected song to backend:", error);
+  //   }
+  //   console.log(songData, "SONG DATA");
+  // };
+  // // useEffect hook to call the function when selectedSong changes
+  // useEffect(() => {
+  //   if (selectedSong) {
+  //     sendSelectedSongToBackend(selectedSong);
+  //   }
+  // }, [selectedSong]);
 
   // useEffect(() => {
   //   if (!refreshToken) return;
@@ -166,6 +189,8 @@ export const SpotifyProvider = ({ children }) => {
         setJwt,
         setSelectedArtist,
         selectedArtist,
+        selectedItems,
+        setSelectedItems,
       }}
     >
       {children}

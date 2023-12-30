@@ -201,8 +201,11 @@ class SongBasket(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String, db.ForeignKey('users.id'))
-    track_id =db.Column(db.String, db.ForeignKey('tracks.id'))
-    playlist_id= db.Column(db.String, db.ForeignKey('playlists.id'))
+    track_id =db.Column(db.String)
+    track_name=db.Column(db.String)
+    track_image=db.Column(db.String)
+    track_album=db.Column(db.String)
+    track_artist=db.Column(db.String)
     
     def __repr__(self):
         return f'<SongBasket {self.id}>'

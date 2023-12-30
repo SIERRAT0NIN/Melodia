@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: e18e3abf5229
+Revision ID: f5add77d0f2f
 Revises: 
-Create Date: 2023-12-27 10:04:53.985584
+Create Date: 2023-12-29 03:09:28.770929
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'e18e3abf5229'
+revision = 'f5add77d0f2f'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -46,6 +46,17 @@ def upgrade():
     sa.ForeignKeyConstraint(['artist_id'], ['artists.id'], name=op.f('fk_albums_artist_id_artists')),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('song_baskets',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.String(), nullable=True),
+    sa.Column('track_id', sa.String(), nullable=True),
+    sa.Column('track_name', sa.String(), nullable=True),
+    sa.Column('track_image', sa.String(), nullable=True),
+    sa.Column('track_album', sa.String(), nullable=True),
+    sa.Column('track_artist', sa.String(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_song_baskets_user_id_users')),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('tokens',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -55,7 +66,10 @@ def upgrade():
     sa.Column('refresh_token_expires_at', sa.DateTime(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_tokens_user_id_users')),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('access_token'),
+    sa.UniqueConstraint('refresh_token'),
+    sa.UniqueConstraint('user_id')
     )
     op.create_table('tracks',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -111,6 +125,7 @@ def downgrade():
     op.drop_table('liked_songs')
     op.drop_table('tracks')
     op.drop_table('tokens')
+    op.drop_table('song_baskets')
     op.drop_table('albums')
     op.drop_table('users')
     op.drop_table('artists')

@@ -5,9 +5,10 @@ import {
   TableCell,
   TableColumn,
   TableBody,
+  Button,
 } from "@nextui-org/react";
 import SongModal from "./SearchDetailsModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SearchArtistModal from "./SearchArtistModal";
 import SeachAlbumModal from "./SearchAlbumModal";
 import { useSpotify } from "../Spotify/SpotifyContext";
@@ -24,6 +25,8 @@ function SearchResults({
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [isArtistModalOpen, setIsArtistModalOpen] = useState(false);
   const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
+  const { userId } = useSpotify();
+  const [selectedSongs, setSelectedSongs] = useState([]);
 
   const handleItemClick = (item) => {
     if (item.type === "track") {
@@ -38,6 +41,63 @@ function SearchResults({
       setSelectedAlbum(item);
       setIsAlbumModalOpen(true);
       onAlbumClick(item);
+    }
+  };
+
+  const handleSelectionChange = (selectedRows) => {
+    console.log("Received selectedRows:", selectedRows);
+
+    if (selectedRows instanceof Set) {
+      const selectedSongIDs = Array.from(selectedRows);
+      console.log("Selected Song IDs:", selectedSongIDs);
+
+      // Map IDs to song details
+      const selectedSongDetails = selectedSongIDs
+        .map((id) => {
+          const song = searchData.tracks.items.find((track) => track.id === id);
+          return song
+            ? {
+                id: song.id,
+                name: song.name,
+                album: song.album.name,
+                artist: song.artists.map((artist) => artist.name).join(", "),
+                image: song.album.images[0].url, // Assuming the first image is the one you want
+              }
+            : null;
+        })
+        .filter((song) => song !== null); // Filter out any nulls
+
+      console.log("Selected Song Details:", selectedSongDetails);
+      setSelectedSongs(selectedSongDetails); // Update state with song details
+    } else {
+      console.error("selectedRows is not a recognized format:", selectedRows);
+    }
+  };
+  const prepareSongDataForBackend = () => {
+    return selectedSongs.map((song) => ({
+      user_id: "alberto_sierra", // Replace with the actual user ID
+      track_id: song.id, // Ensure this is the correct field for the track ID
+      track_name: song.name,
+      track_image: song.image,
+      track_album: song.album,
+      track_artist: song.artist,
+    }));
+  };
+  const sendSelectedSongToBackend = async () => {
+    const songData = prepareSongDataForBackend();
+    console.log("Prepared Song Data:", songData);
+
+    try {
+      const response = await fetch("http://localhost:5556/songbasket", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(songData),
+      });
+
+      const data = await response.json();
+      console.log("Response from backend:", data);
+    } catch (error) {
+      console.error("Error sending selected songs to backend:", error);
     }
   };
 
@@ -127,9 +187,14 @@ function SearchResults({
       </TableRow>
     ));
   };
+
   return (
     <div style={{ maxHeight: "500px", overflowY: "auto" }}>
-      <Table aria-label="Search results" selectionMode="multiple">
+      <Table
+        aria-label="Search results"
+        selectionMode="multiple"
+        onSelectionChange={handleSelectionChange}
+      >
         <TableHeader>
           <TableColumn>Songs</TableColumn>
           <TableColumn>Artist</TableColumn>
@@ -174,7 +239,10 @@ function SearchResults({
         onClose={() => setIsModalOpen(false)}
         songData={selectedItem}
         scrollBehavior={"inside"}
-      />
+      />{" "}
+      <Button onClick={() => sendSelectedSongToBackend()}>
+        Send to Backend
+      </Button>
     </div>
   );
 }

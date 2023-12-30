@@ -942,62 +942,49 @@ class RequestJWT(Resource):
         return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 
-# @app.route('/songbasket', methods=['POST'])
-# def add_song_to_basket():
-#     data = request.json
-
-#     # Validate incoming data
-#     if not all(k in data for k in ("user_id", "track_id", "playlist_id")):
-#         return jsonify({"error": "Missing data"}), 400
-
-#     user_id = data['user_id']
-#     track_id = data['track_id']
-#     playlist_id = data['playlist_id']
-
-#     # Create a new SongBasket instance
-#     new_song_basket = SongBasket(user_id=user_id, track_id=track_id, playlist_id=playlist_id)
-
-#     # Add to the database
-#     try:
-#         db.session.add(new_song_basket)
-#         db.session.commit()
-#         return jsonify({"message": "Song added to basket successfully"}), 201
-#     except Exception as e:
-#         db.session.rollback()
-#         return jsonify({"error": str(e)}), 500@app.route('/songbasket', methods=['POST'])
+@app.route('/songbasket', methods=['POST'])
 def add_song_to_basket():
     data = request.json
+    print("Received data:", data)  # Debugging line
 
-    # Expecting data to be a list of songs
+    # Check if data is a list, if not, make it a list
     if not isinstance(data, list):
-        return jsonify({"error": "Invalid data format"}), 400
+        data = [data]
 
     added_songs = []
     errors = []
 
     for song_data in data:
+        print("Processing song:", song_data)  # Debugging line
+
         # Validate each song data
-        if not all(k in song_data for k in ("user_id", "track_id", "playlist_id")):
+        required_keys = ["user_id", "track_id", "track_name", "track_image", "track_album", "track_artist"]
+        if not all(k in song_data for k in required_keys):
             errors.append({"error": "Missing data", "song": song_data})
             continue
 
+        # Extract song details from song_data
         user_id = song_data['user_id']
         track_id = song_data['track_id']
-        playlist_id = song_data['playlist_id']
+        track_name = song_data['track_name']
+        track_image = song_data['track_image']
+        track_album = song_data['track_album']
+        track_artist = song_data['track_artist']
 
         # Create a new SongBasket instance
-        new_song_basket = SongBasket(user_id=user_id, track_id=track_id, playlist_id=playlist_id)
+        new_song_basket = SongBasket(user_id=user_id, track_id=track_id, track_name=track_name, track_image=track_image, track_album=track_album, track_artist=track_artist)
 
-        # Add to the database
         try:
             db.session.add(new_song_basket)
-            db.session.flush()  # Flush to get the ID of the new song basket
+            db.session.flush()
             added_songs.append({"id": new_song_basket.id, "track_id": track_id})
         except Exception as e:
             db.session.rollback()
             errors.append({"error": str(e), "song": song_data})
+            continue
 
-    db.session.commit()  # Commit at the end if there were no critical errors
+    if not errors:  # Only commit if there are no errors
+        db.session.commit()
 
     if errors:
         return jsonify({"added_songs": added_songs, "errors": errors}), 207  # HTTP 207 for Multi-Status
