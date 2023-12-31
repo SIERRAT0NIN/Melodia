@@ -24,9 +24,9 @@ export default function BasketSearchModal({ isOpen, onClose }) {
           <Button color="danger" variant="light" onPress={onClose}>
             Close
           </Button>
-          <Button color="primary" onPress={onClose}>
+          {/* <Button color="primary" onPress={onClose}>
             Save
-          </Button>
+          </Button> */}
         </ModalFooter>
       </ModalContent>
     </Modal>

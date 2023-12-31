@@ -88,7 +88,7 @@ function SearchResults({
     console.log("Prepared Song Data:", songData);
 
     try {
-      const response = await fetch("http://localhost:5556/songbasket", {
+      const response = await fetch("http://localhost:5556/songs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(songData),

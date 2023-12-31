@@ -29,9 +29,6 @@ TOKEN_INFO = 'token_info'
 JWT_SECRET_KEY = 'fkjasjkeoriu234-wefk9w0uri1o24jd'
 JWT_ALGORITHM = "HS256"          
 app.secret_key = 'din12823112390238ub09843209a1234'
-# redirect_uri = 'http://127.0.0.1:5556/token-exchange' 
-# redirect_uri = 'http://127.0.0.1:5556/user_saved_tracks' 
-# redirect_uri = 'http://127.0.0.1:5556/current_user' 
 api=Api(app)
 
 #CORS Routes
@@ -828,11 +825,18 @@ class Refresh(Resource):
 
 
 
-    
-    
+
 class StoreUser(Resource):
     def post(self):
         data = request.get_json()
+
+        existing_user = User.query.filter(
+            (User.email == data.get('email')) | 
+            (User.username == data.get('userId'))
+        ).first()
+
+        if existing_user:
+            return {'error': 'User already exists with this email or username'}, 409
 
         # Validate data
         required_fields = ['email', 'name', 'userId', ]
@@ -866,28 +870,41 @@ class StoreTokensResource(Resource):
         try:
             data = request.get_json()
 
-
+            # Validation
             if 'access_token_expires_at' not in data or 'refresh_token_expires_at' not in data:
                 return {'error': 'Missing access_token_expires_at or refresh_token_expires_at'}, 400
 
+            # Convert timestamps to datetime objects
             access_token_expires_at = datetime.fromtimestamp(data['access_token_expires_at'])
             refresh_token_expires_at = datetime.fromtimestamp(data['refresh_token_expires_at'])
 
-            new_token = Token(
-                user_id=data['user_id'],
-                access_token=data['access_token'],
-                refresh_token=data['refresh_token'],
-                access_token_expires_at=access_token_expires_at,
-                refresh_token_expires_at=refresh_token_expires_at
-            )
+            # Check if a token for the user already exists
+            token = Token.query.filter_by(user_id=data['user_id']).first()
 
-            db.session.add(new_token)
+            if token:
+                # Update existing token
+                token.access_token = data['access_token']
+                token.refresh_token = data['refresh_token']
+                token.access_token_expires_at = access_token_expires_at
+                token.refresh_token_expires_at = refresh_token_expires_at
+            else:
+                # Create new token entry
+                new_token = Token(
+                    user_id=data['user_id'],
+                    access_token=data['access_token'],
+                    refresh_token=data['refresh_token'],
+                    access_token_expires_at=access_token_expires_at,
+                    refresh_token_expires_at=refresh_token_expires_at
+                )
+                db.session.add(new_token)
+
             db.session.commit()
             return {'message': 'Token stored successfully'}, 201
         except KeyError as e:
             return {'error': f'Missing key in request data: {str(e)}'}, 400
         except Exception as e:
             return {'error': str(e)}, 500
+
 
 def decode_jwt(token):
     try:
@@ -942,7 +959,7 @@ class RequestJWT(Resource):
         return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 
-@app.route('/songbasket', methods=['POST'])
+@app.route('/songs', methods=['POST'])
 def add_song_to_basket():
     data = request.json
     print("Received data:", data)  # Debugging line
@@ -972,7 +989,7 @@ def add_song_to_basket():
         track_artist = song_data['track_artist']
 
         # Create a new SongBasket instance
-        new_song_basket = SongBasket(user_id=user_id, track_id=track_id, track_name=track_name, track_image=track_image, track_album=track_album, track_artist=track_artist)
+        new_song_basket = Song(user_id=user_id, track_id=track_id, track_name=track_name, track_image=track_image, track_album=track_album, track_artist=track_artist)
 
         try:
             db.session.add(new_song_basket)

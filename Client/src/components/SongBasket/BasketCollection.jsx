@@ -3,15 +3,14 @@ import SongBasket from "./SongBasket";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import BasketCheckBox from "./BasketCheckBox";
+import { CreateSongBasket } from "./CreateSongBasket";
 
 function BasketCollection() {
   return (
     <Container>
-      <BasketCheckBox />
       <Row>
         <Col className="song-basket-col">
-          <SongBasket />
+          <CreateSongBasket />
         </Col>
       </Row>
     </Container>

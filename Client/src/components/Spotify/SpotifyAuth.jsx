@@ -25,7 +25,6 @@ const SpotifyAuth = ({
     setAccessTokenExpiresAt,
     refreshTokenExpiresAt,
     setRefreshTokenExpiresAt,
-    tokenStatus,
     setTokenStatus,
     jwt,
     setJwt,
