@@ -55,9 +55,8 @@ class Token(db.Model):
 class Song(db.Model):
     __tablename__ = 'songs'
     
-    # id = db.Column(db.Integer, primary_key=True)
-
-    track_id =db.Column(db.String, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    track_id =db.Column(db.String)
     track_name=db.Column(db.String)
     track_image=db.Column(db.String)
     track_album=db.Column(db.String)

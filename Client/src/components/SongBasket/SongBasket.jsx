@@ -2,7 +2,7 @@ import { Card, CardFooter, Image, Button, Badge } from "@nextui-org/react";
 import BasketSearchModal from "./BasketSearchModal";
 import React, { useState } from "react";
 
-export default function SongBasket() {
+export default function SongBasket({ id }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const onOpen = () => {
@@ -10,6 +10,8 @@ export default function SongBasket() {
     setIsOpen(true);
   };
   const onClose = () => setIsOpen(false);
+  console.log(id);
+
   return (
     <div className="basket-collection" onClick={onOpen}>
       <Badge

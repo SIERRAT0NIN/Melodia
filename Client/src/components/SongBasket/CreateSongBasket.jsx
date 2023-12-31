@@ -4,9 +4,15 @@ import SongBasket from "./SongBasket";
 
 export const CreateSongBasket = () => {
   const [songBaskets, setSongBaskets] = useState([]);
+  const [nextId, setNextId] = useState(0);
 
   const handleAddSongBasket = () => {
-    setSongBaskets([...songBaskets, {}]);
+    const newBasket = {
+      id: nextId,
+      // any other properties you want to include
+    };
+    setSongBaskets([...songBaskets, newBasket]);
+    setNextId(nextId + 1);
   };
 
   return (
@@ -14,8 +20,8 @@ export const CreateSongBasket = () => {
       <Button variant="faded" onClick={handleAddSongBasket}>
         Create a new song basket
       </Button>
-      {songBaskets.map((_, index) => (
-        <SongBasket key={index} />
+      {songBaskets.map((basket, index) => (
+        <SongBasket key={basket.id} id={basket.id} />
       ))}
     </div>
   );

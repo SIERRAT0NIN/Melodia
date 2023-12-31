@@ -33,7 +33,6 @@ function App() {
             <Route path="/user_playlist" element={<SavedPlaylist />} />
             <Route path="/create_playlist" element={<CreatePlaylist />} />
             <Route path="/search_results" element={<SearchResults />} />
-            <Route path="/create_playlist" element={<CreatePlaylist />} />
             <Route path="/baskets" element={<BasketCollection />} />
             <Route path="/" element={<Blob />} />
             <Route path="/logout" element={<Logout />} />

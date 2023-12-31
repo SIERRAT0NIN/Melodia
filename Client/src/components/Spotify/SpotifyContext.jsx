@@ -9,6 +9,7 @@ export const SpotifyProvider = ({ children }) => {
   const [userId, setUserId] = useState(null);
   const [refreshToken, setRefreshToken] = useState(null);
   const [savedTracks, setSavedTracks] = useState([]);
+  const [playlists, setPlaylists] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
   const [selectedSong, setSelectedSong] = useState(null);
   const [displayName, setDisplayName] = useState(null);
@@ -20,6 +21,35 @@ export const SpotifyProvider = ({ children }) => {
   const [jwt, setJwt] = useState(null);
   const [selectedArtist, setSelectedArtist] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]); //! Song basket
+  const [backendToken, setBackendToken] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAccessToken = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5556/get_token/${userId}`
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          setError(errorData.error || "Failed to fetch access token");
+          return;
+        }
+
+        const data = await response.json();
+        setBackendToken(data.access_token);
+      } catch (err) {
+        // Handle network errors
+        setError(err.message);
+      }
+    };
+
+    if (userId) {
+      fetchAccessToken();
+    }
+  }, [userId]);
+  console.log("Backend Token: ", backendToken);
 
   // const sendSelectedSongToBackend = async (selectedItems) => {
   //   try {
@@ -191,6 +221,9 @@ export const SpotifyProvider = ({ children }) => {
         selectedArtist,
         selectedItems,
         setSelectedItems,
+        playlists,
+        setPlaylists,
+        backendToken,
       }}
     >
       {children}

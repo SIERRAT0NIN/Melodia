@@ -38,6 +38,7 @@
     "request": "^2.88.2",
     "semantic-ui-react": "^2.1.5",
     "styled-components": "^6.1.1",
+    "uuid": "^9.0.1",
     "vite-plugin-css": "^1.0.4",
     "vite-plugin-tailwind": "^0.0.4"
   },

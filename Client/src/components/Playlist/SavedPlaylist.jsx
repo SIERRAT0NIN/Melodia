@@ -9,11 +9,11 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import PlaylistDetails from "./PlaylistDetails";
-
-export default function SavedPlaylist({ playlists, setPlaylists }) {
+import { useSpotify } from "../Spotify/SpotifyContext";
+export default function SavedPlaylist() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
-
+  const { playlists, setPlaylists } = useSpotify(null);
   const openModalWithPlaylist = (playlist) => {
     setSelectedPlaylist(playlist);
     onOpen();
@@ -22,7 +22,7 @@ export default function SavedPlaylist({ playlists, setPlaylists }) {
   if (!playlists || playlists.length === 0) {
     return <p>No playlists available.</p>;
   }
-
+  console.log(playlists);
   return (
     <>
       <Table aria-label="User Playlists" css={{ cursor: "pointer" }}>

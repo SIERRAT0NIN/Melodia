@@ -870,41 +870,28 @@ class StoreTokensResource(Resource):
         try:
             data = request.get_json()
 
-            # Validation
+
             if 'access_token_expires_at' not in data or 'refresh_token_expires_at' not in data:
                 return {'error': 'Missing access_token_expires_at or refresh_token_expires_at'}, 400
 
-            # Convert timestamps to datetime objects
             access_token_expires_at = datetime.fromtimestamp(data['access_token_expires_at'])
             refresh_token_expires_at = datetime.fromtimestamp(data['refresh_token_expires_at'])
 
-            # Check if a token for the user already exists
-            token = Token.query.filter_by(user_id=data['user_id']).first()
+            new_token = Token(
+                user_id=data['user_id'],
+                access_token=data['access_token'],
+                refresh_token=data['refresh_token'],
+                access_token_expires_at=access_token_expires_at,
+                refresh_token_expires_at=refresh_token_expires_at
+            )
 
-            if token:
-                # Update existing token
-                token.access_token = data['access_token']
-                token.refresh_token = data['refresh_token']
-                token.access_token_expires_at = access_token_expires_at
-                token.refresh_token_expires_at = refresh_token_expires_at
-            else:
-                # Create new token entry
-                new_token = Token(
-                    user_id=data['user_id'],
-                    access_token=data['access_token'],
-                    refresh_token=data['refresh_token'],
-                    access_token_expires_at=access_token_expires_at,
-                    refresh_token_expires_at=refresh_token_expires_at
-                )
-                db.session.add(new_token)
-
+            db.session.add(new_token)
             db.session.commit()
             return {'message': 'Token stored successfully'}, 201
         except KeyError as e:
             return {'error': f'Missing key in request data: {str(e)}'}, 400
         except Exception as e:
             return {'error': str(e)}, 500
-
 
 def decode_jwt(token):
     try:
@@ -975,13 +962,11 @@ def add_song_to_basket():
         print("Processing song:", song_data)  # Debugging line
 
         # Validate each song data
-        required_keys = ["user_id", "track_id", "track_name", "track_image", "track_album", "track_artist"]
+        required_keys = ["track_id", "track_name", "track_image", "track_album", "track_artist"]
         if not all(k in song_data for k in required_keys):
             errors.append({"error": "Missing data", "song": song_data})
             continue
-
         # Extract song details from song_data
-        user_id = song_data['user_id']
         track_id = song_data['track_id']
         track_name = song_data['track_name']
         track_image = song_data['track_image']
@@ -989,7 +974,7 @@ def add_song_to_basket():
         track_artist = song_data['track_artist']
 
         # Create a new SongBasket instance
-        new_song_basket = Song(user_id=user_id, track_id=track_id, track_name=track_name, track_image=track_image, track_album=track_album, track_artist=track_artist)
+        new_song_basket = Song(track_id=track_id, track_name=track_name, track_image=track_image, track_album=track_album, track_artist=track_artist)
 
         try:
             db.session.add(new_song_basket)
@@ -1004,10 +989,20 @@ def add_song_to_basket():
         db.session.commit()
 
     if errors:
-        return jsonify({"added_songs": added_songs, "errors": errors}), 207  # HTTP 207 for Multi-Status
+        return jsonify({"added_songs": added_songs, "errors": errors}), 207 
     else:
         return jsonify({"added_songs": added_songs}), 201
 
+class GetTokenResource(Resource):
+    def get(self, user_id):
+        token = Token.query.filter_by(user_id=user_id).first()
+        if token:
+            return {'access_token': token.access_token}, 200
+        else:
+            return {'error': 'Token not found'}, 404
+
+# Adding the resource to the API
+api.add_resource(GetTokenResource, '/get_token/<string:user_id>')
 
 api.add_resource(VerifyToken, '/verify_token')
 api.add_resource(RequestJWT, '/request_jwt')

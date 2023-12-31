@@ -28,6 +28,7 @@ const SpotifyAuth = ({
     setTokenStatus,
     jwt,
     setJwt,
+    backendToken,
   } = useSpotify();
   const client_secret = "2fb5a9bb603a48aeadc6dfb28eeb00a0";
   const client_id = "6abb9eac788d42e08c2a50e3f5ff4e53";
@@ -37,7 +38,7 @@ const SpotifyAuth = ({
   // const client_id = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
   // const redirect_uri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
   // const jwtToken = localStorage.getItem("jwtToken"); // Retrieve JWT token from localStorage
-
+  console.log("Token from the backend: ", backendToken);
   const calculateAccessTokenExpiration = () => {
     const currentTime = new Date();
     const expiresIn = 3600;

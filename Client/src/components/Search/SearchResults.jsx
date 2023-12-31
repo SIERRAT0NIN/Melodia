@@ -75,7 +75,6 @@ function SearchResults({
   };
   const prepareSongDataForBackend = () => {
     return selectedSongs.map((song) => ({
-      user_id: "alberto_sierra", // Replace with the actual user ID
       track_id: song.id, // Ensure this is the correct field for the track ID
       track_name: song.name,
       track_image: song.image,
