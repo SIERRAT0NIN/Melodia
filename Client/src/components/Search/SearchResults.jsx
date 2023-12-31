@@ -25,9 +25,9 @@ function SearchResults({
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [isArtistModalOpen, setIsArtistModalOpen] = useState(false);
   const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
-  const { userId } = useSpotify();
+  const { userId, selectedBasketId, setSelectedBasketId } = useSpotify();
   const [selectedSongs, setSelectedSongs] = useState([]);
-
+  console.log(selectedBasketId, "BASKET ID");
   const handleItemClick = (item) => {
     if (item.type === "track") {
       setSelectedItem(item);
@@ -61,7 +61,7 @@ function SearchResults({
                 name: song.name,
                 album: song.album.name,
                 artist: song.artists.map((artist) => artist.name).join(", "),
-                image: song.album.images[0].url, // Assuming the first image is the one you want
+                image: song.album.images[0].url,
               }
             : null;
         })
@@ -75,7 +75,8 @@ function SearchResults({
   };
   const prepareSongDataForBackend = () => {
     return selectedSongs.map((song) => ({
-      track_id: song.id, // Ensure this is the correct field for the track ID
+      basket_id: selectedBasketId,
+      track_id: song.id,
       track_name: song.name,
       track_image: song.image,
       track_album: song.album,

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Button } from "@nextui-org/react";
 import SongBasket from "./SongBasket";
-
+import { useSpotify } from "../Spotify/SpotifyContext";
 export const CreateSongBasket = () => {
+  const { setSelectedBasketId } = useSpotify(null);
   const [songBaskets, setSongBaskets] = useState([]);
+
   const [nextId, setNextId] = useState(0);
 
   const handleAddSongBasket = () => {
@@ -13,6 +15,7 @@ export const CreateSongBasket = () => {
     };
     setSongBaskets([...songBaskets, newBasket]);
     setNextId(nextId + 1);
+    setSelectedBasketId(nextId);
   };
 
   return (

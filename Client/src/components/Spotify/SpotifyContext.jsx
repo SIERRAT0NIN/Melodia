@@ -23,6 +23,7 @@ export const SpotifyProvider = ({ children }) => {
   const [selectedItems, setSelectedItems] = useState([]); //! Song basket
   const [backendToken, setBackendToken] = useState(null);
   const [error, setError] = useState(null);
+  const [selectedBasketId, setSelectedBasketId] = useState(null);
 
   useEffect(() => {
     const fetchAccessToken = async () => {
@@ -224,6 +225,8 @@ export const SpotifyProvider = ({ children }) => {
         playlists,
         setPlaylists,
         backendToken,
+        selectedBasketId,
+        setSelectedBasketId,
       }}
     >
       {children}

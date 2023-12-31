@@ -61,6 +61,7 @@ class Song(db.Model):
     track_image=db.Column(db.String)
     track_album=db.Column(db.String)
     track_artist=db.Column(db.String)
+    basket_id=db.Column(db.Integer)
     # song_basket_id=db.Column(db.Integer, db.ForeignKey('song_baskets.id'))
     
     def __repr__(self):

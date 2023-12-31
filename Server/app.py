@@ -962,7 +962,7 @@ def add_song_to_basket():
         print("Processing song:", song_data)  # Debugging line
 
         # Validate each song data
-        required_keys = ["track_id", "track_name", "track_image", "track_album", "track_artist"]
+        required_keys = ["track_id", "track_name", "track_image", "track_album", "track_artist", 'basket_id']
         if not all(k in song_data for k in required_keys):
             errors.append({"error": "Missing data", "song": song_data})
             continue
@@ -972,9 +972,10 @@ def add_song_to_basket():
         track_image = song_data['track_image']
         track_album = song_data['track_album']
         track_artist = song_data['track_artist']
+        basket_id = song_data['basket_id']
 
         # Create a new SongBasket instance
-        new_song_basket = Song(track_id=track_id, track_name=track_name, track_image=track_image, track_album=track_album, track_artist=track_artist)
+        new_song_basket = Song(track_id=track_id, track_name=track_name, track_image=track_image, track_album=track_album, track_artist=track_artist, basket_id=basket_id)
 
         try:
             db.session.add(new_song_basket)
@@ -1003,7 +1004,6 @@ class GetTokenResource(Resource):
 
 # Adding the resource to the API
 api.add_resource(GetTokenResource, '/get_token/<string:user_id>')
-
 api.add_resource(VerifyToken, '/verify_token')
 api.add_resource(RequestJWT, '/request_jwt')
 api.add_resource(Home, '/home')
