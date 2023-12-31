@@ -25,10 +25,10 @@ const SpotifyAuth = ({
     setAccessTokenExpiresAt,
     refreshTokenExpiresAt,
     setRefreshTokenExpiresAt,
-    tokenStatus,
     setTokenStatus,
     jwt,
     setJwt,
+    backendToken,
   } = useSpotify();
   const client_secret = "2fb5a9bb603a48aeadc6dfb28eeb00a0";
   const client_id = "6abb9eac788d42e08c2a50e3f5ff4e53";
@@ -38,7 +38,7 @@ const SpotifyAuth = ({
   // const client_id = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
   // const redirect_uri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
   // const jwtToken = localStorage.getItem("jwtToken"); // Retrieve JWT token from localStorage
-
+  console.log("Token from the backend: ", backendToken);
   const calculateAccessTokenExpiration = () => {
     const currentTime = new Date();
     const expiresIn = 3600;
@@ -53,6 +53,12 @@ const SpotifyAuth = ({
 
   //! Getting the Auth Code
   //* Working
+  useEffect(() => {
+    const storedAccessToken = localStorage.getItem("accessToken");
+    if (storedAccessToken) {
+      setAccessToken(storedAccessToken);
+    }
+  }, [setAccessToken]);
   useEffect(() => {
     const getAuthorizationCode = () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -91,6 +97,8 @@ const SpotifyAuth = ({
 
         if (response.ok) {
           setAccessToken(data.access_token);
+          localStorage.setItem("accessToken", data.access_token); //! ACCESS TOKEN
+
           setRefreshToken(data.refresh_token);
           setAccessTokenExpiresAt(calculateAccessTokenExpiration());
           setRefreshTokenExpiresAt(calculateRefreshTokenExpiration());
@@ -149,6 +157,7 @@ const SpotifyAuth = ({
           // const response = await fetch("http://127.0.0.1:5556/current_user", {
           headers: {
             Authorization: `Bearer ${accessToken}`,
+
             "Content-Type": "application/json",
           },
         });
@@ -388,7 +397,10 @@ const SpotifyAuth = ({
       if (response.ok) {
         const data = await response.json();
         setJwt(data.jwt);
-        verifyToken(data.jwt);
+        localStorage.setItem("jwtToken", data.jwt); // Store JWT
+
+        verifyToken(data.jwt); // Store the JWT in state
+        // JWT will be logged when it's updated in the state
       } else {
         console.error("Error fetching JWT:", response.statusText);
       }
@@ -405,6 +417,58 @@ const SpotifyAuth = ({
   }, [userId]);
   console.log("JWT: ", jwt);
 
+  const authenticatedFetch = (url, options = {}) => {
+    // Retrieve the JWT token from localStorage
+    const jwtToken = localStorage.getItem("jwtToken");
+
+    // Check if the JWT token is available
+    if (!jwtToken) {
+      console.error("JWT token not found in localStorage");
+      // Ideally, handle the absence of a JWT token by redirecting to a login page or similar
+      return Promise.reject(new Error("JWT token not found"));
+    }
+
+    // Merge the Authorization header with any existing headers in the options
+    const headersWithAuth = {
+      ...(options.headers || {}),
+      Authorization: `Bearer ${jwtToken}`,
+    };
+
+    // Return the fetch promise with the merged options and headers
+    return fetch(url, {
+      ...options,
+      headers: headersWithAuth,
+    })
+      .then((response) => {
+        // Check if the response is successful
+        if (!response.ok) {
+          // If not successful, reject the promise with the error message
+          return Promise.reject(
+            new Error(`HTTP error! Status: ${response.status}`)
+          );
+        }
+        return response.json(); // Assuming the response is JSON
+      })
+      .catch((error) => {
+        // Log and rethrow the error for further handling
+        console.error("Error in authenticated fetch:", error);
+        throw error;
+      });
+  };
+
+  useEffect(() => {
+    if (accessToken) {
+      authenticatedFetch("http://127.0.0.1:5556/user_saved_tracks")
+        .then((response) => response.json())
+        .then((data) => console.log(data))
+        .catch((error) => console.error(error));
+    }
+  }, [accessToken]);
+
+  // const logout = () => {
+  //   localStorage.removeItem("jwtToken");
+  //   // Perform other cleanup tasks, like resetting state
+  // };
   return <div></div>;
 };
 

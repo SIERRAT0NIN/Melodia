@@ -29,9 +29,6 @@ TOKEN_INFO = 'token_info'
 JWT_SECRET_KEY = 'fkjasjkeoriu234-wefk9w0uri1o24jd'
 JWT_ALGORITHM = "HS256"          
 app.secret_key = 'din12823112390238ub09843209a1234'
-# redirect_uri = 'http://127.0.0.1:5556/token-exchange' 
-# redirect_uri = 'http://127.0.0.1:5556/user_saved_tracks' 
-# redirect_uri = 'http://127.0.0.1:5556/current_user' 
 api=Api(app)
 
 #CORS Routes
@@ -40,6 +37,7 @@ CORS(app, resources={
         r"/current_user": {"origins": "http://localhost:5555"},
         r"/store_user": {"origins": "http://localhost:5555"},
         r"/user_saved_tracks": {"origins": "http://localhost:5555"},
+        r"/baskets": {"origins": "http://localhost:5555"},
     })    
 # def generate_jwt_secret(length=32):
 #     return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode()
@@ -334,23 +332,29 @@ class TokenExchange(Resource):
             return ({'error': str(e)}), 500     
  
 class SavedSongs(Resource):
-    def get(self):
-        code = request.args.get('code')
-        if not code:
-            return {'message': 'No code provided'}, 400
-        access_token = self.get_access_token_from_request()        
-        token_info = exchange_code(code)
-        if token_info:
-            session['token_info'] = token_info
-            return redirect('http://127.0.0.1:5556/user_saved_tracks')  
-        else:
-            return ({'error': str(e)}), 500
-            # results = sp.current_user_saved_tracks()
-            # songs = self.extract_songs(results)
+    # def get(self):
+    #     code = request.args.get('code')
+    #     if not code:
+    #         return {'message': 'No code provided'}, 400
+    #     access_token = self.get_access_token_from_request()        
+    #     token_info = exchange_code(code)
+    #     if token_info:
+    #         session['token_info'] = token_info
+    #         return redirect('http://127.0.0.1:5556/user_saved_tracks')  
+    #     else:
+    #         return ({'error': str(e)}), 500
+    #         # results = sp.current_user_saved_tracks()
+    #         # songs = self.extract_songs(results)
             
-            # return ({'songs': songs}), 200
-            # except Exception as e:
-            # return ({"error": str(e)}), 500
+    #         # return ({'songs': songs}), 200
+    #         # except Exception as e:
+    #         # return ({"error": str(e)}), 500
+    def get(self):
+        access_token = self.get_access_token_from_request()
+        if not access_token:
+            return {'message': 'Access token is missing or invalid'}, 401
+        return {'message': 'Successfully authenticated with JWT'}, 200
+
     def get_access_token_from_request(self):
         """
         The function `get_access_token_from_request` extracts the access token from the Authorization header
@@ -821,11 +825,18 @@ class Refresh(Resource):
 
 
 
-    
-    
+
 class StoreUser(Resource):
     def post(self):
         data = request.get_json()
+
+        existing_user = User.query.filter(
+            (User.email == data.get('email')) | 
+            (User.username == data.get('userId'))
+        ).first()
+
+        if existing_user:
+            return {'error': 'User already exists with this email or username'}, 409
 
         # Validate data
         required_fields = ['email', 'name', 'userId', ]
@@ -852,30 +863,6 @@ class StoreUser(Resource):
 
     def options(self):
         return {'message': 'OK'}, 200
-
-    
-# class StoreTokensResource(Resource):
-#     def post(self):
-#         try:
-#             data = request.get_json()
-#             print(data,"DATA")
-#             access_token_expires_at = datetime.fromtimestamp(data['access_token_expires_at'])
-#             refresh_token_expires_at = datetime.fromtimestamp(data['refresh_token_expires_at'])
-
-
-#             new_token = Token(
-#                 user_id=data['user_id'],
-#                 access_token=data['access_token'],
-#                 refresh_token=data['refresh_token'],
-#                 access_token_expires_at=access_token_expires_at,
-#                 refresh_token_expires_at=refresh_token_expires_at
-#             )
-
-#             db.session.add(new_token)
-#             db.session.commit()
-#             return {'message': 'Token stored successfully'}, 201
-#         except Exception as e:
-#             return {'error': str(e)}, 500
 
 
 class StoreTokensResource(Resource):
@@ -906,57 +893,9 @@ class StoreTokensResource(Resource):
         except Exception as e:
             return {'error': str(e)}, 500
 
-
-# Add the new Resource to the API
-
-    
-    
-    
-    # def post(self):
-    #     user_id = request.json.get('user_id')
-    #     if not user_id:
-    #         return {'error': 'User ID is missing'}, 400
-
-    #     user_token = User.query.filter_by(user_id=user_id).first()
-    #     if not user_token:
-    #         return {'error': 'User token not found'}, 404
-
-    #     if user_token.is_token_expired():
-    #         # Prepare the data for the token request
-    #         token_data = {
-    #             'grant_type': 'refresh_token',
-    #             'refresh_token': user_token.refresh_token,
-    #         }
-
-    #         token_headers = {
-    #             'Authorization': f'Basic {encode_client_credentials(client_id, client_secret)}',
-    #         }
-
-    #         # Spotify token endpoint
-    #         token_url = "https://accounts.spotify.com/api/token"
-
-    #         # Send the request
-    #         response = requests.post(token_url, data=token_data, headers=token_headers)
-
-    #         # Handle the response
-    #         if response.status_code == 200:
-    #             new_token_info = response.json()
-    #             # Update the access token in your database
-    #             user_token.access_token = new_token_info['access_token']
-    #             user_token.expires_at = datetime.utcnow() + timedelta(seconds=new_token_info['expires_in'])
-
-    #             # Commit changes to the database
-    #             db.session.commit()
-
-    #             return {'access_token': new_token_info['access_token']}
-    #         else:
-    #             return {'error': 'Failed to refresh token'}, response.status_code
-    #     else:
-    #         # Token is still valid, return the current access token
-    #         return {'access_token': user_token.access_token}
 def decode_jwt(token):
     try:
-        # Decoding the token
+
         decoded_token = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         return decoded_token
     except jwt.ExpiredSignatureError:
@@ -979,19 +918,18 @@ class VerifyToken(Resource):
 
         return {'message': "Token is valid!", 'data': decoded}, 200
 
-api.add_resource(VerifyToken, '/verify_token')
 
 class RequestJWT(Resource):
     def post(self):
         try:
-            # Extract user data from the request
+
             user_data = request.get_json()
 
-            # Validate user_data
+
             if not user_data or 'user_id' not in user_data:
                 return jsonify({'error': 'user_id is required'}), 400
 
-            # Generate JWT token
+
             token = self.generate_jwt_token(user_data['user_id'])
             return jsonify({'jwt': token})
         except Exception as e:
@@ -1006,10 +944,68 @@ class RequestJWT(Resource):
             'sub': user_id
         }
         return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
-# Add the resource to the API
-api.add_resource(RequestJWT, '/request_jwt')
 
-    
+
+@app.route('/songs', methods=['POST'])
+def add_song_to_basket():
+    data = request.json
+    print("Received data:", data)  # Debugging line
+
+    # Check if data is a list, if not, make it a list
+    if not isinstance(data, list):
+        data = [data]
+
+    added_songs = []
+    errors = []
+
+    for song_data in data:
+        print("Processing song:", song_data)  # Debugging line
+
+        # Validate each song data
+        required_keys = ["track_id", "track_name", "track_image", "track_album", "track_artist"]
+        if not all(k in song_data for k in required_keys):
+            errors.append({"error": "Missing data", "song": song_data})
+            continue
+        # Extract song details from song_data
+        track_id = song_data['track_id']
+        track_name = song_data['track_name']
+        track_image = song_data['track_image']
+        track_album = song_data['track_album']
+        track_artist = song_data['track_artist']
+
+        # Create a new SongBasket instance
+        new_song_basket = Song(track_id=track_id, track_name=track_name, track_image=track_image, track_album=track_album, track_artist=track_artist)
+
+        try:
+            db.session.add(new_song_basket)
+            db.session.flush()
+            added_songs.append({"id": new_song_basket.id, "track_id": track_id})
+        except Exception as e:
+            db.session.rollback()
+            errors.append({"error": str(e), "song": song_data})
+            continue
+
+    if not errors:  # Only commit if there are no errors
+        db.session.commit()
+
+    if errors:
+        return jsonify({"added_songs": added_songs, "errors": errors}), 207 
+    else:
+        return jsonify({"added_songs": added_songs}), 201
+
+class GetTokenResource(Resource):
+    def get(self, user_id):
+        token = Token.query.filter_by(user_id=user_id).first()
+        if token:
+            return {'access_token': token.access_token}, 200
+        else:
+            return {'error': 'Token not found'}, 404
+
+# Adding the resource to the API
+api.add_resource(GetTokenResource, '/get_token/<string:user_id>')
+
+api.add_resource(VerifyToken, '/verify_token')
+api.add_resource(RequestJWT, '/request_jwt')
 api.add_resource(Home, '/home')
 api.add_resource(TokenExchange, '/token-exchangse')
 api.add_resource(AccessTokenResource, '/access_token')

@@ -1,40 +1,32 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
-from sqlalchemy import MetaData
 from flask_migrate import Migrate
 from app_config import db 
 from sqlalchemy import MetaData, create_engine, Column, String
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, Table, ForeignKey
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from datetime import datetime
-
-
-
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import relationship
+
 
 import os
-# JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')  
 
-
-
-
-
-
-
-
-
+user_songs = Table('user_songs', db.Model.metadata,
+    Column('user_id', Integer, ForeignKey('users.id')),
+    Column('song_id', String, ForeignKey('songs.track_id'))
+)
 class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    username = db.Column(db.String)
-    email = db.Column(db.String)
+    username = db.Column(db.String, unique=True)
+    email = db.Column(db.String, unique=True)
     profile_pic = db.Column(db.String)
     password = db.Column(db.String)
-    jwt = db.Column(db.String)
-    
+    # songs = relationship('Song', secondary=user_songs, backref=db.backref('users', lazy='dynamic'))
+
     def verify_refresh_token(self, refresh_token_to_be_checked):
         return self.refresh_token == refresh_token_to_be_checked
     
@@ -44,6 +36,50 @@ class UserSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = User
         
+
+        
+class Token(db.Model):
+    __tablename__ = 'tokens'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    access_token = db.Column(db.String, nullable=False, unique=True)
+    refresh_token = db.Column(db.String, nullable=False, unique=True)
+    access_token_expires_at = db.Column(db.DateTime)
+    refresh_token_expires_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Token user_id={self.user_id}>'
+
+#Many to many-- Many baskets can have many songs and many songs can belong to many baskets.
+class Song(db.Model):
+    __tablename__ = 'songs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    track_id =db.Column(db.String)
+    track_name=db.Column(db.String)
+    track_image=db.Column(db.String)
+    track_album=db.Column(db.String)
+    track_artist=db.Column(db.String)
+    # song_basket_id=db.Column(db.Integer, db.ForeignKey('song_baskets.id'))
+    
+    def __repr__(self):
+        return f'<Song {self.id}>'
+    
+class SongSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Song
+        
+        
+class Song_Basket(db.Model):
+    __tablename__ = 'song_baskets'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String, db.ForeignKey('users.id'))
+    track_id = db.Column(db.String, db.ForeignKey('songs.track_id'))
+    def __repr__(self):
+        return f'<Song_Basket {self.id}>'
+
 # class RefreshToken(db.Model):
 #     __tablename__ = 'refresh_tokens'
 #     user_id = db.Column(db.String, primary_key=True)
@@ -72,143 +108,117 @@ class UserSchema(SQLAlchemyAutoSchema):
 #     def is_token_expired(self):
 #         return datetime.utcnow() > self.expires_at
         
-class Token(db.Model):
-    __tablename__ = 'tokens'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
-    access_token = db.Column(db.String, nullable=False, unique=True)
-    refresh_token = db.Column(db.String, nullable=False, unique=True)
-    access_token_expires_at = db.Column(db.DateTime)
-    refresh_token_expires_at = db.Column(db.DateTime)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __repr__(self):
-        return f'<Token user_id={self.user_id}>'
-
-
-class Liked_Song(db.Model):
-    __tablename__ = 'liked_songs'
-    id = db.Column(db.String, primary_key=True)
-    track_id = db.Column(db.String, db.ForeignKey('tracks.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    album_id = db.Column(db.Integer, db.ForeignKey('albums.id'))
-    liked = db.Column(db.Boolean)
-    def __repr__(self):
-        return f'<Liked_Song {self.id}>'
-class Liked_Song_Schema(SQLAlchemyAutoSchema):
+# class Liked_Song(db.Model):
+#     __tablename__ = 'liked_songs'
+#     id = db.Column(db.String, primary_key=True)
+#     track_id = db.Column(db.String, db.ForeignKey('tracks.id'))
+#     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+#     album_id = db.Column(db.Integer, db.ForeignKey('albums.id'))
+#     liked = db.Column(db.Boolean)
+#     def __repr__(self):
+#         return f'<Liked_Song {self.id}>'
+# class Liked_Song_Schema(SQLAlchemyAutoSchema):
     
-    class Meta:
-        model = Liked_Song
-
-class Artist(db.Model):
-    __tablename__ = 'artists'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    bio = db.Column(db.String)
-    stats = db.Column(db.Integer)
-    def __repr__(self):
-        return f'<Artist {self.id, self.name, self.bio, self.stats }>'
-class ArtistSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = Artist
-        
-class Album(db.Model):
-    __tablename__ = 'albums'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    track_list = db.Column(db.String)
-    released_date = db.Column(db.DateTime)
-    image = db.Column(db.String)
-    public = db.Column(db.Boolean)
-    artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'))
-
-    def __repr__(self):
-        return f'<Album {self.id, self.name, self.released_date, self.public}>'
-class AlbumSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = Album
-
-class Track(db.Model):
-    __tablename__ = 'tracks'
-
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String)
-    description = db.Column(db.String)
-    image = db.Column(db.Integer)
-    artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'))
-    album_id = db.Column(db.Integer, db.ForeignKey('albums.id'))
-    stats = db.Column(db.String)
-    liked = db.Column(db.Boolean)
-
-    def __repr__(self):
-        return f'<Track {self.id, self.title, self.description, self.image, self.stats, self.liked}>'
-class Track_Schema(SQLAlchemyAutoSchema):
-
-    class Meta:
-        model = Track
-
-class Playlist_Track(db.Model):
-    __tablename__ = 'playlist_tracks'
-    id = db.Column(db.Integer, primary_key=True)
-    track_id = db.Column(db.String, db.ForeignKey('tracks.id'))
-    playlist_id = db.Column(db.String, db.ForeignKey('playlists.id'))
-    def __repr__(self):
-        return f'<Playlist_Track {self.track_id, self.playlist_id}>'
-
-class Playlist(db.Model):
-    __tablename__ = 'playlists'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    description = db.Column(db.String)
-    track_id = db.Column(db.Integer, db.ForeignKey('tracks.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    created_at = db.Column(db.DateTime)
-    public = db.Column(db.Boolean)
-
-    def __repr__(self):
-        return f'<Playlist {self.id}>'
-class PlaylistSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = Playlist
-        
-
-def save_to_database(user_id, refresh_token):
-    # Check if a token already exists for the user
-    existing_token = RefreshToken.query.filter_by(user_id=user_id).first()
-    
-    if existing_token:
-        # Update the existing token
-        existing_token.refresh_token = refresh_token
-    else:
-        # Create a new token record
-        new_token = RefreshToken()
-        new_token.user_id = user_id
-        new_token.refresh_token = refresh_token
-        db.session.add(new_token)
-
-    # Commit the session
-    db.session.commit()
-
-
-
-
-#Many to many-- Many baskets can have many songs and many songs can belong to many baskets.
-# class SongBasket(db.Model):
-#     __tablename__ = 'song_baskets'
-    
-#     id = db.Column(db.Integer, primary_key=True
-#     user_id = db.Column(db.String, db.ForeignKey('users.id'))
-#     track_id =db.Column(db.String, db.ForeignKey('track.id'))
-#     playlist_id= db.Column(db.String, db.ForeignKey('playlist.id'))
-    
-#     def __repr__(self)
-#         return f'<SongBasket {self.id}>'
-        
 #     class Meta:
-#         model = SongBasket
+#         model = Liked_Song
+
+# class Artist(db.Model):
+#     __tablename__ = 'artists'
+
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String)
+#     bio = db.Column(db.String)
+#     stats = db.Column(db.Integer)
+#     def __repr__(self):
+#         return f'<Artist {self.id, self.name, self.bio, self.stats }>'
+# class ArtistSchema(SQLAlchemyAutoSchema):
+#     class Meta:
+#         model = Artist
+        
+# class Album(db.Model):
+#     __tablename__ = 'albums'
+
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String)
+#     track_list = db.Column(db.String)
+#     released_date = db.Column(db.DateTime)
+#     image = db.Column(db.String)
+#     public = db.Column(db.Boolean)
+#     artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'))
+
+#     def __repr__(self):
+#         return f'<Album {self.id, self.name, self.released_date, self.public}>'
+# class AlbumSchema(SQLAlchemyAutoSchema):
+#     class Meta:
+#         model = Album
+
+# class Track(db.Model):
+#     __tablename__ = 'tracks'
+
+#     id = db.Column(db.Integer, primary_key=True)
+#     title = db.Column(db.String)
+#     description = db.Column(db.String)
+#     image = db.Column(db.Integer)
+#     artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'))
+#     album_id = db.Column(db.Integer, db.ForeignKey('albums.id'))
+#     stats = db.Column(db.String)
+#     liked = db.Column(db.Boolean)
+
+#     def __repr__(self):
+#         return f'<Track {self.id, self.title, self.description, self.image, self.stats, self.liked}>'
+# class Track_Schema(SQLAlchemyAutoSchema):
+
+#     class Meta:
+#         model = Track
+
+# class Playlist_Track(db.Model):
+#     __tablename__ = 'playlist_tracks'
+#     id = db.Column(db.Integer, primary_key=True)
+#     track_id = db.Column(db.String, db.ForeignKey('tracks.id'))
+#     playlist_id = db.Column(db.String, db.ForeignKey('playlists.id'))
+#     def __repr__(self):
+#         return f'<Playlist_Track {self.track_id, self.playlist_id}>'
+
+# class Playlist(db.Model):
+#     __tablename__ = 'playlists'
+
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String)
+#     description = db.Column(db.String)
+#     track_id = db.Column(db.Integer, db.ForeignKey('tracks.id'))
+#     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+#     created_at = db.Column(db.DateTime)
+#     public = db.Column(db.Boolean)
+
+#     def __repr__(self):
+#         return f'<Playlist {self.id}>'
+# class PlaylistSchema(SQLAlchemyAutoSchema):
+#     class Meta:
+#         model = Playlist
+        
+
+# def save_to_database(user_id, refresh_token):
+#     # Check if a token already exists for the user
+#     existing_token = RefreshToken.query.filter_by(user_id=user_id).first()
+    
+#     if existing_token:
+#         # Update the existing token
+#         existing_token.refresh_token = refresh_token
+#     else:
+#         # Create a new token record
+#         new_token = RefreshToken()
+#         new_token.user_id = user_id
+#         new_token.refresh_token = refresh_token
+#         db.session.add(new_token)
+
+#     # Commit the session
+#     db.session.commit()
+
+
+
+
+
         
 
 #Relationships

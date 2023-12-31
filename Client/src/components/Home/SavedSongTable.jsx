@@ -13,10 +13,11 @@ import SongModal from "./SongDetail";
 import { useSpotify } from "../Spotify/SpotifyContext";
 const SavedSongs = () => {
   const [savedTracks, setSavedTracks] = useState([]);
-  const [playlists, setPlaylists] = useState([]);
+  // const [playlists, setPlaylists] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   // const [selectedSong, setSelectedSong] = useState(null);
-  const { selectedSong, setSelectedSong } = useSpotify();
+  const { selectedSong, setSelectedSong, playlists, setPlaylists } =
+    useSpotify();
   const handleSavedTracksChange = (tracks) => {
     setSavedTracks(tracks);
   };

@@ -13,7 +13,7 @@ import CurrentlyPlayingCard from "./MusicPlayer/CurrentlyPlayingCard";
 import Blob from "./Home/NewLoginBlob";
 import { BrowserRouter as Router } from "react-router-dom";
 import SearchResults from "./Search/SearchResults";
-import BasketCollection from "./Search/SongBasket/BasketCollection";
+import BasketCollection from "./SongBasket/BasketCollection";
 
 function App() {
   const is_logged_in = true;
@@ -33,7 +33,6 @@ function App() {
             <Route path="/user_playlist" element={<SavedPlaylist />} />
             <Route path="/create_playlist" element={<CreatePlaylist />} />
             <Route path="/search_results" element={<SearchResults />} />
-            <Route path="/create_playlist" element={<CreatePlaylist />} />
             <Route path="/baskets" element={<BasketCollection />} />
             <Route path="/" element={<Blob />} />
             <Route path="/logout" element={<Logout />} />

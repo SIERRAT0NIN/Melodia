@@ -12,8 +12,9 @@ import {
 } from "@nextui-org/react";
 import { useState } from "react";
 import { useSpotify } from "../Spotify/SpotifyContext";
+import SearchArtistModal from "./SearchArtistModal";
 
-const SongModal = ({ isOpen, onClose, songData }) => {
+const SongModal = ({ isOpen, onClose, songData, scrollBehavior }) => {
   const [popoverMessage, setPopoverMessage] = useState("");
   const [isLiked, setIsLiked] = useState(true);
   const { accessToken } = useSpotify();
@@ -24,7 +25,9 @@ const SongModal = ({ isOpen, onClose, songData }) => {
     likeUnlikeSong(songData.id, isLiked)
       .then(() => {
         setIsLiked(!isLiked);
-        setPopoverMessage("Song has been liked!");
+        setPopoverMessage(
+          isLiked ? "Song has been unliked!" : "Song has been liked!"
+        );
       })
       .catch((error) => console.error(error));
   };
@@ -71,7 +74,12 @@ const SongModal = ({ isOpen, onClose, songData }) => {
   };
   console.log(songData);
   return (
-    <Modal isOpen={isOpen} onClose={onClose} backdrop="blur">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      backdrop="blur"
+      scrollBehavior={scrollBehavior}
+    >
       <ModalContent>
         <ModalHeader className="flex flex-col justify-center items-center gap-1">
           <Image
@@ -81,12 +89,10 @@ const SongModal = ({ isOpen, onClose, songData }) => {
             alt={songData.name}
           />
 
-          <h2>{songData.name}</h2>
-          <h4>{songData.artists.map((artist) => artist.name).join(", ")}</h4>
-          <h4>{songData.album.name}</h4>
+          <h4>{songData.name}</h4>
         </ModalHeader>
-        <ModalBody>
-          <p>Release Date: {songData.album.release_date}</p>
+        <ModalBody className="modal-body-content">
+          <p>Release Date: {songData.release_date}</p>
           <p>Popularity: {songData.popularity}</p>
         </ModalBody>
         <ModalFooter className="flex justify-center items-center">

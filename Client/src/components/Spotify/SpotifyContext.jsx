@@ -9,6 +9,7 @@ export const SpotifyProvider = ({ children }) => {
   const [userId, setUserId] = useState(null);
   const [refreshToken, setRefreshToken] = useState(null);
   const [savedTracks, setSavedTracks] = useState([]);
+  const [playlists, setPlaylists] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
   const [selectedSong, setSelectedSong] = useState(null);
   const [displayName, setDisplayName] = useState(null);
@@ -18,6 +19,88 @@ export const SpotifyProvider = ({ children }) => {
   const [refreshTokenExpiresAt, setRefreshTokenExpiresAt] = useState(null);
   const [tokenStatus, setTokenStatus] = useState(null);
   const [jwt, setJwt] = useState(null);
+  const [selectedArtist, setSelectedArtist] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]); //! Song basket
+  const [backendToken, setBackendToken] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAccessToken = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5556/get_token/${userId}`
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          setError(errorData.error || "Failed to fetch access token");
+          return;
+        }
+
+        const data = await response.json();
+        setBackendToken(data.access_token);
+      } catch (err) {
+        // Handle network errors
+        setError(err.message);
+      }
+    };
+
+    if (userId) {
+      fetchAccessToken();
+    }
+  }, [userId]);
+  console.log("Backend Token: ", backendToken);
+
+  // const sendSelectedSongToBackend = async (selectedItems) => {
+  //   try {
+  //     const response = await fetch("http://localhost:5556/songbasket", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(selectedItems),
+  //     });
+
+  //     const data = await response.json();
+  //     console.log("Response from backend:", data);
+  //   } catch (error) {
+  //     console.error("Error sending selected song to backend:", error);
+  //   }
+  // };
+  // // useEffect hook to call the function when selectedSong changes
+  // useEffect(() => {
+  //   if (selectedSong) {
+  //     sendSelectedSongToBackend(selectedItems);
+  //   }
+  // }, [selectedItems]);
+  // const sendSelectedSongToBackend = async (song) => {
+  //   const songData = {
+  //     id: song.id,
+  //     name: song.name,
+  //     // image: song.images[1].url,
+  //   };
+  //   try {
+  //     const response = await fetch("http://localhost:5556/songbasket", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(songData),
+  //     });
+
+  //     const data = await response.json();
+  //     console.log("Response from backend:", data);
+  //   } catch (error) {
+  //     console.error("Error sending selected song to backend:", error);
+  //   }
+  //   console.log(songData, "SONG DATA");
+  // };
+  // // useEffect hook to call the function when selectedSong changes
+  // useEffect(() => {
+  //   if (selectedSong) {
+  //     sendSelectedSongToBackend(selectedSong);
+  //   }
+  // }, [selectedSong]);
 
   // useEffect(() => {
   //   if (!refreshToken) return;
@@ -134,6 +217,13 @@ export const SpotifyProvider = ({ children }) => {
         setTokenStatus,
         jwt,
         setJwt,
+        setSelectedArtist,
+        selectedArtist,
+        selectedItems,
+        setSelectedItems,
+        playlists,
+        setPlaylists,
+        backendToken,
       }}
     >
       {children}

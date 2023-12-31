@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSpotify } from "../Spotify/SpotifyContext";
 import { Input, Button } from "@nextui-org/react";
-import SearchResults from "./SearchResults";
+import SearchResults from "../Search/SearchResults";
 
 const SpotifySearch = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -11,13 +11,26 @@ const SpotifySearch = () => {
     albums: { items: [] },
   });
   const [isLoading, setIsLoading] = useState(false);
-  const { accessToken, setSelectedSong } = useSpotify("");
+  const {
+    accessToken,
+    setSelectedSong,
+    setAccessToken,
+    setSelectedArtist,
+    selectedArtist,
+  } = useSpotify("");
+
+  useEffect(() => {
+    const storedAccessToken = localStorage.getItem("accessToken");
+    if (storedAccessToken) {
+      setAccessToken(storedAccessToken);
+    }
+  }, [setAccessToken]);
 
   const fetchSpotifyData = async (query, token) => {
     const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(
       query
     )}&type=track,artist,album`;
-    const headers = { Authorization: `Bearer ${token}` };
+    const headers = { Authorization: `Bearer ${accessToken}` };
 
     try {
       const response = await fetch(url, { headers });
@@ -53,6 +66,7 @@ const SpotifySearch = () => {
 
   const handleArtistClick = (artist) => {
     console.log("Selected Artist:", artist);
+    setSelectedArtist(artist);
   };
 
   const handleAlbumClick = (album) => {

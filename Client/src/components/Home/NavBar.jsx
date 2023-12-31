@@ -8,7 +8,7 @@ import {
   ButtonGroup,
 } from "@nextui-org/react";
 import EqualizerRoundedIcon from "@mui/icons-material/EqualizerRounded";
-import SpotifySearch from "../Search/SpotifySearch.jsx";
+// import SpotifySearch from "../Search/SpotifySearch.jsx";
 
 export default function NavBar() {
   return (
@@ -43,7 +43,7 @@ export default function NavBar() {
           </ButtonGroup>
         </div>
       </Navbar>
-      <SpotifySearch />
+      {/* <SpotifySearch /> */}
     </>
   );
 }

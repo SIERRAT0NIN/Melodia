@@ -1,128 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import {
-//   Card,
-//   CardBody,
-//   Image,
-//   Button,
-//   Slider,
-//   Spinner,
-// } from "@nextui-org/react";
-// import { HeartIcon } from "../Home/HeartIcon";
-// import { PauseCircleIcon } from "./PauseCircleIcon";
-// import { NextIcon } from "./NextIcon";
-// import { PreviousIcon } from "./PreviousIcon";
-// import { RepeatOneIcon } from "./RepeatOneIcon";
-// import { ShuffleIcon } from "./ShuffleIcon";
-
-// export default function CurrentlyPlayingCard({ accessToken }) {
-//   const [liked, setLiked] = useState(false);
-//   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-
-//   useEffect(() => {
-//     const fetchCurrentlyPlaying = async () => {
-//       try {
-//         if (!accessToken) {
-//           console.error("Access token is null");
-//           return;
-//         }
-
-//         const response = await fetch(
-//           "https://api.spotify.com/v1/me/player/currently-playing",
-//           {
-//             headers: {
-//               Authorization: `Bearer ${accessToken}`,
-//             },
-//           }
-//         );
-
-//         if (response.ok) {
-//           const data = await response.json();
-//           console.log(data);
-//           setCurrentlyPlaying(data);
-//         } else {
-//           console.error("Failed to fetch currently playing track");
-//           setError("Failed to fetch data");
-//         }
-//       } catch (error) {
-//         console.error("Error fetching currently playing track:", error);
-//         setError("Error fetching data");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchCurrentlyPlaying();
-//   }, [accessToken]);
-
-//   if (loading) {
-//     return <Spinner />;
-//   }
-
-//   if (error) {
-//     return <p>Error: {error}</p>;
-//   }
-
-//   if (!currentlyPlaying || !currentlyPlaying.item) {
-//     return <p>No currently playing track.</p>;
-//   }
-
-//   const { item } = currentlyPlaying;
-//   const albumImageUrl = item.album.images[0]?.url;
-//   const trackName = item.name;
-//   const artistName = item.artists.map((artist) => artist.name).join(", ");
-
-//   return (
-//     <Card
-//       isBlurred
-//       className="border-none bg-background/60 dark:bg-default-100/50 max-w-[610px]"
-//       shadow="sm"
-//     >
-//       <CardBody>
-//         <div className="grid grid-cols-6 md:grid-cols-12 gap-6 md:gap-4 items-center justify-center">
-//           <div className="relative col-span-6 md:col-span-4">
-//             <Image
-//               alt="Album cover"
-//               className="object-cover"
-//               height={200}
-//               shadow="md"
-//               src={albumImageUrl}
-//               width="100%"
-//             />
-//           </div>
-
-//           <div className="flex flex-col col-span-6 md:col-span-8">
-//             <div className="flex justify-between items-start">
-//               <div className="flex flex-col gap-0">
-//                 <h3 className="font-semibold text-foreground/90">
-//                   {trackName}
-//                 </h3>
-//                 <p className="text-small text-foreground/80">{artistName}</p>
-//                 {/* Additional details can be added here */}
-//               </div>
-//               <Button
-//                 isIconOnly
-//                 className="text-default-900/60 data-[hover]:bg-foreground/10 -translate-y-2 translate-x-2"
-//                 radius="full"
-//                 variant="light"
-//                 onPress={() => setLiked((v) => !v)}
-//               >
-//                 <HeartIcon
-//                   className={liked ? "[&>path]:stroke-transparent" : ""}
-//                   fill={liked ? "currentColor" : "none"}
-//                 />
-//               </Button>
-//             </div>
-
-//             {/* ...remaining component structure... */}
-//           </div>
-//         </div>
-//       </CardBody>
-//     </Card>
-//   );
-// }
-
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -143,10 +18,10 @@ import { useSpotify } from "../Spotify/SpotifyContext";
 
 export default function CurrentlyPlayingCard() {
   const [liked, setLiked] = useState(false);
-  const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
+  const [currentlyPlaying, setCurrentlyPlaying] = useState();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { accessToken } = useSpotify();
+  const { setAccessToken } = useSpotify();
   const [songPosition, setSongPosition] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -157,20 +32,21 @@ export default function CurrentlyPlayingCard() {
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
   }
 
+  const storedAccessToken = localStorage.getItem("accessToken");
   useEffect(() => {
-    const fetchCurrentlyPlaying = async () => {
-      if (!accessToken) {
-        console.error("Access token is null");
-        setError("Access token is not available");
-        setLoading(false);
-        return;
-      }
+    if (!storedAccessToken) {
+      console.error("Access token is null");
+      setError("Access token is not available");
+      setLoading(false);
+      return;
+    }
 
+    const fetchCurrentlyPlaying = async () => {
       try {
         const response = await fetch(
           "https://api.spotify.com/v1/me/player/currently-playing",
           {
-            headers: { Authorization: `Bearer ${accessToken}` },
+            headers: { Authorization: `Bearer ${storedAccessToken}` },
           }
         );
 
@@ -191,13 +67,13 @@ export default function CurrentlyPlayingCard() {
     };
 
     fetchCurrentlyPlaying();
-  }, [accessToken]);
+  }, [setAccessToken]); // Remove setAccessToken if you're not using it in the fetch
 
   const handleNextPrevious = async (direction) => {
     try {
       await fetch(`https://api.spotify.com/v1/me/player/${direction}`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${storedAccessToken}` },
       });
       fetchCurrentlyPlaying(); // Refresh the currently playing track
     } catch (error) {
@@ -210,7 +86,7 @@ export default function CurrentlyPlayingCard() {
       const endpoint = isPlaying ? "pause" : "play";
       await fetch(`https://api.spotify.com/v1/me/player/${endpoint}`, {
         method: "PUT",
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${storedAccessToken}` },
       });
       setIsPlaying(!isPlaying); // Toggle the state
     } catch (error) {
@@ -224,7 +100,7 @@ export default function CurrentlyPlayingCard() {
         `https://api.spotify.com/v1/me/player/seek?position_ms=${newValue}`,
         {
           method: "PUT",
-          headers: { Authorization: `Bearer ${accessToken}` },
+          headers: { Authorization: `Bearer ${storedAccessToken}` },
         }
       );
       setSongPosition(newValue);
@@ -245,15 +121,15 @@ export default function CurrentlyPlayingCard() {
   const handleNext = async () => {
     handleNextPrevious("next");
   };
-  console.log(accessToken);
+
   return (
     <Card
       isBlurred
-      className="border-none bg-background/60 dark:bg-default-100/50 max-w-[610px]"
+      className="border-none bg-background/60 dark:bg-default-100/50 max-w-[610px] "
       shadow="sm"
     >
       <CardBody>
-        <div className="grid grid-cols-6 md:grid-cols-12 gap-6 md:gap-4 items-center justify-center">
+        <div className="grid grid-cols-6 md:grid-cols-12 gap-6 md:gap-4 items-center justify-center ">
           <div className="relative col-span-6 md:col-span-4">
             <Image
               alt="Album cover"
