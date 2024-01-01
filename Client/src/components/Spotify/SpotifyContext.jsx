@@ -20,9 +20,11 @@ export const SpotifyProvider = ({ children }) => {
   const [tokenStatus, setTokenStatus] = useState(null);
   const [jwt, setJwt] = useState(null);
   const [selectedArtist, setSelectedArtist] = useState(null);
-  const [selectedItems, setSelectedItems] = useState([]); //! Song basket
+  const [selectedItems, setSelectedItems] = useState([]);
   const [backendToken, setBackendToken] = useState(null);
   const [error, setError] = useState(null);
+  const [selectedBasketId, setSelectedBasketId] = useState(null);
+  const [jwtUserId, setJwtUserId] = useState("");
 
   useEffect(() => {
     const fetchAccessToken = async () => {
@@ -49,7 +51,6 @@ export const SpotifyProvider = ({ children }) => {
       fetchAccessToken();
     }
   }, [userId]);
-  console.log("Backend Token: ", backendToken);
 
   // const sendSelectedSongToBackend = async (selectedItems) => {
   //   try {
@@ -224,6 +225,10 @@ export const SpotifyProvider = ({ children }) => {
         playlists,
         setPlaylists,
         backendToken,
+        selectedBasketId,
+        setSelectedBasketId,
+        jwtUserId,
+        setJwtUserId,
       }}
     >
       {children}

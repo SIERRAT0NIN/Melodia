@@ -25,9 +25,9 @@ function SearchResults({
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [isArtistModalOpen, setIsArtistModalOpen] = useState(false);
   const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
-  const { userId } = useSpotify();
+  const { userId, selectedBasketId, setSelectedBasketId } = useSpotify();
   const [selectedSongs, setSelectedSongs] = useState([]);
-
+  console.log(userId);
   const handleItemClick = (item) => {
     if (item.type === "track") {
       setSelectedItem(item);
@@ -61,7 +61,7 @@ function SearchResults({
                 name: song.name,
                 album: song.album.name,
                 artist: song.artists.map((artist) => artist.name).join(", "),
-                image: song.album.images[0].url, // Assuming the first image is the one you want
+                image: song.album.images[0].url,
               }
             : null;
         })
@@ -75,7 +75,8 @@ function SearchResults({
   };
   const prepareSongDataForBackend = () => {
     return selectedSongs.map((song) => ({
-      track_id: song.id, // Ensure this is the correct field for the track ID
+      basket_id: selectedBasketId,
+      track_id: song.id,
       track_name: song.name,
       track_image: song.image,
       track_album: song.album,
@@ -84,12 +85,17 @@ function SearchResults({
   };
   const sendSelectedSongToBackend = async () => {
     const songData = prepareSongDataForBackend();
-    console.log("Prepared Song Data:", songData);
+    const accessToken = localStorage.getItem("accessToken");
+
+    console.log("JWT : ", accessToken);
 
     try {
       const response = await fetch("http://localhost:5556/songs", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`, // Include the token in the request header
+        },
         body: JSON.stringify(songData),
       });
 

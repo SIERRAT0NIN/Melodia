@@ -26,7 +26,7 @@ client_secret = os.environ.get('SPOTIPY_CLIENT_SECRET')
 redirect_uri = os.environ.get('REDIRECT_URI') 
 
 TOKEN_INFO = 'token_info'
-JWT_SECRET_KEY = 'fkjasjkeoriu234-wefk9w0uri1o24jd'
+JWT_SECRET = '12346574839201928374637291029384'
 JWT_ALGORITHM = "HS256"          
 app.secret_key = 'din12823112390238ub09843209a1234'
 api=Api(app)
@@ -42,8 +42,8 @@ CORS(app, resources={
 # def generate_jwt_secret(length=32):
 #     return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode()
 
-# JWT_SECRET_KEY = generate_jwt_secret()
-# print("jwt secret key",JWT_SECRET_KEY)
+# JWT_SECRET = generate_jwt_secret()
+# print("jwt secret key",JWT_SECRET)
 
 
 def generate_jwt_token(user_id):
@@ -53,12 +53,12 @@ def generate_jwt_token(user_id):
         'sub': user_id
     }
     print("PAYLOAD:", payload)
-    # return jwt.encode(payload, JWT_SECRET_KEY, algorithm='HS256')
-    return jwt.encode(payload, JWT_SECRET_KEY, algorithm='HS256').decode('utf-8')
+    # return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
+    return jwt.encode(payload, JWT_SECRET, algorithm='HS256').decode('utf-8')
 
 def decode_jwt_token(token):
     try:
-        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
         return payload['sub']
     except jwt.ExpiredSignatureError:
         return 'Signature expired. Please log in again.'
@@ -893,10 +893,12 @@ class StoreTokensResource(Resource):
         except Exception as e:
             return {'error': str(e)}, 500
 
+
+
 def decode_jwt(token):
     try:
 
-        decoded_token = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         return decoded_token
     except jwt.ExpiredSignatureError:
         return {'error': 'Signature expired. Please log in again.', 'status': 'expired'}
@@ -908,16 +910,15 @@ def decode_jwt(token):
 class VerifyToken(Resource):
     def post(self):
         token = request.json.get('token', None)
-
         if not token:
             return {'message': 'Token is missing!'}, 400
-        print('this is the token:',token)
         decoded = decode_jwt(token)
         if 'error' in decoded:
             return {'message': decoded['error']}, 401
 
-        return {'message': "Token is valid!", 'data': decoded}, 200
-
+        # Extract user_id from the decoded token
+        user_id = decoded.get('sub', None)
+        return {'message': "Token is valid!", 'user_id': user_id}, 200
 
 class RequestJWT(Resource):
     def post(self):
@@ -943,13 +944,14 @@ class RequestJWT(Resource):
             'iat': datetime.utcnow(),
             'sub': user_id
         }
-        return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+        return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
 @app.route('/songs', methods=['POST'])
 def add_song_to_basket():
     data = request.json
     print("Received data:", data)  # Debugging line
+    
 
     # Check if data is a list, if not, make it a list
     if not isinstance(data, list):
@@ -962,7 +964,7 @@ def add_song_to_basket():
         print("Processing song:", song_data)  # Debugging line
 
         # Validate each song data
-        required_keys = ["track_id", "track_name", "track_image", "track_album", "track_artist"]
+        required_keys = ["track_id", "track_name", "track_image", "track_album", "track_artist", 'basket_id']
         if not all(k in song_data for k in required_keys):
             errors.append({"error": "Missing data", "song": song_data})
             continue
@@ -972,9 +974,10 @@ def add_song_to_basket():
         track_image = song_data['track_image']
         track_album = song_data['track_album']
         track_artist = song_data['track_artist']
+        basket_id = song_data['basket_id']
 
         # Create a new SongBasket instance
-        new_song_basket = Song(track_id=track_id, track_name=track_name, track_image=track_image, track_album=track_album, track_artist=track_artist)
+        new_song_basket = Song(track_id=track_id, track_name=track_name, track_image=track_image, track_album=track_album, track_artist=track_artist, basket_id=basket_id)
 
         try:
             db.session.add(new_song_basket)
@@ -1000,10 +1003,46 @@ class GetTokenResource(Resource):
             return {'access_token': token.access_token}, 200
         else:
             return {'error': 'Token not found'}, 404
+        
+@app.route('/create_song_basket', methods=['POST'])
+def create_song_basket():
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return {'message': 'Authorization token is missing or invalid'}, 401
+
+        access_token = auth_header.split(' ')[1]
+
+        # Validate access token here (e.g., check against database or external API)
+        # user_id = get_user_id_from_token(access_token)
+        # if not user_id:
+        #     return {'message': 'Invalid or expired token'}, 401
+        
+        data = request.json
+        songs = data.get('songs', [])
+        user_id = data.get('user_id')
+
+        # Assuming user_id is retrieved from the token validation process
+        new_basket = Song_Basket(user_id=user_id)
+        db.session.add(new_basket)
+        db.session.flush()
+
+        for song_data in songs:
+            new_song = Song(
+                # Your song data processing
+            )
+            new_basket.songs.append(new_song)
+            db.session.add(new_song)
+
+        db.session.commit()
+        return {"message": "Song basket created", "basket_id": new_basket.basket_id}, 201
+
+    except Exception as e:
+        db.session.rollback()
+        return {'message': f'An error occurred: {str(e)}'}, 500
 
 # Adding the resource to the API
 api.add_resource(GetTokenResource, '/get_token/<string:user_id>')
-
 api.add_resource(VerifyToken, '/verify_token')
 api.add_resource(RequestJWT, '/request_jwt')
 api.add_resource(Home, '/home')

@@ -11,7 +11,7 @@ import {
 export default function CreatePlaylist() {
   const [playlistName, setPlaylistName] = useState("");
   const [playlistDescription, setPlaylistDescription] = useState("");
-  const { userId } = useSpotify();
+  const { jwtUserId } = useSpotify();
   const [popoverMessage, setPopoverMessage] = useState("");
   const [creatingPlaylist, setCreatingPlaylist] = useState(false);
 
@@ -22,7 +22,7 @@ export default function CreatePlaylist() {
 
   const createPlaylist = async () => {
     let accessToken = localStorage.getItem("accessToken");
-    if (!accessToken || !userId) {
+    if (!accessToken || !jwtUserId) {
       console.error("Access Token or User ID is missing");
       setPopoverMessage("Missing access token or user ID");
       return;
@@ -48,17 +48,20 @@ export default function CreatePlaylist() {
   };
 
   const makePlaylistRequest = async (accessToken) => {
-    return await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: playlistName,
-        description: playlistDescription,
-      }),
-    });
+    return await fetch(
+      `https://api.spotify.com/v1/users/${jwtUserId}/playlists`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: playlistName,
+          description: playlistDescription,
+        }),
+      }
+    );
   };
 
   const handleAddToPlaylistClick = async () => {
