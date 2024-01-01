@@ -10,12 +10,11 @@ export default function SongBasket({ id }) {
     setIsOpen(true);
   };
   const onClose = () => setIsOpen(false);
-  console.log(id);
 
   return (
     <div className="basket-collection" onClick={onOpen}>
       <Badge
-        content="5"
+        content="0"
         size="lg"
         color="secondary"
         variant="faded"

@@ -27,7 +27,7 @@ function SearchResults({
   const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
   const { userId, selectedBasketId, setSelectedBasketId } = useSpotify();
   const [selectedSongs, setSelectedSongs] = useState([]);
-  console.log(selectedBasketId, "BASKET ID");
+  console.log(userId);
   const handleItemClick = (item) => {
     if (item.type === "track") {
       setSelectedItem(item);
@@ -85,12 +85,17 @@ function SearchResults({
   };
   const sendSelectedSongToBackend = async () => {
     const songData = prepareSongDataForBackend();
-    console.log("Prepared Song Data:", songData);
+    const accessToken = localStorage.getItem("accessToken");
+
+    console.log("JWT : ", accessToken);
 
     try {
       const response = await fetch("http://localhost:5556/songs", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`, // Include the token in the request header
+        },
         body: JSON.stringify(songData),
       });
 
