@@ -415,7 +415,6 @@ const SpotifyAuth = ({
       fetchJwt(userId);
     }
   }, [userId]);
-  console.log("JWT: ", jwt);
 
   const authenticatedFetch = (url, options = {}) => {
     // Retrieve the JWT token from localStorage

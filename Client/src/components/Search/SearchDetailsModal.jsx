@@ -72,7 +72,7 @@ const SongModal = ({ isOpen, onClose, songData, scrollBehavior }) => {
       console.error("Error:", error);
     }
   };
-  console.log(songData);
+
   return (
     <Modal
       isOpen={isOpen}

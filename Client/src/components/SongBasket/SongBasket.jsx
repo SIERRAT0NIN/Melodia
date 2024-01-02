@@ -14,7 +14,7 @@ export default function SongBasket({ id }) {
   return (
     <div className="basket-collection" onClick={onOpen}>
       <Badge
-        content="0"
+        content="0" //useState to track the number of songs in the basket
         size="lg"
         color="secondary"
         variant="faded"

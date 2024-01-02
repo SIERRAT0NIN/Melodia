@@ -5,6 +5,7 @@ from flask_cors import CORS
 from sqlalchemy import MetaData
 from app_config import db, app, sp
 from all_models import *
+# from Models import Song, Token, User
 from flask import request, url_for, session, redirect, make_response, jsonify
 import time
 import base64
@@ -38,7 +39,8 @@ CORS(app, resources={
         r"/store_user": {"origins": "http://localhost:5555"},
         r"/user_saved_tracks": {"origins": "http://localhost:5555"},
         r"/baskets": {"origins": "http://localhost:5555"},
-    })    
+        r"/song_basket/<string: user_id>": {"origins": "http://localhost:5555"},
+    })   
 # def generate_jwt_secret(length=32):
 #     return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode()
 
@@ -1004,6 +1006,8 @@ class GetTokenResource(Resource):
         else:
             return {'error': 'Token not found'}, 404
         
+        
+        
 @app.route('/create_song_basket', methods=['POST'])
 def create_song_basket():
     try:
@@ -1023,17 +1027,22 @@ def create_song_basket():
         user_id = data.get('user_id')
 
         # Assuming user_id is retrieved from the token validation process
-        new_basket = Song_Basket(user_id=user_id)
+        new_basket = SongBasket(user_id=user_id)
         db.session.add(new_basket)
         db.session.flush()
 
         for song_data in songs:
             new_song = Song(
-                # Your song data processing
-            )
-            new_basket.songs.append(new_song)
+                track_id=song_data['track_id'],
+                track_name=song_data['track_name'],
+                track_image=song_data['track_image'],
+                track_album=song_data['track_album'],
+                track_artist=song_data['track_artist'],
+                basket_id=new_basket.basket_id  # Linking the song to the basket
+        )
             db.session.add(new_song)
 
+        # new_basket.songs.append(new_song)
         db.session.commit()
         return {"message": "Song basket created", "basket_id": new_basket.basket_id}, 201
 
@@ -1041,12 +1050,45 @@ def create_song_basket():
         db.session.rollback()
         return {'message': f'An error occurred: {str(e)}'}, 500
 
+
+class SongBasketResource(Resource):
+    def get(self, user_id):
+        basket = SongBasket.query.filter_by(user_id=user_id).first()
+        
+        # Check if the basket exists first
+        if not basket:
+            return {'message': 'Basket not found'}, 404
+
+        # If basket exists, then fetch the songs
+        # songs = Song.query.filter(Song.baskets.any(basket_id=basket.basket_id)).all()
+        songs = Song.query.all()
+
+        
+        # Prepare the basket data
+        basket_data = {
+            'basket': basket.to_dict(),
+            'songs': [song.to_dict() for song in songs]
+        }
+        
+        return basket_data
+    def post(self, user_id):
+        # Create a new song basket for the user
+        new_basket = SongBasket(user_id=user_id)
+        print('user id',user_id)
+        db.session.add(new_basket)
+        db.session.commit()
+        return {'message': 'Basket created'}, 201
+
+api.add_resource(SongBasketResource, '/song_basket/<string:user_id>')
+
+
+
 # Adding the resource to the API
 api.add_resource(GetTokenResource, '/get_token/<string:user_id>')
 api.add_resource(VerifyToken, '/verify_token')
 api.add_resource(RequestJWT, '/request_jwt')
 api.add_resource(Home, '/home')
-api.add_resource(TokenExchange, '/token-exchangse')
+api.add_resource(TokenExchange, '/token-exchange')
 api.add_resource(AccessTokenResource, '/access_token')
 api.add_resource(StoreTokensResource, '/store_tokens')
 api.add_resource(Redirect, '/redirect')
