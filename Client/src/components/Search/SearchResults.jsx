@@ -25,9 +25,9 @@ function SearchResults({
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [isArtistModalOpen, setIsArtistModalOpen] = useState(false);
   const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
-  const { userId, selectedBasketId, setSelectedBasketId } = useSpotify();
+  const { selectedBasketId } = useSpotify();
   const [selectedSongs, setSelectedSongs] = useState([]);
-  console.log(userId);
+
   const handleItemClick = (item) => {
     if (item.type === "track") {
       setSelectedItem(item);
@@ -45,11 +45,8 @@ function SearchResults({
   };
 
   const handleSelectionChange = (selectedRows) => {
-    console.log("Received selectedRows:", selectedRows);
-
     if (selectedRows instanceof Set) {
       const selectedSongIDs = Array.from(selectedRows);
-      console.log("Selected Song IDs:", selectedSongIDs);
 
       // Map IDs to song details
       const selectedSongDetails = selectedSongIDs

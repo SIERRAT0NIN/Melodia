@@ -22,7 +22,7 @@ export default function SavedPlaylist() {
   if (!playlists || playlists.length === 0) {
     return <p>No playlists available.</p>;
   }
-  console.log(playlists);
+
   return (
     <>
       <Table aria-label="User Playlists" css={{ cursor: "pointer" }}>
