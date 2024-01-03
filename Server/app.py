@@ -10,6 +10,7 @@ from flask import request, url_for, session, redirect, make_response, jsonify
 import time
 import base64
 import secrets
+from sqlalchemy.exc import SQLAlchemyError
 
 from datetime import datetime, timedelta
 import jwt
@@ -1055,30 +1056,7 @@ def create_song_basket():
 
 #get_jwt_identity()
 class SongBasketResource(Resource):
-    # def get(self, user_id):
-    #     #Send song basket ID
-    #     basket = SongBasket.query.filter_by(user_id=user_id).first()
 
-    #     if not basket:
-    #         return {'message': 'Basket not found'}, 404
-    #     # songs = Song.query.join(Song.baskets).filter(SongBasket.basket_id == basket.basket_id).all()
-
-    #     ##########
-    #     #db.session.execute() because no model
-    #     #SELECT * FROM song_basket_association WHERE basket_id = VALUE 
-    #     # songs = song_basket_association.query.filter(Song.baskets.any(basket_id=basket.basket_id)).all() 
-    #     # songs = Song.query.all()
-    #     songs = Song.query.join(song_basket_association).filter_by(basket_id=basket.basket_id).all()
-        
-    #     # db.session.execute()
-        
-
-    #     basket_data = {
-    #         'basket': basket.to_dict(),
-    #         'songs': [song.to_dict() for song in songs]
-    #     }
-        
-    #     return basket_data
     def get(self, user_id):
         # Fetch all song baskets for the user
         baskets = SongBasket.query.filter_by(user_id=user_id).all()
@@ -1105,9 +1083,28 @@ class SongBasketResource(Resource):
         db.session.add(new_basket)
         db.session.commit()
         return {'message': 'Basket created'}, 201
+    def delete(self, user_id, basket_id, song_id):
+        # Fetch the specified song basket
+        basket = SongBasket.query.filter_by(user_id=user_id, basket_id=basket_id).first()
 
-api.add_resource(SongBasketResource, '/song_basket/<string:user_id>')
+        if not basket:
+            return {'message': 'Basket not found'}, 404
 
+        # Fetch the song to be deleted
+        song = Song.query.get(song_id)
+        if not song:
+            return {'message': 'Song not found'}, 404
+
+        # Remove the song from the basket
+        try:
+            basket.songs.remove(song)
+            db.session.commit()
+            return {'message': 'Song removed from basket'}, 200
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {'message': str(e)}, 500
+api.add_resource(SongBasketResource, '/song_basket/<string:user_id>',
+                '/song_basket/<string:user_id>/<int:basket_id>/<int:song_id>')
 
 
 # Adding the resource to the API

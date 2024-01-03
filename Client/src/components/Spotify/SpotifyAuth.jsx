@@ -38,7 +38,7 @@ const SpotifyAuth = ({
   // const client_id = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
   // const redirect_uri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
   // const jwtToken = localStorage.getItem("jwtToken"); // Retrieve JWT token from localStorage
-  console.log("Token from the backend: ", backendToken);
+
   const calculateAccessTokenExpiration = () => {
     const currentTime = new Date();
     const expiresIn = 3600;
@@ -344,7 +344,6 @@ const SpotifyAuth = ({
         });
 
         const data = await response.json();
-        console.log("Response from backend:", data);
       } catch (error) {
         console.error("Error storing refresh token:", error);
       }
@@ -371,7 +370,6 @@ const SpotifyAuth = ({
       .then((response) => response.json())
       .then((data) => {
         if (data.message === "Token is valid!") {
-          console.log("Token verified:", data.data);
           setTokenStatus("valid");
         } else {
           console.error("Token verification failed:", data.message);

@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from "react";
 import SongBasket from "./SongBasket";
-// import Container from "react-bootstrap/Container";
-// import Row from "react-bootstrap/Row";
-// import Col from "react-bootstrap/Col";
 import { CreateSongBasket } from "./CreateSongBasket";
 import VerifyJWT from "../Spotify/VerifyJWT";
-import Button from "react-bootstrap/Button";
 import { useSpotify } from "../Spotify/SpotifyContext";
-
 import {
   Table,
   TableHeader,
@@ -15,14 +10,23 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
   Image,
+  Button,
+  useDisclosure,
 } from "@nextui-org/react";
 import NavBar from "../Home/NavBar";
-function BasketCollection() {
-  // const [basket, setBasket] = useState([]);
+import CreatePlaylist from "../Playlist/CreatePlaylist";
+
+function BasketCollection({ setSongCount, songCount }) {
   const { jwtUserId } = useSpotify();
   const [basketData, setBasketData] = useState([]);
-  const [songCount, setSongCount] = useState(0); // New state for song count
+  const [currentBasketId, setCurrentBasketId] = useState(null);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const loadSongBasket = () => {
     fetch(`http://localhost:5556/song_basket/${jwtUserId}`)
@@ -45,11 +49,48 @@ function BasketCollection() {
       });
   };
 
+  const removeSongFromBasket = (basketId, songId) => {
+    fetch(
+      `http://localhost:5556/song_basket/${jwtUserId}/${basketId}/${songId}`,
+      { method: "DELETE" }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to remove song");
+        }
+        return response.json();
+      })
+      .then(() => {
+        // Update local state to reflect the change
+        setBasketData((currentData) =>
+          currentData.map((basket) => {
+            if (basket.basket_id === basketId) {
+              return {
+                ...basket,
+                songs: basket.songs.filter((song) => song.id !== songId),
+              };
+            }
+            return basket;
+          })
+        );
+      })
+      .catch((error) => console.error("Error removing song:", error));
+  };
+
   useEffect(() => {
     loadSongBasket();
   }, [jwtUserId]);
 
-  console.log(basketData);
+  const showModal = (basketId) => {
+    setCurrentBasketId(basketId);
+    onOpen();
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+  };
+
+  console.log("Basket Data:", basketData);
   return (
     <div>
       <NavBar />
@@ -65,17 +106,30 @@ function BasketCollection() {
         {basketData.map((basket, index) => (
           <div key={basket.basket_id}>
             <h3>Basket ID: {basket.basket_id}</h3>
-            <Table striped>
+            <Table striped aria-label="Song Basket Table">
               <TableHeader>
-                <TableColumn>Song</TableColumn>
-                <TableColumn>Artist</TableColumn>
-                <TableColumn></TableColumn>
+                <TableColumn aria-label="Song Column">Song</TableColumn>
+                <TableColumn aria-label="Artist Column">Artist</TableColumn>
+                <TableColumn aria-label="Image Column"></TableColumn>
               </TableHeader>
               <TableBody>
                 {basket.songs.length > 0 ? (
                   basket.songs.map((song) => (
                     <TableRow key={song.id}>
-                      <TableCell>{song.track_name}</TableCell>
+                      <TableCell>
+                        <button
+                          className="rm-song"
+                          onClick={() =>
+                            removeSongFromBasket(
+                              basket.basket_id,
+                              song.track_id
+                            )
+                          }
+                        >
+                          Remove song from song basket
+                        </button>
+                        {song.track_name}
+                      </TableCell>
                       <TableCell>
                         {song.track_artist || "Unknown Artist"}
                       </TableCell>
@@ -83,6 +137,7 @@ function BasketCollection() {
                         <Image
                           className="basket-img"
                           src={song.track_image}
+                          isBlurred
                         ></Image>
                       </TableCell>
                     </TableRow>
@@ -94,9 +149,30 @@ function BasketCollection() {
                 )}
               </TableBody>
             </Table>
+            <button className="bn5" onClick={() => showModal(basket.basket_id)}>
+              Create into a Spotify Playlist
+            </button>
           </div>
         ))}
       </div>
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>Create Spotify Playlist</ModalHeader>
+              <ModalBody>
+                <p>Creating playlist for Basket ID: {currentBasketId}</p>
+                <CreatePlaylist />
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
