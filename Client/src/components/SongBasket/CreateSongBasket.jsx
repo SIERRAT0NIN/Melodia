@@ -3,10 +3,13 @@ import { Button } from "@nextui-org/react";
 import SongBasket from "./SongBasket";
 import { useSpotify } from "../Spotify/SpotifyContext";
 
-export const CreateSongBasket = () => {
+export const CreateSongBasket = ({
+  loadSongBasket,
+  songCount,
+  setSongCount,
+}) => {
   const { setSelectedBasketId, jwtUserId } = useSpotify(null);
   const [songBaskets, setSongBaskets] = useState([]);
-  const [nextId, setNextId] = useState(0);
 
   const createSongBasketInBackend = async () => {
     const accessToken = localStorage.getItem("accessToken");
@@ -25,30 +28,40 @@ export const CreateSongBasket = () => {
         body: JSON.stringify({ user_id: jwtUserId }),
       });
 
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
       const data = await response.json();
       console.log("New Song Basket Created with ID:", data.basket_id);
+      return data.basket_id; // Return the actual basket ID
     } catch (error) {
       console.error("Error creating song basket:", error);
+      return null; // Return null in case of error
     }
   };
 
-  const handleAddSongBasket = () => {
-    const newBasket = {
-      id: nextId,
-    };
-    setSongBaskets([...songBaskets, newBasket]);
-    setNextId(nextId + 1);
-    setSelectedBasketId(nextId);
-    createSongBasketInBackend();
+  const handleAddSongBasket = async () => {
+    const basketId = await createSongBasketInBackend();
+    if (basketId) {
+      setSongBaskets([...songBaskets, { id: basketId }]);
+      setSelectedBasketId(basketId);
+    }
   };
 
   return (
     <div>
-      <Button variant="faded" onClick={handleAddSongBasket}>
+      <Button variant="shadow" color="secondary" onClick={handleAddSongBasket}>
         Create a new song basket
       </Button>
-      {songBaskets.map((basket, index) => (
-        <SongBasket key={basket.id} id={basket.id} />
+      {songBaskets.map((basket) => (
+        <SongBasket
+          key={basket.id}
+          id={basket.id}
+          loadSongBasket={loadSongBasket}
+          songCount={songCount}
+          setSongCount={setSongCount}
+        />
       ))}
     </div>
   );

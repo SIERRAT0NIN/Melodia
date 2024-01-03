@@ -43,11 +43,11 @@ const VerifyJWT = () => {
   console.log("JWT User Id: ", jwtUserId);
   return (
     <div>
-      {errorMessage ? (
+      {/* {errorMessage ? (
         <p>Error: {errorMessage}</p>
       ) : (
         <p>Token is {isTokenValid ? "valid" : "invalid"}.</p>
-      )}
+      )} */}
     </div>
   );
 };

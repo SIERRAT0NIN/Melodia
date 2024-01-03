@@ -554,3 +554,8 @@ button:focus-visible {
   max-height: 400px; /* Adjust this value based on your needs */
   overflow-y: auto;
 }
+
+.home-nav {
+  text-decoration: none;
+  color: #fff;
+}
