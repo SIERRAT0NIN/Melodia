@@ -15,6 +15,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  Image,
 } from "@nextui-org/react";
 import NavBar from "../Home/NavBar";
 function BasketCollection() {
@@ -60,34 +61,42 @@ function BasketCollection() {
           songCount={songCount}
         />
       </div>
-
-      {basketData.map((basket, index) => (
-        <div key={basket.basket_id}>
-          <h3>Basket ID: {basket.basket_id}</h3>
-          <Table striped>
-            <TableHeader>
-              <TableColumn>Song</TableColumn>
-              {/* <TableColumn>Artist</TableColumn> */}
-            </TableHeader>
-            <TableBody>
-              {basket.songs.length > 0 ? (
-                basket.songs.map((song) => (
-                  <TableRow key={song.id}>
-                    <TableCell>{song.track_name}</TableCell>
-                    {/* <TableCell>
-                      {song.track_artist || "Unknown Artist"}
-                    </TableCell> */}
+      <div className="glassmorphism-basket">
+        {basketData.map((basket, index) => (
+          <div key={basket.basket_id}>
+            <h3>Basket ID: {basket.basket_id}</h3>
+            <Table striped>
+              <TableHeader>
+                <TableColumn>Song</TableColumn>
+                <TableColumn>Artist</TableColumn>
+                <TableColumn></TableColumn>
+              </TableHeader>
+              <TableBody>
+                {basket.songs.length > 0 ? (
+                  basket.songs.map((song) => (
+                    <TableRow key={song.id}>
+                      <TableCell>{song.track_name}</TableCell>
+                      <TableCell>
+                        {song.track_artist || "Unknown Artist"}
+                      </TableCell>
+                      <TableCell>
+                        <Image
+                          className="basket-img"
+                          src={song.track_image}
+                        ></Image>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={3}>No songs in basket</TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={2}>No songs in basket</TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      ))}
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

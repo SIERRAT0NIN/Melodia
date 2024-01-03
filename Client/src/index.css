@@ -559,3 +559,18 @@ button:focus-visible {
   text-decoration: none;
   color: #fff;
 }
+.basket-img {
+  height: 100px;
+  width: 100px;
+}
+
+.glassmorphism-basket {
+  background: rgba(255, 107, 213, 0.477);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(20px);
+  color: black;
+  padding: 25px;
+}

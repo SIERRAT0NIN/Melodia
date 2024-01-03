@@ -42,7 +42,9 @@ class Song(db.Model):
         return {
             'track_id': self.track_id,
             'track_name': self.track_name,
-#artist names?
+            'track_image': self.track_image,
+            'track_artist': self.track_artist
+
         }
     baskets = db.relationship('SongBasket', secondary='song_basket_association', back_populates='songs', lazy='dynamic')
 
