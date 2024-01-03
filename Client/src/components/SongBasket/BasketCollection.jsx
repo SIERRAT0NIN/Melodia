@@ -49,34 +49,6 @@ function BasketCollection({ setSongCount, songCount }) {
       });
   };
 
-  const removeSongFromBasket = (basketId, songId) => {
-    fetch(
-      `http://localhost:5556/song_basket/${jwtUserId}/${basketId}/${songId}`,
-      { method: "DELETE" }
-    )
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to remove song");
-        }
-        return response.json();
-      })
-      .then(() => {
-        // Update local state to reflect the change
-        setBasketData((currentData) =>
-          currentData.map((basket) => {
-            if (basket.basket_id === basketId) {
-              return {
-                ...basket,
-                songs: basket.songs.filter((song) => song.id !== songId),
-              };
-            }
-            return basket;
-          })
-        );
-      })
-      .catch((error) => console.error("Error removing song:", error));
-  };
-
   useEffect(() => {
     loadSongBasket();
   }, [jwtUserId]);
@@ -89,6 +61,27 @@ function BasketCollection({ setSongCount, songCount }) {
   const closeModal = () => {
     setIsModalVisible(false);
   };
+
+  function removeSongFromBasket(basketId, songId) {
+    fetch(
+      `http://localhost:5556/song_basket/${jwtUserId}/${basketId}/${songId}`,
+      {
+        method: "DELETE",
+      }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then(() => {
+        loadSongBasket();
+      })
+      .catch((error) => {
+        console.error("Error removing song:", error);
+      });
+  }
 
   console.log("Basket Data:", basketData);
   return (
@@ -109,28 +102,25 @@ function BasketCollection({ setSongCount, songCount }) {
             <Table striped aria-label="Song Basket Table">
               <TableHeader>
                 <TableColumn aria-label="Song Column">Song</TableColumn>
-                <TableColumn aria-label="Artist Column">Artist</TableColumn>
-                <TableColumn aria-label="Image Column"></TableColumn>
+                {/* <TableColumn aria-label="Artist Column">Artist</TableColumn>
+                <TableColumn aria-label="Image Column"></TableColumn> */}
               </TableHeader>
               <TableBody>
                 {basket.songs.length > 0 ? (
                   basket.songs.map((song) => (
-                    <TableRow key={song.id}>
+                    <TableRow key={song.track_id}>
                       <TableCell>
                         <button
                           className="rm-song"
                           onClick={() =>
-                            removeSongFromBasket(
-                              basket.basket_id,
-                              song.track_id
-                            )
+                            removeSongFromBasket(basket.basket_id, song.id)
                           }
                         >
-                          Remove song from song basket
+                          Remove
                         </button>
                         {song.track_name}
                       </TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         {song.track_artist || "Unknown Artist"}
                       </TableCell>
                       <TableCell>
@@ -139,7 +129,7 @@ function BasketCollection({ setSongCount, songCount }) {
                           src={song.track_image}
                           isBlurred
                         ></Image>
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))
                 ) : (

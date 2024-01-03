@@ -22,7 +22,6 @@ class User(db.Model):
     username = db.Column(db.String, unique=True)
     email = db.Column(db.String, unique=True)
     profile_pic = db.Column(db.String)
-    password = db.Column(db.String)
 
     tokens = db.relationship('Token', backref='user', lazy='dynamic')
     song_baskets = db.relationship('SongBasket', back_populates='user', lazy='dynamic')
@@ -40,6 +39,7 @@ class Song(db.Model):
 
     def to_dict(self):
         return {
+            'id': self.id,
             'track_id': self.track_id,
             'track_name': self.track_name,
             'track_image': self.track_image,

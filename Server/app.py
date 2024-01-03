@@ -1083,19 +1083,16 @@ class SongBasketResource(Resource):
         db.session.add(new_basket)
         db.session.commit()
         return {'message': 'Basket created'}, 201
-    def delete(self, user_id, basket_id, song_id):
-        # Fetch the specified song basket
+    def delete(self, user_id, basket_id, id):
+        print('User:', user_id, 'Basket:', basket_id, 'Song ID:', id)
         basket = SongBasket.query.filter_by(user_id=user_id, basket_id=basket_id).first()
-
         if not basket:
             return {'message': 'Basket not found'}, 404
 
-        # Fetch the song to be deleted
-        song = Song.query.get(song_id)
+        song = Song.query.get(id)
         if not song:
             return {'message': 'Song not found'}, 404
 
-        # Remove the song from the basket
         try:
             basket.songs.remove(song)
             db.session.commit()
@@ -1103,9 +1100,9 @@ class SongBasketResource(Resource):
         except SQLAlchemyError as e:
             db.session.rollback()
             return {'message': str(e)}, 500
-api.add_resource(SongBasketResource, '/song_basket/<string:user_id>',
-                '/song_basket/<string:user_id>/<int:basket_id>/<int:song_id>')
 
+api.add_resource(SongBasketResource, '/song_basket/<string:user_id>',
+                '/song_basket/<string:user_id>/<int:basket_id>/<int:id>')
 
 # Adding the resource to the API
 api.add_resource(GetTokenResource, '/get_token/<string:user_id>')
