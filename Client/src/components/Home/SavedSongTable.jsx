@@ -11,6 +11,7 @@ import SpotifyAuth from "../Spotify/SpotifyAuth";
 import SavedPlaylist from "../Playlist/SavedPlaylist";
 import SongModal from "./SongDetail";
 import { useSpotify } from "../Spotify/SpotifyContext";
+import SongPages from "./SongPages";
 const SavedSongs = () => {
   const [savedTracks, setSavedTracks] = useState([]);
   // const [playlists, setPlaylists] = useState([]);
@@ -62,6 +63,7 @@ const SavedSongs = () => {
             ))}
           </TableBody>
         </Table>
+        <SongPages />
       </div>
       <br />
       <SavedPlaylist playlists={playlists} setPlaylists={setPlaylists} />

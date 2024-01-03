@@ -23,7 +23,9 @@ export default function NavBar() {
                 Melody
               </p>
             </NavbarBrand>
-            <h1>Melodía</h1>
+            <a href="http://localhost:5555/home">
+              <h1 className="home-nav">Melodía</h1>
+            </a>
           </div>
         </NavbarContent>
         <div className="flex items-center justify-end">
@@ -38,7 +40,7 @@ export default function NavBar() {
               <a href="/baskets">Song Baskets</a>
             </Button>
             <Button className="nav-btn">
-              <a href="/create_playlist">Create a playlist</a>
+              <a href="/account">Profile</a>
             </Button>
           </ButtonGroup>
         </div>

@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from "react";
 import SongBasket from "./SongBasket";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+// import Container from "react-bootstrap/Container";
+// import Row from "react-bootstrap/Row";
+// import Col from "react-bootstrap/Col";
 import { CreateSongBasket } from "./CreateSongBasket";
 import VerifyJWT from "../Spotify/VerifyJWT";
 import Button from "react-bootstrap/Button";
 import { useSpotify } from "../Spotify/SpotifyContext";
+
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@nextui-org/react";
+import NavBar from "../Home/NavBar";
 function BasketCollection() {
-  const [basket, setBasket] = useState([]);
+  // const [basket, setBasket] = useState([]);
   const { jwtUserId } = useSpotify();
-  const [basketData, setBasketData] = useState(null);
+  const [basketData, setBasketData] = useState([]);
+  const [songCount, setSongCount] = useState(0); // New state for song count
 
   const loadSongBasket = () => {
     fetch(`http://localhost:5556/song_basket/${jwtUserId}`)
@@ -23,6 +34,7 @@ function BasketCollection() {
       .then((data) => {
         console.log("Basket Data: ", data);
         setBasketData(data);
+        setSongCount(data.songs.length); // Update song count based on fetched data
       })
       .catch((error) => {
         console.error(
@@ -34,38 +46,49 @@ function BasketCollection() {
 
   useEffect(() => {
     loadSongBasket();
-  }, []);
+  }, [jwtUserId]);
 
   console.log(basketData);
   return (
-    <Container>
+    <div>
+      <NavBar />
       <VerifyJWT />
-      <Row>
-        <CreateSongBasket />
-      </Row>
-      <Row>
-        <Col>
-          <Button onClick={loadSongBasket}>Load My Song Basket</Button>
-        </Col>
-      </Row>
-      {basketData && (
-        <Row>
-          <Col>
-            <div>Basket ID: {basketData.basket.basket_id}</div>
-            <h3>Songs:</h3>
-            {basketData.songs.length > 0 ? (
-              basketData.songs.map((song, index) => (
-                <div key={index}>
-                  Song: {song.track_name}, Artist: {song.track_artist}
-                </div>
-              ))
-            ) : (
-              <p>No songs in basket</p>
-            )}
-          </Col>
-        </Row>
-      )}
-    </Container>
+      <div>
+        <CreateSongBasket
+          loadSongBasket={loadSongBasket}
+          setSongCount={setSongCount}
+          songCount={songCount}
+        />
+      </div>
+
+      {basketData.map((basket, index) => (
+        <div key={basket.basket_id}>
+          <h3>Basket ID: {basket.basket_id}</h3>
+          <Table striped>
+            <TableHeader>
+              <TableColumn>Song</TableColumn>
+              {/* <TableColumn>Artist</TableColumn> */}
+            </TableHeader>
+            <TableBody>
+              {basket.songs.length > 0 ? (
+                basket.songs.map((song) => (
+                  <TableRow key={song.id}>
+                    <TableCell>{song.track_name}</TableCell>
+                    {/* <TableCell>
+                      {song.track_artist || "Unknown Artist"}
+                    </TableCell> */}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={2}>No songs in basket</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      ))}
+    </div>
   );
 }
 

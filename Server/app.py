@@ -822,7 +822,7 @@ class Refresh(Resource):
         user.access_token = token_info['access_token']
         db.session.commit()
 
-     #Return the new access token
+
         return {'access_token': token_info['access_token']}, 200
 
 
@@ -840,13 +840,13 @@ class StoreUser(Resource):
         if existing_user:
             return {'error': 'User already exists with this email or username'}, 409
 
-        # Validate data
+
         required_fields = ['email', 'name', 'userId', ]
         missing_fields = [field for field in required_fields if field not in data]
         if missing_fields:
             return {'error': f'Missing fields: {", ".join(missing_fields)}'}, 400
 
-        # Create a new user with safe data access
+
         new_user = User(
             email=data.get('email'),
             name=data.get('name'),
@@ -855,7 +855,7 @@ class StoreUser(Resource):
         )
         db.session.add(new_user)
 
-        # Commit to the database with error handling
+
         try:
             db.session.commit()
             return {'message': 'User created successfully'}, 201
@@ -918,7 +918,7 @@ class VerifyToken(Resource):
         if 'error' in decoded:
             return {'message': decoded['error']}, 401
 
-        # Extract user_id from the decoded token
+       
         user_id = decoded.get('sub', None)
         return {'message': "Token is valid!", 'user_id': user_id}, 200
 
@@ -951,11 +951,12 @@ class RequestJWT(Resource):
 
 @app.route('/songs', methods=['POST'])
 def add_song_to_basket():
+    from sqlalchemy import text
     data = request.json
-    print("Received data:", data)  # Debugging line
+    print("Received data:", data)  
     
 
-    # Check if data is a list, if not, make it a list
+
     if not isinstance(data, list):
         data = [data]
 
@@ -963,7 +964,8 @@ def add_song_to_basket():
     errors = []
 
     for song_data in data:
-        print("Processing song:", song_data)  # Debugging line
+    
+        print("Processing song:", song_data)  
 
         # Validate each song data
         required_keys = ["track_id", "track_name", "track_image", "track_album", "track_artist", 'basket_id']
@@ -984,18 +986,21 @@ def add_song_to_basket():
         try:
             db.session.add(new_song_basket)
             db.session.flush()
-            added_songs.append({"id": new_song_basket.id, "track_id": track_id})
+            added_songs.append({"track_id": new_song_basket.id, "track_id": track_id})
+         
+            db.session.execute(text(f'INSERT INTO song_basket_association (basket_id, song_id) VALUES ({basket_id}, {new_song_basket.id})'))
         except Exception as e:
             db.session.rollback()
+
             errors.append({"error": str(e), "song": song_data})
             continue
 
-    if not errors:  # Only commit if there are no errors
-        db.session.commit()
+
 
     if errors:
         return jsonify({"added_songs": added_songs, "errors": errors}), 207 
     else:
+        db.session.commit()
         return jsonify({"added_songs": added_songs}), 201
 
 class GetTokenResource(Resource):
@@ -1007,8 +1012,9 @@ class GetTokenResource(Resource):
             return {'error': 'Token not found'}, 404
         
         
-        
+# from jwt_extended import jwt_required
 @app.route('/create_song_basket', methods=['POST'])
+# @jwt_required()
 def create_song_basket():
     try:
         auth_header = request.headers.get('Authorization')
@@ -1016,12 +1022,6 @@ def create_song_basket():
             return {'message': 'Authorization token is missing or invalid'}, 401
 
         access_token = auth_header.split(' ')[1]
-
-        # Validate access token here (e.g., check against database or external API)
-        # user_id = get_user_id_from_token(access_token)
-        # if not user_id:
-        #     return {'message': 'Invalid or expired token'}, 401
-        
         data = request.json
         songs = data.get('songs', [])
         user_id = data.get('user_id')
@@ -1030,6 +1030,7 @@ def create_song_basket():
         new_basket = SongBasket(user_id=user_id)
         db.session.add(new_basket)
         db.session.flush()
+        # import ipdb; ipdb.set_trace()
 
         for song_data in songs:
             new_song = Song(
@@ -1041,38 +1042,64 @@ def create_song_basket():
                 basket_id=new_basket.basket_id  # Linking the song to the basket
         )
             db.session.add(new_song)
+            db.session.commit()
 
-        # new_basket.songs.append(new_song)
+            db.session.execute(f'INSERT INTO song_basket_association (basket_id, song_id) VALUES (?,?)', (new_basket.basket_id, new_song.id, ))
         db.session.commit()
+        # new_basket.songs.append(new_song)
         return {"message": "Song basket created", "basket_id": new_basket.basket_id}, 201
 
     except Exception as e:
         db.session.rollback()
         return {'message': f'An error occurred: {str(e)}'}, 500
 
-
+#get_jwt_identity()
 class SongBasketResource(Resource):
+    # def get(self, user_id):
+    #     #Send song basket ID
+    #     basket = SongBasket.query.filter_by(user_id=user_id).first()
+
+    #     if not basket:
+    #         return {'message': 'Basket not found'}, 404
+    #     # songs = Song.query.join(Song.baskets).filter(SongBasket.basket_id == basket.basket_id).all()
+
+    #     ##########
+    #     #db.session.execute() because no model
+    #     #SELECT * FROM song_basket_association WHERE basket_id = VALUE 
+    #     # songs = song_basket_association.query.filter(Song.baskets.any(basket_id=basket.basket_id)).all() 
+    #     # songs = Song.query.all()
+    #     songs = Song.query.join(song_basket_association).filter_by(basket_id=basket.basket_id).all()
+        
+    #     # db.session.execute()
+        
+
+    #     basket_data = {
+    #         'basket': basket.to_dict(),
+    #         'songs': [song.to_dict() for song in songs]
+    #     }
+        
+    #     return basket_data
     def get(self, user_id):
-        basket = SongBasket.query.filter_by(user_id=user_id).first()
-        
-        # Check if the basket exists first
-        if not basket:
-            return {'message': 'Basket not found'}, 404
+        # Fetch all song baskets for the user
+        baskets = SongBasket.query.filter_by(user_id=user_id).all()
 
-        # If basket exists, then fetch the songs
-        # songs = Song.query.filter(Song.baskets.any(basket_id=basket.basket_id)).all()
-        songs = Song.query.all()
+        if not baskets:
+            return {'message': 'No baskets found'}, 404
 
-        
-        # Prepare the basket data
-        basket_data = {
-            'basket': basket.to_dict(),
-            'songs': [song.to_dict() for song in songs]
-        }
-        
-        return basket_data
+        all_baskets_data = []
+        for basket in baskets:
+            # Fetch songs for each basket
+            songs = Song.query.join(song_basket_association).filter(song_basket_association.c.basket_id == basket.basket_id).all()
+            basket_data = {
+                'basket_id': basket.basket_id,
+                'songs': [song.to_dict() for song in songs]
+            }
+            all_baskets_data.append(basket_data)
+
+        return all_baskets_data
+    
     def post(self, user_id):
-        # Create a new song basket for the user
+
         new_basket = SongBasket(user_id=user_id)
         print('user id',user_id)
         db.session.add(new_basket)
