@@ -1031,7 +1031,7 @@ class CreateSongBasket(Resource):
             playlist_description = data.get('playlist_description')
             playlist_img= data.get('playlist_img')
             
-
+            
             new_basket = SongBasket(
                 user_id=user_id,
                 playlist_name=playlist_name,
@@ -1052,13 +1052,13 @@ class CreateSongBasket(Resource):
                     basket_id=new_basket.basket_id
                 )
                 db.session.add(new_song)
-
+            # import ipdb; ipdb.set_trace()
             db.session.commit()
-            return jsonify({"message": "Song basket created", "basket_id": new_basket.basket_id}), 201
+            return {"message": "Song basket created", "basket_id": new_basket.basket_id}, 201
 
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': f'An error occurred: {str(e)}'}), 500
+            return {'message': f'An error occurred: {str(e)}'}, 422
 api.add_resource(CreateSongBasket,'/create_song_basket')
 
 #get_jwt_identity()
@@ -1068,8 +1068,8 @@ class SongBasketResource(Resource):
         # Fetch all song baskets for the user
         baskets = SongBasket.query.filter_by(user_id=user_id).all()
 
-        if not baskets:
-            return {'message': 'No baskets found'}, 404
+        # if not baskets:
+        #     return [], 200
 
         all_baskets_data = []
         for basket in baskets:
@@ -1077,14 +1077,16 @@ class SongBasketResource(Resource):
             songs = Song.query.join(song_basket_association).filter(song_basket_association.c.basket_id == basket.basket_id).all()
             basket_data = {
                 'basket_id': basket.basket_id,
-                'songs': [song.to_dict() for song in songs]
+                'songs': [song.to_dict() for song in songs],
+                'playlist_name': basket.playlist_name,
+                'playlist_description': basket.playlist_description,
+                'playlist_img': basket.playlist_img
             }
             all_baskets_data.append(basket_data)
 
         return all_baskets_data
     
     def post(self, user_id):
-
         new_basket = SongBasket(user_id=user_id)
         print('user id',user_id)
         db.session.add(new_basket)
@@ -1126,7 +1128,7 @@ class SongBasketResource(Resource):
             return {'message': 'Basket updated successfully'}, 200
         except SQLAlchemyError as e:
             db.session.rollback()
-            return {'message': str(e)}, 500
+            return {'message': str(e)}, 500 #change 500, always created
 
 # Route registration
 api.add_resource(SongBasketResource, 

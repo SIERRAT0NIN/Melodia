@@ -49,11 +49,11 @@ const EditBasketModal = ({
     };
     // Rest of your update logic
   };
-  const handleUpdate = () => {
+  const handleUpdate = (values) => {
     const updatedData = {
-      playlist_name: basketInfo.playlist_name,
-      playlist_description: basketInfo.playlist_description,
-      playlist_img: basketInfo.playlist_img,
+      playlist_name: values.name,
+      playlist_description: values.description,
+      playlist_img: values.image,
     };
 
     fetch(
@@ -125,7 +125,7 @@ const EditBasketModal = ({
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
-        onSubmit={handleSubmit}
+        onSubmit={handleUpdate}
         enableReinitialize
       >
         {({ errors, touched }) => (

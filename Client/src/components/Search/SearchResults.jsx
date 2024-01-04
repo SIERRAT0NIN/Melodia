@@ -18,6 +18,7 @@ function SearchResults({
   onSongClick,
   onArtistClick,
   onAlbumClick,
+  handleSongToBasket,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -99,6 +100,8 @@ function SearchResults({
       });
 
       const data = await response.json();
+      debugger;
+      handleSongToBasket(data[0].basket_id, data);
       console.log("Response from backend:", data);
     } catch (error) {
       console.error("Error sending selected songs to backend:", error);

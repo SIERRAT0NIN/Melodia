@@ -40,7 +40,7 @@ export const CreateSongBasket = ({
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const createSongBasketInBackend = async () => {
+  const createSongBasketInBackend = async (values) => {
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
       console.error("Access token not found");
@@ -56,10 +56,10 @@ export const CreateSongBasket = ({
         },
         body: JSON.stringify({
           user_id: jwtUserId,
-          playlist_name: playlistName,
-          playlist_description: playlistDescription,
+          playlist_name: values.name,
+          playlist_description: values.description,
           basket_id: basketId,
-          playlist_img: playlistImage,
+          playlist_img: values.image,
         }),
       });
 
@@ -68,6 +68,7 @@ export const CreateSongBasket = ({
       }
 
       const data = await response.json();
+
       console.log("New Song Basket Created with ID:", data.basket_id);
       return data.basket_id;
     } catch (error) {
@@ -122,7 +123,7 @@ export const CreateSongBasket = ({
         <ModalContent>
           <ModalHeader>Create New Playlist</ModalHeader>
           <Formik
-            initialValues={{ name: "", description: "", image: "" }}
+            initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
