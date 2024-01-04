@@ -1,57 +1,56 @@
-import React, { useState } from 'react';
-import { useSpotify } from '../Spotify/SpotifyContext';
-const CreateSpotifyPlaylist = ({ jwtUserId, songUris }) => {
+import React, { useState } from "react";
+import { useSpotify } from "../Spotify/SpotifyContext";
+const CreateSpotifyPlaylist = ({ songUris }) => {
   const [playlistId, setPlaylistId] = useState(null);
-  const [statusMessage, setStatusMessage] = useState('');
-    const { jwtUserId, }
+  const [statusMessage, setStatusMessage] = useState("");
+  const { jwtUserId } = useSpotify();
   const createPlaylist = async () => {
-    const accessToken = localStorage.getItem('accessToken');
+    const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
-      setStatusMessage('Access Token is missing');
+      setStatusMessage("Access Token is missing");
       return;
     }
 
-    // Create a new playlist
     try {
-      const response = await fetch(`https://api.spotify.com/v1/users/${jwtUserId}/playlists`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: 'New Playlist', description: 'Created from my app' }),
-      });
+      // Step 1: Create a new playlist
+      const createResponse = await fetch(
+        `https://api.spotify.com/v1/users/${jwtUserId}/playlists`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: "New Playlist",
+            description: "Created from my app",
+          }),
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error('Failed to create playlist');
-      }
+      if (!createResponse.ok) throw new Error("Failed to create playlist");
 
-      const data = await response.json();
-      setPlaylistId(data.id);
-      setStatusMessage('Playlist created successfully!');
-      addSongsToPlaylist(data.id);
-    } catch (error) {
-      setStatusMessage(error.message);
-    }
-  };
+      const playlistData = await createResponse.json();
+      setPlaylistId(playlistData.id);
+      setStatusMessage("Playlist created successfully!");
 
-  const addSongsToPlaylist = async (playlistId) => {
-    const accessToken = localStorage.getItem('accessToken');
-    try {
-      const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ uris: songUris }),
-      });
+      // Step 2: Add songs to the playlist
+      const addSongsResponse = await fetch(
+        `https://api.spotify.com/v1/playlists/${playlistData.id}/tracks`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ uris: songUris }),
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error('Failed to add songs to playlist');
-      }
+      if (!addSongsResponse.ok)
+        throw new Error("Failed to add songs to playlist");
 
-      setStatusMessage('Songs added to playlist successfully!');
+      setStatusMessage("Songs added to playlist successfully!");
     } catch (error) {
       setStatusMessage(error.message);
     }

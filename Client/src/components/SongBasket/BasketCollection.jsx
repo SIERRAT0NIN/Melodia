@@ -24,6 +24,7 @@ import CreatePlaylist from "../Playlist/CreatePlaylist";
 import AddSongs from "./AddSongs";
 import BasketSearchModal from "./BasketSearchModal";
 import EditBasketModal from "./EditBasketModal";
+import CreateSpotifyPlaylist from "./SpotifyBasket";
 
 function BasketCollection({ setSongCount, songCount }) {
   const {
@@ -152,6 +153,9 @@ function BasketCollection({ setSongCount, songCount }) {
     setCurrentBasketInfo(basket); // Set the information of the basket to be edited
     setIsEditModalOpen(true); // Open the Edit Modal
   };
+  const uris = basketData
+    .map((basket) => basket.songs.map((song) => song.track_uri))
+    .flat();
 
   return (
     <div>
@@ -167,9 +171,9 @@ function BasketCollection({ setSongCount, songCount }) {
       <div className="glassmorphism-basket">
         {basketData.map((basket, index) => (
           <div key={basket.basket_id}>
-            <Image src={basket.playlist_img} alt="Basket Image" />
+            <Image src={basket.playlist_img}></Image>
             <h3>Basket ID: {basket.basket_id}</h3>
-            <h2>Name: {basket.playlist_name}</h2>
+            <h2>Name: {name}</h2>
             <h3>Description: {basket.playlist_description}</h3>
             <div>
               <button
@@ -253,6 +257,7 @@ function BasketCollection({ setSongCount, songCount }) {
             <button className="bn5" onClick={() => showModal(basket.basket_id)}>
               Create into a Spotify Playlist
             </button>
+            <CreateSpotifyPlaylist songUris={uris} />
           </div>
         ))}
       </div>
@@ -269,7 +274,7 @@ function BasketCollection({ setSongCount, songCount }) {
               <ModalHeader>Create Spotify Playlist</ModalHeader>
               <ModalBody>
                 <p>Creating playlist for Basket ID: {currentBasketId}</p>
-                <CreatePlaylist image={image} setImage={setImage} />
+                <CreatePlaylist />
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
