@@ -279,7 +279,6 @@ function BasketCollection({ setSongCount, songCount }) {
               <ModalHeader>Create Spotify Playlist</ModalHeader>
               <ModalBody>
                 <p>Creating playlist for Basket ID: {currentBasketId}</p>
-                <CreatePlaylist />
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>

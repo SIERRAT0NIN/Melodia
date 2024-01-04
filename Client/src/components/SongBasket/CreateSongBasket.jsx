@@ -1,6 +1,8 @@
 import { useState } from "react";
 import SongBasket from "./SongBasket";
 import { useSpotify } from "../Spotify/SpotifyContext";
+import Snackbar from "@mui/material/Snackbar";
+
 import {
   Modal,
   ModalContent,
@@ -33,6 +35,8 @@ export const CreateSongBasket = ({
     setPlaylistImage,
   } = useSpotify(null);
   const [songBaskets, setSongBaskets] = useState([]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -84,7 +88,15 @@ export const CreateSongBasket = ({
     image: Yup.string().required("Required"),
   });
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values, { validateForm }) => {
+    const errors = await validateForm();
+    if (Object.keys(errors).length) {
+      const firstError = Object.values(errors)[0];
+      setSnackbarMessage(firstError);
+      setSnackbarOpen(true);
+      return;
+    }
+
     const basketId = await createSongBasketInBackend(values);
     if (basketId) {
       setSongBaskets([...songBaskets, { id: basketId }]);
@@ -94,23 +106,11 @@ export const CreateSongBasket = ({
     }
   };
 
-  // const handleAddSongBasket = async () => {
-  //   const basketId = await createSongBasketInBackend();
-  //   if (basketId) {
-  //     // Add the new basket ID to the songBaskets array
-  //     setSongBaskets([...songBaskets, { id: basketId }]);
-  //     setSelectedBasketId(basketId);
-
-  //     // Close the modal and reset the form fields
-  //     setIsModalVisible(false);
-  //     setPlaylistName("");
-  //     setPlaylistDescription("");
-  //     setPlaylistImage("");
-
-  //     // Reload all song baskets to include the new one
-  //     loadSongBasket();
-  //   }
-  // };
+  const handleValidation = (errors) => {
+    const firstError = Object.values(errors)[0];
+    setSnackbarMessage(firstError);
+    setSnackbarOpen(true);
+  };
 
   return (
     <div>
@@ -170,6 +170,12 @@ export const CreateSongBasket = ({
           loadSongBasket={loadSongBasket}
         />
       ))}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMessage}
+      />
     </div>
   );
 };
