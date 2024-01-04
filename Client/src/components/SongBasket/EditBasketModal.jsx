@@ -15,18 +15,24 @@ const EditBasketModal = ({
   updateBasket,
   jwtUserId,
   loadSongBasket,
+  name,
+  setName,
+  description,
+  setDescription,
+  image,
+  setImage,
 }) => {
-  const [name, setName] = useState(basketInfo.playlist_name);
-  const [description, setDescription] = useState(
-    basketInfo.playlist_description
-  );
-  const [image, setImage] = useState(basketInfo.playlist_img);
+  // const [name, setName] = useState(basketInfo.playlist_name);
+  // const [description, setDescription] = useState(
+  //   basketInfo.playlist_description
+  // );
+  // const [image, setImage] = useState(basketInfo.playlist_img);
 
   const handleUpdate = () => {
     const updatedData = {
-      playlist_name: name,
-      playlist_description: description,
-      playlist_img: image,
+      playlist_name: basketInfo.playlist_name,
+      playlist_description: basketInfo.playlist_description,
+      playlist_img: basketInfo.playlist_img,
     };
 
     fetch(
@@ -67,18 +73,20 @@ const EditBasketModal = ({
       <ModalBody>
         <Input
           label="Basket Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={basketInfo.playlist_name}
+          onChange={(e) => (basketInfo.playlist_name = e.target.value)}
         />
         <Input
           label="Basket Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          value={basketInfo.playlist_description}
+          placeholder={basketInfo.playlist_description}
+          onChange={(e) => (basketInfo.playlist_description = e.target.value)}
         />
         <Input
           label="Basket Image URL"
-          value={image}
-          onChange={(e) => setImage(e.target.value)}
+          value={basketInfo.playlist_img}
+          placeholder={basketInfo.playlist_img}
+          onChange={(e) => (basketInfo.playlist_img = e.target.value)}
         />
       </ModalBody>
       <ModalFooter>

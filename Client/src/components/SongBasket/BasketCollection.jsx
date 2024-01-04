@@ -39,6 +39,11 @@ function BasketCollection({ setSongCount, songCount }) {
   const [showSpotifySearch, setShowSpotifySearch] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentBasketInfo, setCurrentBasketInfo] = useState({});
+  const [name, setName] = useState(currentBasketInfo.playlist_name);
+  const [description, setDescription] = useState(
+    currentBasketInfo.playlist_description
+  );
+  const [image, setImage] = useState(currentBasketInfo.playlist_img);
 
   const closeEditModal = () => {
     setIsEditModalOpen(false);
@@ -162,9 +167,10 @@ function BasketCollection({ setSongCount, songCount }) {
       <div className="glassmorphism-basket">
         {basketData.map((basket, index) => (
           <div key={basket.basket_id}>
+            <Image src={basket.playlist_img} alt="Basket Image" />
             <h3>Basket ID: {basket.basket_id}</h3>
-            <h2>{basket.playlist_name}</h2>
-            <h3>{basket.playlist_description}</h3>
+            <h2>Name: {basket.playlist_name}</h2>
+            <h3>Description: {basket.playlist_description}</h3>
             <div>
               <button
                 className="bn54"
@@ -188,9 +194,14 @@ function BasketCollection({ setSongCount, songCount }) {
                 updateBasket={updateBasket}
                 jwtUserId={jwtUserId}
                 loadSongBasket={loadSongBasket}
+                name={name}
+                setName={setName}
+                description={description}
+                setDescription={setDescription}
+                image={image}
+                setImage={setImage}
               />
             </div>
-
             <Table striped aria-label="Song Basket Table">
               <TableHeader>
                 <TableColumn aria-label="Song Column">Song</TableColumn>
@@ -258,7 +269,7 @@ function BasketCollection({ setSongCount, songCount }) {
               <ModalHeader>Create Spotify Playlist</ModalHeader>
               <ModalBody>
                 <p>Creating playlist for Basket ID: {currentBasketId}</p>
-                <CreatePlaylist />
+                <CreatePlaylist image={image} setImage={setImage} />
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>

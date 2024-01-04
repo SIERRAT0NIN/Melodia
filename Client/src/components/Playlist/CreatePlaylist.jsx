@@ -8,7 +8,7 @@ import {
   PopoverContent,
 } from "@nextui-org/react";
 
-export default function CreatePlaylist() {
+export default function CreatePlaylist({ image, setImage }) {
   const [playlistName, setPlaylistName] = useState("");
   const [playlistDescription, setPlaylistDescription] = useState("");
   const { jwtUserId } = useSpotify();
@@ -105,6 +105,12 @@ export default function CreatePlaylist() {
         value={playlistDescription}
         onChange={(e) => setPlaylistDescription(e.target.value)}
         placeholder="Playlist Description"
+      />
+      <Input
+        type="text"
+        value={image}
+        onChange={(e) => setImage(e.target.value)}
+        placeholder="Playlist Image"
       />
       <br />
       <Popover placement="top" color={"default"}>

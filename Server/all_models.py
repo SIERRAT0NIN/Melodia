@@ -35,6 +35,7 @@ class Song(db.Model):
     track_image = db.Column(db.String)
     track_album = db.Column(db.String)
     track_artist = db.Column(db.String)
+    track_uri = db.Column(db.String)
     basket_id = db.Column(db.Integer, db.ForeignKey('song_baskets.basket_id'))  
 
     def to_dict(self):
@@ -43,7 +44,8 @@ class Song(db.Model):
             'track_id': self.track_id,
             'track_name': self.track_name,
             'track_image': self.track_image,
-            'track_artist': self.track_artist
+            'track_artist': self.track_artist,
+            'track_uri': self.track_uri
         }
     baskets = db.relationship('SongBasket', secondary='song_basket_association', back_populates='songs', lazy='dynamic')
 

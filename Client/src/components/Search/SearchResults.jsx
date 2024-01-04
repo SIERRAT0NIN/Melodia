@@ -59,6 +59,7 @@ function SearchResults({
                 album: song.album.name,
                 artist: song.artists.map((artist) => artist.name).join(", "),
                 image: song.album.images[0].url,
+                uri: song.uri,
               }
             : null;
         })
@@ -78,6 +79,7 @@ function SearchResults({
       track_image: song.image,
       track_album: song.album,
       track_artist: song.artist,
+      track_uri: song.uri,
     }));
   };
   const sendSelectedSongToBackend = async () => {

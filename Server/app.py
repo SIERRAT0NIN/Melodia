@@ -611,11 +611,11 @@ class PlaylistCoverImage(Resource):
             return {'message': 'Error retrieving playlist cover image'}
 
 class PlaylistAddItems(Resource):
-    def post(self, playlist_id, track_uris):
+    def post(self, playlist_id, track_uri):
         try:
             token_info = get_token()
             sp = spotipy.Spotify(auth=token_info['access_token'])
-            sp.playlist_add_items(playlist_id, track_uris)
+            sp.playlist_add_items(playlist_id, track_uri)
             return {'message': 'Tracks added to playlist successfully'}
         except:
             return {'message': 'Error adding tracks to playlist'}
@@ -970,7 +970,9 @@ def add_song_to_basket():
         print("Processing song:", song_data)  
 
         # Validate each song data
-        required_keys = ["track_id", "track_name", "track_image", "track_album", "track_artist", 'basket_id']
+        required_keys = ["track_id", "track_name", "track_image", "track_album", "track_artist", "track_uri", "basket_id"]
+
+
         if not all(k in song_data for k in required_keys):
             errors.append({"error": "Missing data", "song": song_data})
             continue
@@ -980,10 +982,11 @@ def add_song_to_basket():
         track_image = song_data['track_image']
         track_album = song_data['track_album']
         track_artist = song_data['track_artist']
+        track_uri = song_data['track_uri']
         basket_id = song_data['basket_id']
 
         # Create a new SongBasket instance
-        new_song_basket = Song(track_id=track_id, track_name=track_name, track_image=track_image, track_album=track_album, track_artist=track_artist, basket_id=basket_id)
+        new_song_basket = Song(track_id=track_id, track_name=track_name, track_image=track_image, track_album=track_album, track_artist=track_artist, track_uri=track_uri, basket_id=basket_id)
 
         try:
             db.session.add(new_song_basket)
@@ -996,9 +999,6 @@ def add_song_to_basket():
 
             errors.append({"error": str(e), "song": song_data})
             continue
-
-
-
     if errors:
         return jsonify({"added_songs": added_songs, "errors": errors}), 207 
     else:
@@ -1030,6 +1030,7 @@ class CreateSongBasket(Resource):
             playlist_name = data.get('playlist_name')
             playlist_description = data.get('playlist_description')
             playlist_img= data.get('playlist_img')
+            
 
             new_basket = SongBasket(
                 user_id=user_id,
@@ -1047,6 +1048,7 @@ class CreateSongBasket(Resource):
                     track_image=song_data['track_image'],
                     track_album=song_data['track_album'],
                     track_artist=song_data['track_artist'],
+                    track_uri=song_data['track_uri'],
                     basket_id=new_basket.basket_id
                 )
                 db.session.add(new_song)

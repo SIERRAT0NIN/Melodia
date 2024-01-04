@@ -15,6 +15,9 @@ export const CreateSongBasket = ({
   loadSongBasket,
   songCount,
   setSongCount,
+  name,
+  description,
+  image,
 }) => {
   const {
     setSelectedBasketId,
@@ -69,16 +72,21 @@ export const CreateSongBasket = ({
   const handleAddSongBasket = async () => {
     const basketId = await createSongBasketInBackend();
     if (basketId) {
+      // Add the new basket ID to the songBaskets array
       setSongBaskets([...songBaskets, { id: basketId }]);
       setSelectedBasketId(basketId);
-      setIsModalVisible(false); // Close the modal after creation
-      setPlaylistName(""); // Reset the form
+
+      // Close the modal and reset the form fields
+      setIsModalVisible(false);
+      setPlaylistName("");
       setPlaylistDescription("");
-      loadSongBasket(); // Load the newly created basket
+      setPlaylistImage("");
+
+      // Reload all song baskets to include the new one
+      loadSongBasket();
     }
   };
-  console.log(playlistDescription);
-  console.log(playlistName);
+
   return (
     <div>
       <Button
