@@ -41,6 +41,7 @@ CORS(app, resources={
         r"/user_saved_tracks": {"origins": "http://localhost:5555"},
         r"/baskets": {"origins": "http://localhost:5555"},
         r"/song_basket/<string: user_id>": {"origins": "http://localhost:5555"},
+        r"/create_song_basket": {"origins": "http://localhost:5555"},
     })   
 # def generate_jwt_secret(length=32):
 #     return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode()
@@ -1014,45 +1015,47 @@ class GetTokenResource(Resource):
         
         
 # from jwt_extended import jwt_required
-@app.route('/create_song_basket', methods=['POST'])
 # @jwt_required()
-def create_song_basket():
-    try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return {'message': 'Authorization token is missing or invalid'}, 401
+class CreateSongBasket(Resource):
+    def post(self):
+        try:
+            auth_header = request.headers.get('Authorization')
+            if not auth_header or not auth_header.startswith('Bearer '):
+                return jsonify({'message': 'Authorization token is missing or invalid'}), 401
 
-        access_token = auth_header.split(' ')[1]
-        data = request.json
-        songs = data.get('songs', [])
-        user_id = data.get('user_id')
+            access_token = auth_header.split(' ')[1]
+            data = request.json
+            songs = data.get('songs', [])
+            user_id = data.get('user_id')
+            playlist_name = data.get('playlist_name')
+            playlist_description = data.get('playlist_description')
 
-        # Assuming user_id is retrieved from the token validation process
-        new_basket = SongBasket(user_id=user_id)
-        db.session.add(new_basket)
-        db.session.flush()
-        # import ipdb; ipdb.set_trace()
+            new_basket = SongBasket(
+                user_id=user_id,
+                playlist_name=playlist_name,
+                playlist_description=playlist_description
+            )
+            db.session.add(new_basket)
+            db.session.flush()
 
-        for song_data in songs:
-            new_song = Song(
-                track_id=song_data['track_id'],
-                track_name=song_data['track_name'],
-                track_image=song_data['track_image'],
-                track_album=song_data['track_album'],
-                track_artist=song_data['track_artist'],
-                basket_id=new_basket.basket_id  # Linking the song to the basket
-        )
-            db.session.add(new_song)
+            for song_data in songs:
+                new_song = Song(
+                    track_id=song_data['track_id'],
+                    track_name=song_data['track_name'],
+                    track_image=song_data['track_image'],
+                    track_album=song_data['track_album'],
+                    track_artist=song_data['track_artist'],
+                    basket_id=new_basket.basket_id
+                )
+                db.session.add(new_song)
+
             db.session.commit()
+            return jsonify({"message": "Song basket created", "basket_id": new_basket.basket_id}), 201
 
-            db.session.execute(f'INSERT INTO song_basket_association (basket_id, song_id) VALUES (?,?)', (new_basket.basket_id, new_song.id, ))
-        db.session.commit()
-        # new_basket.songs.append(new_song)
-        return {"message": "Song basket created", "basket_id": new_basket.basket_id}, 201
-
-    except Exception as e:
-        db.session.rollback()
-        return {'message': f'An error occurred: {str(e)}'}, 500
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'message': f'An error occurred: {str(e)}'}), 500
+api.add_resource(CreateSongBasket,'/create_song_basket')
 
 #get_jwt_identity()
 class SongBasketResource(Resource):
@@ -1101,8 +1104,31 @@ class SongBasketResource(Resource):
             db.session.rollback()
             return {'message': str(e)}, 500
 
+
+
 api.add_resource(SongBasketResource, '/song_basket/<string:user_id>',
                 '/song_basket/<string:user_id>/<int:basket_id>/<int:id>')
+
+class DeleteBasketResource(Resource):
+    def delete(self, user_id, basket_id):
+        basket = SongBasket.query.filter_by(user_id=user_id, basket_id=basket_id).first()
+        if not basket:
+            return {'message': 'Basket not found'}, 404
+
+        try:
+            # Remove all songs from the basket first
+            for song in basket.songs:
+                basket.songs.remove(song)
+            
+            db.session.delete(basket)
+            db.session.commit()
+            return {'message': 'Basket deleted successfully'}, 200
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {'message': str(e)}, 500
+
+# Route for basket deletion
+api.add_resource(DeleteBasketResource, '/delete_basket/<string:user_id>/<int:basket_id>')
 
 # Adding the resource to the API
 api.add_resource(GetTokenResource, '/get_token/<string:user_id>')
@@ -1142,20 +1168,8 @@ api.add_resource(UserPlaylistFollow, '/user_playlist_follow/<string:playlist_id>
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
-   
+    print(app.url_map)
     app.run(debug=True, port=5556)
 
 

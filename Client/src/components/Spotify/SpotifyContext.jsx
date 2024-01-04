@@ -25,6 +25,8 @@ export const SpotifyProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [selectedBasketId, setSelectedBasketId] = useState(null);
   const [jwtUserId, setJwtUserId] = useState("");
+  const [playlistName, setPlaylistName] = useState("");
+  const [playlistDescription, setPlaylistDescription] = useState("");
 
   useEffect(() => {
     const fetchAccessToken = async () => {
@@ -229,6 +231,10 @@ export const SpotifyProvider = ({ children }) => {
         setSelectedBasketId,
         jwtUserId,
         setJwtUserId,
+        playlistDescription,
+        setPlaylistDescription,
+        playlistName,
+        setPlaylistName,
       }}
     >
       {children}

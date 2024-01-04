@@ -21,12 +21,22 @@ import {
 } from "@nextui-org/react";
 import NavBar from "../Home/NavBar";
 import CreatePlaylist from "../Playlist/CreatePlaylist";
+import AddSongs from "./AddSongs";
+import BasketSearchModal from "./BasketSearchModal";
 
 function BasketCollection({ setSongCount, songCount }) {
-  const { jwtUserId } = useSpotify();
+  const {
+    jwtUserId,
+    selectedBasketId,
+    setSelectedBasketId,
+    playlistName,
+    playlistDescription,
+  } = useSpotify();
   const [basketData, setBasketData] = useState([]);
   const [currentBasketId, setCurrentBasketId] = useState(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [showSpotifySearch, setShowSpotifySearch] = useState(false);
+  // const [selectedBasketId, setSelectedBasketId] = useState(null);
 
   const loadSongBasket = () => {
     fetch(`http://localhost:5556/song_basket/${jwtUserId}`)
@@ -49,6 +59,24 @@ function BasketCollection({ setSongCount, songCount }) {
       });
   };
 
+  function deleteBasket(basketId) {
+    fetch(`http://localhost:5556/delete_basket/${jwtUserId}/${basketId}`, {
+      method: "DELETE",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then(() => {
+        loadSongBasket(); // Reload baskets to reflect the deletion
+      })
+      .catch((error) => {
+        console.error("Error deleting basket:", error);
+      });
+  }
+
   useEffect(() => {
     loadSongBasket();
   }, [jwtUserId]);
@@ -61,7 +89,22 @@ function BasketCollection({ setSongCount, songCount }) {
   const closeModal = () => {
     setIsModalVisible(false);
   };
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
+  const openSpotifySearch = (basketId) => {
+    setSelectedBasketId(basketId);
+    setShowSpotifySearch(true);
+  };
+
+  const openSearchModal = (basketId) => {
+    setSelectedBasketId(basketId); // Set the selected basket ID
+    setIsSearchModalOpen(true); // Open the modal
+  };
+
+  // Function to close the BasketSearchModal
+  const closeSearchModal = () => {
+    setIsSearchModalOpen(false);
+  };
   function removeSongFromBasket(basketId, songId) {
     fetch(
       `http://localhost:5556/song_basket/${jwtUserId}/${basketId}/${songId}`,
@@ -82,6 +125,7 @@ function BasketCollection({ setSongCount, songCount }) {
         console.error("Error removing song:", error);
       });
   }
+  const onSearchModalClose = () => setShowSpotifySearch(false);
 
   console.log("Basket Data:", basketData);
   return (
@@ -99,6 +143,23 @@ function BasketCollection({ setSongCount, songCount }) {
         {basketData.map((basket, index) => (
           <div key={basket.basket_id}>
             <h3>Basket ID: {basket.basket_id}</h3>
+            <h2>{basket.playlist_name}</h2>
+            <h3>{basket.playlist_description}</h3>
+            <div>
+              <button
+                className="bn54"
+                onClick={() => openSearchModal(basket.basket_id)}
+              >
+                <span className="bn54span">Add songs</span>
+              </button>
+              <AddSongs isOpen={isOpen} onClose={onSearchModalClose} />
+              <BasketSearchModal
+                isOpen={isSearchModalOpen}
+                onClose={closeSearchModal}
+                basketId={selectedBasketId}
+              />
+            </div>
+
             <Table striped aria-label="Song Basket Table">
               <TableHeader>
                 <TableColumn aria-label="Song Column">Song</TableColumn>
@@ -110,14 +171,14 @@ function BasketCollection({ setSongCount, songCount }) {
                   basket.songs.map((song) => (
                     <TableRow key={song.track_id}>
                       <TableCell>
-                        <button
+                        <Button
                           className="rm-song"
                           onClick={() =>
                             removeSongFromBasket(basket.basket_id, song.id)
                           }
                         >
                           Remove
-                        </button>
+                        </Button>
                         {song.track_name}
                       </TableCell>
                       {/* <TableCell>
@@ -139,12 +200,26 @@ function BasketCollection({ setSongCount, songCount }) {
                 )}
               </TableBody>
             </Table>
+            <div>
+              <button
+                className="bn54"
+                onClick={() => deleteBasket(basket.basket_id)}
+              >
+                <span className="bn54span">Delete basket</span>
+              </button>
+            </div>
             <button className="bn5" onClick={() => showModal(basket.basket_id)}>
               Create into a Spotify Playlist
             </button>
           </div>
         ))}
       </div>
+      {showSpotifySearch && (
+        <AddSongs
+          basketId={selectedBasketId}
+          onClose={() => setShowSpotifySearch(false)}
+        />
+      )}
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (

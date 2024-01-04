@@ -9,7 +9,7 @@ import {
 } from "@nextui-org/react";
 import SpotifySearch from "../Search/SpotifySearch";
 
-export default function BasketSearchModal({ isOpen, onClose, basketId }) {
+export default function AddSongs({ isOpen, onClose, basketId }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalContent>

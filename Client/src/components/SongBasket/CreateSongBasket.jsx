@@ -1,21 +1,39 @@
-import { useState, useEffect } from "react";
-import { Button } from "@nextui-org/react";
+import { useState } from "react";
 import SongBasket from "./SongBasket";
 import { useSpotify } from "../Spotify/SpotifyContext";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Input,
+} from "@nextui-org/react";
 
 export const CreateSongBasket = ({
   loadSongBasket,
   songCount,
   setSongCount,
 }) => {
-  const { setSelectedBasketId, jwtUserId } = useSpotify(null);
+  const {
+    setSelectedBasketId,
+    jwtUserId,
+    setPlaylistName,
+    setPlaylistDescription,
+    playlistDescription,
+    playlistName,
+    basketId,
+  } = useSpotify(null);
   const [songBaskets, setSongBaskets] = useState([]);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const createSongBasketInBackend = async () => {
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
       console.error("Access token not found");
-      return;
+      return null;
     }
 
     try {
@@ -25,7 +43,12 @@ export const CreateSongBasket = ({
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ user_id: jwtUserId }),
+        body: JSON.stringify({
+          user_id: jwtUserId,
+          playlist_name: playlistName,
+          playlist_description: playlistDescription,
+          basket_id: basketId,
+        }),
       });
 
       if (!response.ok) {
@@ -34,26 +57,60 @@ export const CreateSongBasket = ({
 
       const data = await response.json();
       console.log("New Song Basket Created with ID:", data.basket_id);
-      return data.basket_id; // Return the actual basket ID
+      return data.basket_id;
     } catch (error) {
       console.error("Error creating song basket:", error);
-      return null; // Return null in case of error
+      return null;
     }
   };
-
   const handleAddSongBasket = async () => {
     const basketId = await createSongBasketInBackend();
     if (basketId) {
       setSongBaskets([...songBaskets, { id: basketId }]);
       setSelectedBasketId(basketId);
+      setIsModalVisible(false); // Close the modal after creation
+      setPlaylistName(""); // Reset the form
+      setPlaylistDescription("");
+      loadSongBasket(); // Load the newly created basket
     }
   };
-
+  console.log(playlistDescription);
+  console.log(playlistName);
   return (
     <div>
-      <Button variant="shadow" color="secondary" onClick={handleAddSongBasket}>
+      <Button
+        variant="shadow"
+        color="secondary"
+        onClick={() => setIsModalVisible(true)}
+      >
         Create a new song basket
       </Button>
+
+      <Modal isOpen={isModalVisible} onClose={() => setIsModalVisible(false)}>
+        <ModalContent>
+          <ModalHeader>Create New Playlist</ModalHeader>
+          <ModalBody>
+            <Input
+              type="text"
+              value={playlistName}
+              onChange={(e) => setPlaylistName(e.target.value)}
+              placeholder="Playlist Name"
+              maxLength={20}
+            />
+            <Input
+              type="text"
+              value={playlistDescription}
+              onChange={(e) => setPlaylistDescription(e.target.value)}
+              placeholder="Playlist Description"
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button onClick={() => setIsModalVisible(false)}>Close</Button>
+            <Button onClick={handleAddSongBasket}>Create</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
       {songBaskets.map((basket) => (
         <SongBasket
           key={basket.id}
