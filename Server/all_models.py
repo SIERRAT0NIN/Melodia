@@ -22,7 +22,6 @@ class User(db.Model):
     username = db.Column(db.String, unique=True)
     email = db.Column(db.String, unique=True)
     profile_pic = db.Column(db.String)
-    password = db.Column(db.String)
 
     tokens = db.relationship('Token', backref='user', lazy='dynamic')
     song_baskets = db.relationship('SongBasket', back_populates='user', lazy='dynamic')
@@ -40,9 +39,11 @@ class Song(db.Model):
 
     def to_dict(self):
         return {
+            'id': self.id,
             'track_id': self.track_id,
             'track_name': self.track_name,
-#artist names?
+            'track_image': self.track_image,
+            'track_artist': self.track_artist
         }
     baskets = db.relationship('SongBasket', secondary='song_basket_association', back_populates='songs', lazy='dynamic')
 
@@ -51,6 +52,9 @@ class SongBasket(db.Model):
     __tablename__ = 'song_baskets'
     basket_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String, db.ForeignKey('users.id'))
+    playlist_name = db.Column(db.String)
+    playlist_description = db.Column(db.String)
+    playlist_img = db.Column(db.String)
 
     user = db.relationship('User', back_populates='song_baskets')
     songs = db.relationship('Song', secondary='song_basket_association', back_populates='baskets', lazy='dynamic')
@@ -58,14 +62,12 @@ class SongBasket(db.Model):
         return {
             'basket_id': self.basket_id,
             'user_id': self.user_id,
+            'playlist_name': self.playlist_name,
+            'playlist_description': self.playlist_description,
+            'playlist_img': self.playlist_img
         }
 
 
-
-# song_basket_association = db.Table('song_basket_association',
-#     db.Column('song_id', db.Integer, db.ForeignKey('songs.track_id'), primary_key=True),
-#     db.Column('basket_id', db.Integer, db.ForeignKey('song_baskets.basket_id'), primary_key=True)
-# )
 song_basket_association = db.Table('song_basket_association',
     db.Column('song_id', db.Integer, db.ForeignKey('songs.id'), primary_key=True),
     db.Column('basket_id', db.Integer, db.ForeignKey('song_baskets.basket_id'), primary_key=True)

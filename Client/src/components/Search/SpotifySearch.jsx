@@ -3,7 +3,7 @@ import { useSpotify } from "../Spotify/SpotifyContext";
 import { Input, Button } from "@nextui-org/react";
 import SearchResults from "../Search/SearchResults";
 
-const SpotifySearch = () => {
+const SpotifySearch = ({ basketId }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState({
     tracks: { items: [] },

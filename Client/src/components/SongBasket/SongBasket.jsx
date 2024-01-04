@@ -90,7 +90,7 @@ export default function SongBasket({ id, loadSongBasket, songCount }) {
   return (
     <div className="basket-collection" onClick={onSearchModalOpen}>
       <Badge
-        content={songCount.toString()} // Set the content of the badge dynamically
+        content={songCount} // Set the content of the badge dynamically
         size="lg"
         color="secondary"
         variant="faded"
@@ -126,10 +126,10 @@ export default function SongBasket({ id, loadSongBasket, songCount }) {
         </Card>
       </Badge>
 
-      <BasketSearchModal
+      {/* <BasketSearchModal
         isOpen={isSearchModalOpen}
         onClose={onSearchModalClose}
-      />
+      /> */}
 
       {/* Create Playlist Modal */}
       <Modal

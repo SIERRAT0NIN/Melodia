@@ -14,10 +14,6 @@ import {
 import DeletePlaylistBtn from "./DeletePlaylistBtn";
 import EditPlaylistModal from "./EditPlaylist";
 import SongModal from "./PlaylistSongDetail";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { fas } from "@fortawesome/free-solid-svg-icons";
-import { faSpotify, faFontAwesome } from "@fortawesome/free-brands-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 //! PLAYLISTDETAILS
 export default function PlaylistDetails({
@@ -108,7 +104,6 @@ export default function PlaylistDetails({
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
           <h2>{name ?? DEFAULT_PLAYLIST_NAME}</h2>
-          <FontAwesomeIcon icon="fa-brands fa-spotify" />
         </ModalHeader>
 
         <ModalBody>

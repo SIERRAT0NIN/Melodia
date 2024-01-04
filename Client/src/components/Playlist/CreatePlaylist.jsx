@@ -15,10 +15,7 @@ export default function CreatePlaylist() {
   const [popoverMessage, setPopoverMessage] = useState("");
   const [creatingPlaylist, setCreatingPlaylist] = useState(false);
 
-  const getNewAccessToken = async () => {
-    // Implement the logic to get a new access token from your backend
-    // For example, make an API call to your backend to refresh the token
-  };
+  const getNewAccessToken = async () => {};
 
   const createPlaylist = async () => {
     let accessToken = localStorage.getItem("accessToken");

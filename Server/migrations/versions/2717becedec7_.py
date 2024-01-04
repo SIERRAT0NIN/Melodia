@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 212d6a2baf0b
+Revision ID: 2717becedec7
 Revises: 
-Create Date: 2024-01-03 00:11:37.943300
+Create Date: 2024-01-03 23:24:09.891109
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '212d6a2baf0b'
+revision = '2717becedec7'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,7 +24,6 @@ def upgrade():
     sa.Column('username', sa.String(), nullable=True),
     sa.Column('email', sa.String(), nullable=True),
     sa.Column('profile_pic', sa.String(), nullable=True),
-    sa.Column('password', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
@@ -32,6 +31,9 @@ def upgrade():
     op.create_table('song_baskets',
     sa.Column('basket_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.String(), nullable=True),
+    sa.Column('playlist_name', sa.String(), nullable=True),
+    sa.Column('playlist_description', sa.String(), nullable=True),
+    sa.Column('playlist_img', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_song_baskets_user_id_users')),
     sa.PrimaryKeyConstraint('basket_id')
     )
