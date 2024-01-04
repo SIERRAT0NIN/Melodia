@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableHeader,
@@ -14,11 +14,49 @@ import { useSpotify } from "../Spotify/SpotifyContext";
 import SongPages from "./SongPages";
 const SavedSongs = () => {
   const [savedTracks, setSavedTracks] = useState([]);
-  // const [playlists, setPlaylists] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [selectedSong, setSelectedSong] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(10);
   const { selectedSong, setSelectedSong, playlists, setPlaylists } =
     useSpotify();
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
+    const limit = 20; // Number of items per page
+
+    if (!accessToken) return;
+
+    const fetchUserSavedTracks = async () => {
+      const offset = (currentPage - 1) * limit; // Calculate the offset based on the current page
+
+      try {
+        const response = await fetch(
+          `https://api.spotify.com/v1/me/tracks?limit=${limit}&offset=${offset}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setSavedTracks(data.items.map((item) => item.track));
+          setTotalPages(Math.ceil(data.total / limit)); // Update total pages based on the total number of items
+        } else {
+          console.error(
+            "Error fetching user saved tracks:",
+            response.statusText
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching user saved tracks:", error);
+      }
+    };
+
+    fetchUserSavedTracks();
+  }, [currentPage]);
+
   const handleSavedTracksChange = (tracks) => {
     setSavedTracks(tracks);
   };
@@ -30,6 +68,9 @@ const SavedSongs = () => {
   const onSongClick = (song) => {
     setSelectedSong(song); // Set the selected song
     setIsModalOpen(true); // Open the modal
+  };
+  const onPageChange = (newPage) => {
+    setCurrentPage(newPage); // Update the current page
   };
 
   return (
@@ -63,7 +104,11 @@ const SavedSongs = () => {
             ))}
           </TableBody>
         </Table>
-        <SongPages />
+        <SongPages
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />{" "}
       </div>
       <br />
       <SavedPlaylist playlists={playlists} setPlaylists={setPlaylists} />
