@@ -257,7 +257,12 @@ function BasketCollection({ setSongCount, songCount }) {
             <button className="bn5" onClick={() => showModal(basket.basket_id)}>
               Create into a Spotify Playlist
             </button>
-            <CreateSpotifyPlaylist songUris={uris} />
+            <CreateSpotifyPlaylist
+              songUris={uris}
+              name={name}
+              description={description}
+              image={image}
+            />
           </div>
         ))}
       </div>

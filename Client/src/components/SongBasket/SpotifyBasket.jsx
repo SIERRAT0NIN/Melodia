@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useSpotify } from "../Spotify/SpotifyContext";
-const CreateSpotifyPlaylist = ({ songUris }) => {
+const CreateSpotifyPlaylist = ({ songUris, name, description, image }) => {
   const [playlistId, setPlaylistId] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
-  const { jwtUserId } = useSpotify();
+  const { jwtUserId, playlistName } = useSpotify();
   const createPlaylist = async () => {
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
@@ -22,8 +22,8 @@ const CreateSpotifyPlaylist = ({ songUris }) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            name: "New Playlist",
-            description: "Created from my app",
+            name: "Test",
+            description: "Test description sent form <SpotifyBasket />",
           }),
         }
       );

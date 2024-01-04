@@ -7,6 +7,8 @@ import {
   Button,
   Input,
 } from "@nextui-org/react";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
 
 const EditBasketModal = ({
   isOpen,
@@ -27,7 +29,26 @@ const EditBasketModal = ({
   //   basketInfo.playlist_description
   // );
   // const [image, setImage] = useState(basketInfo.playlist_img);
+  const initialValues = {
+    name: basketInfo.playlist_name || "",
+    description: basketInfo.playlist_description || "",
+    image: basketInfo.playlist_img || "",
+  };
 
+  const validationSchema = Yup.object().shape({
+    name: Yup.string().required("Required"),
+    description: Yup.string().required("Required"),
+    image: Yup.string().url("Invalid URL").required("Required"),
+  });
+
+  const handleSubmit = (values) => {
+    const updatedData = {
+      playlist_name: values.name,
+      playlist_description: values.description,
+      playlist_img: values.image,
+    };
+    // Rest of your update logic
+  };
   const handleUpdate = () => {
     const updatedData = {
       playlist_name: basketInfo.playlist_name,
@@ -67,32 +88,67 @@ const EditBasketModal = ({
     setImage(basketInfo.playlist_img);
   }, [basketInfo]);
 
+  //   return (
+  //     <Modal isOpen={isOpen} onClose={onClose}>
+  //       <ModalHeader>Edit Basket</ModalHeader>
+  //       <ModalBody>
+  //         <Input
+  //           label="Basket Name"
+  //           value={basketInfo.playlist_name}
+  //           onChange={(e) => (basketInfo.playlist_name = e.target.value)}
+  //         />
+  //         <Input
+  //           label="Basket Description"
+  //           value={basketInfo.playlist_description}
+  //           placeholder={basketInfo.playlist_description}
+  //           onChange={(e) => (basketInfo.playlist_description = e.target.value)}
+  //         />
+  //         <Input
+  //           label="Basket Image URL"
+  //           value={basketInfo.playlist_img}
+  //           placeholder={basketInfo.playlist_img}
+  //           onChange={(e) => (basketInfo.playlist_img = e.target.value)}
+  //         />
+  //       </ModalBody>
+  //       <ModalFooter>
+  //         <Button onClick={onClose}>Cancel</Button>
+  //         <Button onClick={handleUpdate}>Update</Button>
+  //       </ModalFooter>
+  //     </Modal>
+  //   );
+  // };
+
+  // export default EditBasketModal;
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalHeader>Edit Basket</ModalHeader>
-      <ModalBody>
-        <Input
-          label="Basket Name"
-          value={basketInfo.playlist_name}
-          onChange={(e) => (basketInfo.playlist_name = e.target.value)}
-        />
-        <Input
-          label="Basket Description"
-          value={basketInfo.playlist_description}
-          placeholder={basketInfo.playlist_description}
-          onChange={(e) => (basketInfo.playlist_description = e.target.value)}
-        />
-        <Input
-          label="Basket Image URL"
-          value={basketInfo.playlist_img}
-          placeholder={basketInfo.playlist_img}
-          onChange={(e) => (basketInfo.playlist_img = e.target.value)}
-        />
-      </ModalBody>
-      <ModalFooter>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleUpdate}>Update</Button>
-      </ModalFooter>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+        enableReinitialize
+      >
+        {({ errors, touched }) => (
+          <Form>
+            <ModalBody>
+              <Field name="name" as={Input} label="Basket Name" />
+              {errors.name && touched.name ? <div>{errors.name}</div> : null}
+
+              <Field name="description" as={Input} label="Basket Description" />
+              {errors.description && touched.description ? (
+                <div>{errors.description}</div>
+              ) : null}
+
+              <Field name="image" as={Input} label="Basket Image URL" />
+              {errors.image && touched.image ? <div>{errors.image}</div> : null}
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={onClose}>Cancel</Button>
+              <Button type="submit">Update</Button>
+            </ModalFooter>
+          </Form>
+        )}
+      </Formik>
     </Modal>
   );
 };

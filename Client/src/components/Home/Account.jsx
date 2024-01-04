@@ -1,39 +1,84 @@
-import {
-  DropdownItem,
-  DropdownTrigger,
-  Dropdown,
-  Avatar,
-  DropdownMenu,
-} from "@nextui-org/react";
+import React, { useEffect } from "react";
+import { useSpotify } from "../Spotify/SpotifyContext";
+import NavBar from "./NavBar";
+import { useNavigate } from "react-router-dom";
 
-export default function Account() {
+const Account = () => {
+  const {
+    userId,
+    displayName,
+    userEmail,
+    userImg,
+    setUserId,
+    setDisplayName,
+    setUserEmail,
+    setUserImg,
+  } = useSpotify();
+  const navigate = useNavigate(); // For redirecting after logout
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const accessToken = localStorage.getItem("accessToken");
+
+      if (!accessToken) return;
+      userImg;
+      try {
+        const response = await fetch("https://api.spotify.com/v1/me", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+
+          setUserId(data.id);
+          setDisplayName(data.display_name);
+          setUserEmail(data.email);
+          setUserImg(data.images[1].url);
+          if (data.images && data.images.length > 0) {
+            setUserImg(data.images[1].url);
+          } else {
+            setUserImg(null);
+          }
+        } else {
+          console.error("Error fetching user profile:", response.statusText);
+        }
+        {
+          console.error("Error fetching user profile:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+  const logout = () => {
+    localStorage.removeItem("accessToken");
+    setUserId(null);
+    setDisplayName(null);
+    setUserEmail(null);
+    setUserImg(null);
+    navigate("/"); // Replace "/login" with your login route
+  };
+
   return (
-    <Dropdown placement="bottom-end">
-      <DropdownTrigger>
-        <Avatar
-          src="https://lh3.googleusercontent.com/a/ACg8ocJSHiyA9N1JGNlcNwI_WVLFZ1r9Qe73GvjyrVkI85Lxhcw=s288-c-no"
-          size="lg"
-          textValue="Alberto"
-        />
-        {{
-          src: "https://lh3.googleusercontent.com/a/ACg8ocJSHiyA9N1JGNlcNwI_WVLFZ1r9Qe73GvjyrVkI85Lxhcw=s288-c-no",
-        }}
-      </DropdownTrigger>
-      <DropdownMenu aria-label="Profile Actions" variant="flat">
-        <DropdownItem key="profile" className="h-14 gap-2">
-          <p className="font-semibold">Signed in as</p>
-          <p className="font-semibold">alberto.sierra101@gmail.com</p>
-        </DropdownItem>
-        <DropdownItem key="settings">My Settings</DropdownItem>
-        <DropdownItem key="team_settings">Team Settings</DropdownItem>
-        <DropdownItem key="analytics">Analytics</DropdownItem>
-        <DropdownItem key="system">System</DropdownItem>
-        <DropdownItem key="configurations">Configurations</DropdownItem>
-        <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
-        <DropdownItem key="logout" color="danger">
-          Log Out
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
+    <div className="profile-container" style={{ textAlign: "center" }}>
+      <NavBar />
+      <img
+        src={userImg}
+        alt="Profile"
+        style={{ width: "150px", height: "150px", borderRadius: "50%" }}
+      />
+      <h1>{displayName}</h1>
+      <h2>{userId}</h2>
+      <p>{userEmail}</p>
+      <button onClick={logout}>Logout</button>
+    </div>
   );
-}
+};
+
+export default Account;
