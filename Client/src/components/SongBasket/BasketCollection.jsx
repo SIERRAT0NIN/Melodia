@@ -23,6 +23,7 @@ import NavBar from "../Home/NavBar";
 import CreatePlaylist from "../Playlist/CreatePlaylist";
 import AddSongs from "./AddSongs";
 import BasketSearchModal from "./BasketSearchModal";
+import EditBasketModal from "./EditBasketModal";
 
 function BasketCollection({ setSongCount, songCount }) {
   const {
@@ -36,7 +37,12 @@ function BasketCollection({ setSongCount, songCount }) {
   const [currentBasketId, setCurrentBasketId] = useState(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [showSpotifySearch, setShowSpotifySearch] = useState(false);
-  // const [selectedBasketId, setSelectedBasketId] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentBasketInfo, setCurrentBasketInfo] = useState({});
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+  };
 
   const loadSongBasket = () => {
     fetch(`http://localhost:5556/song_basket/${jwtUserId}`)
@@ -127,7 +133,21 @@ function BasketCollection({ setSongCount, songCount }) {
   }
   const onSearchModalClose = () => setShowSpotifySearch(false);
 
-  console.log("Basket Data:", basketData);
+  const updateBasket = (basketId, updatedData) => {
+    return fetch(`http://localhost:5556/song_basket/${jwtUserId}/${basketId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+      body: JSON.stringify(updatedData),
+    });
+  };
+  const openEditModal = (basket) => {
+    setCurrentBasketInfo(basket); // Set the information of the basket to be edited
+    setIsEditModalOpen(true); // Open the Edit Modal
+  };
+
   return (
     <div>
       <NavBar />
@@ -152,11 +172,22 @@ function BasketCollection({ setSongCount, songCount }) {
               >
                 <span className="bn54span">Add songs</span>
               </button>
+              <button className="bn54" onClick={() => openEditModal(basket)}>
+                <span className="bn54span">Edit Basket </span>
+              </button>
               <AddSongs isOpen={isOpen} onClose={onSearchModalClose} />
               <BasketSearchModal
                 isOpen={isSearchModalOpen}
                 onClose={closeSearchModal}
                 basketId={selectedBasketId}
+              />
+              <EditBasketModal
+                isOpen={isEditModalOpen}
+                onClose={closeEditModal}
+                basketInfo={currentBasketInfo}
+                updateBasket={updateBasket}
+                jwtUserId={jwtUserId}
+                loadSongBasket={loadSongBasket}
               />
             </div>
 
@@ -214,12 +245,12 @@ function BasketCollection({ setSongCount, songCount }) {
           </div>
         ))}
       </div>
-      {showSpotifySearch && (
+      {/* {showSpotifySearch && (
         <AddSongs
           basketId={selectedBasketId}
           onClose={() => setShowSpotifySearch(false)}
         />
-      )}
+      )} */}
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (

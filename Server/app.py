@@ -1029,11 +1029,13 @@ class CreateSongBasket(Resource):
             user_id = data.get('user_id')
             playlist_name = data.get('playlist_name')
             playlist_description = data.get('playlist_description')
+            playlist_img= data.get('playlist_img')
 
             new_basket = SongBasket(
                 user_id=user_id,
                 playlist_name=playlist_name,
-                playlist_description=playlist_description
+                playlist_description=playlist_description,
+                playlist_img=playlist_img
             )
             db.session.add(new_basket)
             db.session.flush()
@@ -1104,9 +1106,30 @@ class SongBasketResource(Resource):
             db.session.rollback()
             return {'message': str(e)}, 500
 
+    def patch(self, user_id, basket_id):
+        basket = SongBasket.query.filter_by(user_id=user_id, basket_id=basket_id).first()
+        if not basket:
+            return {'message': 'Basket not found'}, 404
 
+        data = request.json
+        try:
+            if 'playlist_name' in data:
+                basket.playlist_name = data['playlist_name']
+            if 'playlist_description' in data:
+                basket.playlist_description = data['playlist_description']
+            if 'playlist_img' in data:
+                basket.playlist_img = data['playlist_img']
 
-api.add_resource(SongBasketResource, '/song_basket/<string:user_id>',
+            db.session.commit()
+            return {'message': 'Basket updated successfully'}, 200
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return {'message': str(e)}, 500
+
+# Route registration
+api.add_resource(SongBasketResource, 
+                '/song_basket/<string:user_id>', 
+                '/song_basket/<string:user_id>/<int:basket_id>', 
                 '/song_basket/<string:user_id>/<int:basket_id>/<int:id>')
 
 class DeleteBasketResource(Resource):

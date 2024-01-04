@@ -126,10 +126,10 @@ export default function SongBasket({ id, loadSongBasket, songCount }) {
         </Card>
       </Badge>
 
-      <BasketSearchModal
+      {/* <BasketSearchModal
         isOpen={isSearchModalOpen}
         onClose={onSearchModalClose}
-      />
+      /> */}
 
       {/* Create Playlist Modal */}
       <Modal

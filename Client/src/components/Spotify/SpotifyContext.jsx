@@ -27,6 +27,7 @@ export const SpotifyProvider = ({ children }) => {
   const [jwtUserId, setJwtUserId] = useState("");
   const [playlistName, setPlaylistName] = useState("");
   const [playlistDescription, setPlaylistDescription] = useState("");
+  const [playlistImage, setPlaylistImage] = useState("");
 
   useEffect(() => {
     const fetchAccessToken = async () => {
@@ -235,6 +236,8 @@ export const SpotifyProvider = ({ children }) => {
         setPlaylistDescription,
         playlistName,
         setPlaylistName,
+        playlistImage,
+        setPlaylistImage,
       }}
     >
       {children}

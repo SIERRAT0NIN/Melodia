@@ -54,6 +54,7 @@ class SongBasket(db.Model):
     user_id = db.Column(db.String, db.ForeignKey('users.id'))
     playlist_name = db.Column(db.String)
     playlist_description = db.Column(db.String)
+    playlist_img = db.Column(db.String)
 
     user = db.relationship('User', back_populates='song_baskets')
     songs = db.relationship('Song', secondary='song_basket_association', back_populates='baskets', lazy='dynamic')
@@ -62,7 +63,8 @@ class SongBasket(db.Model):
             'basket_id': self.basket_id,
             'user_id': self.user_id,
             'playlist_name': self.playlist_name,
-            'playlist_description': self.playlist_description
+            'playlist_description': self.playlist_description,
+            'playlist_img': self.playlist_img
         }
 
 

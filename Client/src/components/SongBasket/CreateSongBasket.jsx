@@ -24,6 +24,8 @@ export const CreateSongBasket = ({
     playlistDescription,
     playlistName,
     basketId,
+    playlistImage,
+    setPlaylistImage,
   } = useSpotify(null);
   const [songBaskets, setSongBaskets] = useState([]);
 
@@ -48,6 +50,7 @@ export const CreateSongBasket = ({
           playlist_name: playlistName,
           playlist_description: playlistDescription,
           basket_id: basketId,
+          playlist_img: playlistImage,
         }),
       });
 
@@ -94,14 +97,20 @@ export const CreateSongBasket = ({
               type="text"
               value={playlistName}
               onChange={(e) => setPlaylistName(e.target.value)}
-              placeholder="Playlist Name"
+              placeholder="Basket Name"
               maxLength={20}
             />
             <Input
               type="text"
               value={playlistDescription}
               onChange={(e) => setPlaylistDescription(e.target.value)}
-              placeholder="Playlist Description"
+              placeholder="Basket Description"
+            />
+            <Input
+              type="text"
+              value={playlistImage}
+              onChange={(e) => setPlaylistImage(e.target.value)}
+              placeholder="Basket Image"
             />
           </ModalBody>
           <ModalFooter>
