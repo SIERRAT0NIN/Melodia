@@ -35,7 +35,7 @@ const Footer = () => {
         </div>
       </div>
       <div className="text-center py-3">
-        © {new Date().getFullYear()} Melody. All rights reserved.
+        © {new Date().getFullYear()} Melodía. All rights reserved.
       </div>
     </footer>
   );

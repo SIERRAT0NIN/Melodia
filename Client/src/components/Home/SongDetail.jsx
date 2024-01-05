@@ -119,14 +119,14 @@ const SongModal = ({ isOpen, onClose, songData, onAddToPlaylist }) => {
           <p>Popularity: {songData.popularity}</p>
         </ModalBody>
         <ModalFooter className="flex justify-center items-center">
-          <Popover placement="top" color={"default"}>
+          {/* <Popover placement="top" color={"default"}>
             <PopoverTrigger>
               <Button className="bn30" onClick={handleAddToPlaylistClick}>
                 Add to playlist
               </Button>
             </PopoverTrigger>
             {popoverContent}
-          </Popover>
+          </Popover> */}
           <Popover placement="top" color={isLiked ? "error" : "success"}>
             <PopoverTrigger>
               <Button className="bn30" onClick={handleLikeUnlikeClick}>

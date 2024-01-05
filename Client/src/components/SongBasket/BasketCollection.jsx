@@ -20,7 +20,7 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import NavBar from "../Home/NavBar";
-import CreatePlaylist from "../Playlist/CreatePlaylist";
+
 import AddSongs from "./AddSongs";
 import BasketSearchModal from "./BasketSearchModal";
 import EditBasketModal from "./EditBasketModal";
@@ -266,9 +266,9 @@ function BasketCollection({ setSongCount, songCount }) {
                 <span className="bn54span">Delete basket</span>
               </button>
             </div>
-            <button className="bn5" onClick={() => showModal(basket.basket_id)}>
+            {/* <button className="bn5" onClick={() => showModal(basket.basket_id)}>
               Create into a Spotify Playlist
-            </button>
+            </button> */}
             <CreateSpotifyPlaylist
               songUris={uris}
               name={name}
@@ -284,7 +284,7 @@ function BasketCollection({ setSongCount, songCount }) {
           onClose={() => setShowSpotifySearch(false)}
         />
       )} */}
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+      {/* <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
             <>
@@ -300,7 +300,7 @@ function BasketCollection({ setSongCount, songCount }) {
             </>
           )}
         </ModalContent>
-      </Modal>
+      </Modal> */}
     </div>
   );
 }

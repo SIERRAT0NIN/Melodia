@@ -58,7 +58,9 @@ const CreateSpotifyPlaylist = ({ songUris, name, description, image }) => {
 
   return (
     <div>
-      <button onClick={createPlaylist}>Create Playlist and Add Songs</button>
+      <button className="bn5" onClick={createPlaylist}>
+        Create Playlist and Add Songs
+      </button>
       {statusMessage && <p>{statusMessage}</p>}
       {playlistId && <p>Playlist ID: {playlistId}</p>}
     </div>

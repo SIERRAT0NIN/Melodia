@@ -74,7 +74,7 @@ const SongModal = ({ isOpen, onClose, song }) => {
         <ModalHeader className="flex flex-col justify-center items-center gap-1">
           <Image
             isBlurred
-            src={song.album.images[1].url}
+            src={song.album.images[0].url}
             sizes="lg"
             alt={song.name}
           />
@@ -87,14 +87,14 @@ const SongModal = ({ isOpen, onClose, song }) => {
           <p>Popularity: {song.popularity}</p>
         </ModalBody>
         <ModalFooter>
-          <Popover placement="top" color={"default"}>
+          {/* <Popover placement="top" color={"default"}>
             <PopoverTrigger>
               <Button className="bn30" onClick={handleAddToPlaylistClick}>
                 Add to playlist
               </Button>
             </PopoverTrigger>
             {popoverContent}
-          </Popover>
+          </Popover> */}
           <Popover placement="top" color={isLiked ? "error" : "success"}>
             <PopoverTrigger>
               <Button className="bn30" onClick={handleLikeUnlikeClick}>
