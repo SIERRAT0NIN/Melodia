@@ -1,7 +1,10 @@
 import React, { useEffect } from "react";
 import { useSpotify } from "../Spotify/SpotifyContext";
-import NavBar from "./NavBar";
+import NavBar from "../Home/NavBar";
 import { useNavigate } from "react-router-dom";
+import SpotifyTopTracks from "./TopTracks";
+import SpotifyTopArtists from "./TopArtist";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const Account = () => {
   const {
@@ -14,19 +17,17 @@ const Account = () => {
     setUserEmail,
     setUserImg,
   } = useSpotify();
-  const navigate = useNavigate(); // For redirecting after logout
+  const navigate = useNavigate();
 
+  const accessToken = localStorage.getItem("accessToken");
   useEffect(() => {
     const fetchUserProfile = async () => {
-      const accessToken = localStorage.getItem("accessToken");
-
       if (!accessToken) return;
-      userImg;
+
       try {
         const response = await fetch("https://api.spotify.com/v1/me", {
           headers: {
             Authorization: `Bearer ${accessToken}`,
-
             "Content-Type": "application/json",
           },
         });
@@ -37,16 +38,10 @@ const Account = () => {
           setUserId(data.id);
           setDisplayName(data.display_name);
           setUserEmail(data.email);
-          setUserImg(data.images[1].url);
-          if (data.images && data.images.length > 0) {
-            setUserImg(data.images[1].url);
-          } else {
-            setUserImg(null);
-          }
+          setUserImg(
+            data.images && data.images.length > 0 ? data.images[0].url : null
+          );
         } else {
-          console.error("Error fetching user profile:", response.statusText);
-        }
-        {
           console.error("Error fetching user profile:", response.statusText);
         }
       } catch (error) {
@@ -68,14 +63,22 @@ const Account = () => {
   return (
     <div className="profile-container" style={{ textAlign: "center" }}>
       <NavBar />
-      <img
-        src={userImg}
-        alt="Profile"
-        style={{ width: "150px", height: "150px", borderRadius: "50%" }}
-      />
-      <h1>{displayName}</h1>
-      <h2>{userId}</h2>
-      <p>{userEmail}</p>
+
+      <div className="glassmorphism-profile">
+        <img
+          className="profile"
+          src={userImg}
+          alt="Profile"
+          // style={{ width: "150px", height: "150px", borderRadius: "50%" }}
+        />
+        <h1>{displayName}</h1>
+        <h2>{userId}</h2>
+        <p>{userEmail}</p>
+      </div>
+      <div>
+        <SpotifyTopTracks userId={userId} accessToken={accessToken} />
+        <SpotifyTopArtists userId={userId} accessToken={accessToken} />
+      </div>
       <button onClick={logout}>Logout</button>
     </div>
   );

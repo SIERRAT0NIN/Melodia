@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import Account from "./Home/Account";
+import Account from "./Profile/Account";
 import CreatePlaylist from "./Playlist/CreatePlaylist";
 import HomePage from "./Home/HomePage";
 
