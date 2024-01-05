@@ -1,6 +1,8 @@
 import { useState } from "react";
 import SongBasket from "./SongBasket";
 import { useSpotify } from "../Spotify/SpotifyContext";
+import Snackbar from "@mui/material/Snackbar";
+
 import {
   Modal,
   ModalContent,
@@ -10,6 +12,8 @@ import {
   Button,
   Input,
 } from "@nextui-org/react";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
 
 export const CreateSongBasket = ({
   loadSongBasket,
@@ -31,10 +35,12 @@ export const CreateSongBasket = ({
     setPlaylistImage,
   } = useSpotify(null);
   const [songBaskets, setSongBaskets] = useState([]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const createSongBasketInBackend = async () => {
+  const createSongBasketInBackend = async (values) => {
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
       console.error("Access token not found");
@@ -50,10 +56,10 @@ export const CreateSongBasket = ({
         },
         body: JSON.stringify({
           user_id: jwtUserId,
-          playlist_name: playlistName,
-          playlist_description: playlistDescription,
+          playlist_name: values.name,
+          playlist_description: values.description,
           basket_id: basketId,
-          playlist_img: playlistImage,
+          playlist_img: values.image,
         }),
       });
 
@@ -62,6 +68,7 @@ export const CreateSongBasket = ({
       }
 
       const data = await response.json();
+
       console.log("New Song Basket Created with ID:", data.basket_id);
       return data.basket_id;
     } catch (error) {
@@ -69,62 +76,91 @@ export const CreateSongBasket = ({
       return null;
     }
   };
-  const handleAddSongBasket = async () => {
-    const basketId = await createSongBasketInBackend();
+
+  const initialValues = {
+    name: "",
+    description: "",
+    image: "",
+  };
+
+  const validationSchema = Yup.object().shape({
+    name: Yup.string().required("Required"),
+    description: Yup.string().required("Required"),
+    image: Yup.string().required("Required"),
+  });
+
+  const handleSubmit = async (values, { validateForm }) => {
+    const errors = await validateForm();
+    if (Object.keys(errors).length) {
+      const firstError = Object.values(errors)[0];
+      setSnackbarMessage(firstError);
+      setSnackbarOpen(true);
+      return;
+    }
+
+    const basketId = await createSongBasketInBackend(values);
     if (basketId) {
-      // Add the new basket ID to the songBaskets array
       setSongBaskets([...songBaskets, { id: basketId }]);
       setSelectedBasketId(basketId);
-
-      // Close the modal and reset the form fields
       setIsModalVisible(false);
-      setPlaylistName("");
-      setPlaylistDescription("");
-      setPlaylistImage("");
-
-      // Reload all song baskets to include the new one
       loadSongBasket();
     }
   };
 
+  const handleValidation = (errors) => {
+    const firstError = Object.values(errors)[0];
+    setSnackbarMessage(firstError);
+    setSnackbarOpen(true);
+  };
+
   return (
     <div>
-      <Button
-        variant="shadow"
-        color="secondary"
-        onClick={() => setIsModalVisible(true)}
-      >
+      <Button onClick={() => setIsModalVisible(true)}>
         Create a new song basket
       </Button>
 
       <Modal isOpen={isModalVisible} onClose={() => setIsModalVisible(false)}>
         <ModalContent>
           <ModalHeader>Create New Playlist</ModalHeader>
-          <ModalBody>
-            <Input
-              type="text"
-              value={playlistName}
-              onChange={(e) => setPlaylistName(e.target.value)}
-              placeholder="Basket Name"
-              maxLength={20}
-            />
-            <Input
-              type="text"
-              value={playlistDescription}
-              onChange={(e) => setPlaylistDescription(e.target.value)}
-              placeholder="Basket Description"
-            />
-            <Input
-              type="text"
-              value={playlistImage}
-              onChange={(e) => setPlaylistImage(e.target.value)}
-              placeholder="Basket Image"
-            />
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={() => setIsModalVisible(false)}>Close</Button>
-            <Button onClick={handleAddSongBasket}>Create</Button>
-          </ModalFooter>
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ errors, touched }) => (
+              <Form>
+                <ModalBody>
+                  <Field name="name" as={Input} placeholder="Basket Name" />
+                  {errors.name && touched.name ? (
+                    <div>{errors.name}</div>
+                  ) : null}
+
+                  <Field
+                    name="description"
+                    as={Input}
+                    placeholder="Basket Description"
+                  />
+                  {errors.description && touched.description ? (
+                    <div>{errors.description}</div>
+                  ) : null}
+
+                  <Field name="image" as={Input} placeholder="Basket Image" />
+                  {errors.image && touched.image ? (
+                    <div>{errors.image}</div>
+                  ) : null}
+                </ModalBody>
+                <ModalFooter>
+                  <Button
+                    type="button"
+                    onClick={() => setIsModalVisible(false)}
+                  >
+                    Close
+                  </Button>
+                  <Button type="submit">Create</Button>
+                </ModalFooter>
+              </Form>
+            )}
+          </Formik>
         </ModalContent>
       </Modal>
 
@@ -133,10 +169,14 @@ export const CreateSongBasket = ({
           key={basket.id}
           id={basket.id}
           loadSongBasket={loadSongBasket}
-          songCount={songCount}
-          setSongCount={setSongCount}
         />
       ))}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMessage}
+      />
     </div>
   );
 };

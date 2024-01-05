@@ -12,11 +12,15 @@ import SavedPlaylist from "../Playlist/SavedPlaylist";
 import SongModal from "./SongDetail";
 import { useSpotify } from "../Spotify/SpotifyContext";
 import SongPages from "./SongPages";
-const SavedSongs = () => {
+import NavBar from "./NavBar";
+
+const LikedSongs = () => {
   const [savedTracks, setSavedTracks] = useState([]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(10);
+  const [totalPages, setTotalPages] = useState(10); // Set this based on total available pages
+
   const { selectedSong, setSelectedSong, playlists, setPlaylists } =
     useSpotify();
 
@@ -56,13 +60,8 @@ const SavedSongs = () => {
 
     fetchUserSavedTracks();
   }, [currentPage]);
-
   const handleSavedTracksChange = (tracks) => {
     setSavedTracks(tracks);
-  };
-
-  const handlePlaylistsChange = (playlists) => {
-    setPlaylists(playlists);
   };
 
   const onSongClick = (song) => {
@@ -75,10 +74,8 @@ const SavedSongs = () => {
 
   return (
     <div>
-      <SpotifyAuth
-        onSavedTracksChange={handleSavedTracksChange}
-        onPlaylistsChange={handlePlaylistsChange}
-      />
+      <NavBar />
+      <SpotifyAuth onSavedTracksChange={handleSavedTracksChange} />
       <div>
         <Table color="default" aria-label="Saved Songs Table">
           <TableHeader>
@@ -108,19 +105,9 @@ const SavedSongs = () => {
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={onPageChange}
-        />{" "}
-      </div>
-      <br />
-      <SavedPlaylist playlists={playlists} setPlaylists={setPlaylists} />
-      {selectedSong && (
-        <SongModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          songData={selectedSong}
         />
-      )}
+      </div>
     </div>
   );
 };
-
-export default SavedSongs;
+export default LikedSongs;

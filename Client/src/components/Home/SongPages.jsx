@@ -1,8 +1,17 @@
 import React from "react";
 import { Pagination } from "@nextui-org/react";
 
-export default function SongPages() {
+const SongPages = ({ currentPage, totalPages, onPageChange }) => {
   return (
-    <Pagination loop showControls color="success" total={5} initialPage={1} />
+    <Pagination
+      loop
+      showControls
+      color="success"
+      total={totalPages}
+      initialPage={currentPage}
+      onChange={onPageChange}
+    />
   );
-}
+};
+
+export default SongPages;

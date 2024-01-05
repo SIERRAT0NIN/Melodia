@@ -49,7 +49,15 @@ function BasketCollection({ setSongCount, songCount }) {
   const closeEditModal = () => {
     setIsEditModalOpen(false);
   };
-
+  const handleSongToBasket = (basket_id, songs) => {
+    setBasketData((currentBaskets) =>
+      currentBaskets.map((basket) => {
+        if (basket.basket_id === basket_id) {
+          return { ...basket, songs: [...basket.songs, ...songs] };
+        } else return basket;
+      })
+    );
+  };
   const loadSongBasket = () => {
     fetch(`http://localhost:5556/song_basket/${jwtUserId}`)
       .then((response) => {
@@ -82,7 +90,7 @@ function BasketCollection({ setSongCount, songCount }) {
         return response.json();
       })
       .then(() => {
-        loadSongBasket(); // Reload baskets to reflect the deletion
+        loadSongBasket();
       })
       .catch((error) => {
         console.error("Error deleting basket:", error);
@@ -173,7 +181,7 @@ function BasketCollection({ setSongCount, songCount }) {
           <div key={basket.basket_id}>
             <Image src={basket.playlist_img}></Image>
             <h3>Basket ID: {basket.basket_id}</h3>
-            <h2>Name: {name}</h2>
+            <h2>Name: {basket.playlist_name}</h2>
             <h3>Description: {basket.playlist_description}</h3>
             <div>
               <button
@@ -185,7 +193,11 @@ function BasketCollection({ setSongCount, songCount }) {
               <button className="bn54" onClick={() => openEditModal(basket)}>
                 <span className="bn54span">Edit Basket </span>
               </button>
-              <AddSongs isOpen={isOpen} onClose={onSearchModalClose} />
+              <AddSongs
+                handleSongToBasket={handleSongToBasket}
+                isOpen={isOpen}
+                onClose={onSearchModalClose}
+              />
               <BasketSearchModal
                 isOpen={isSearchModalOpen}
                 onClose={closeSearchModal}
@@ -257,7 +269,12 @@ function BasketCollection({ setSongCount, songCount }) {
             <button className="bn5" onClick={() => showModal(basket.basket_id)}>
               Create into a Spotify Playlist
             </button>
-            <CreateSpotifyPlaylist songUris={uris} />
+            <CreateSpotifyPlaylist
+              songUris={uris}
+              name={name}
+              description={description}
+              image={image}
+            />
           </div>
         ))}
       </div>
@@ -274,7 +291,6 @@ function BasketCollection({ setSongCount, songCount }) {
               <ModalHeader>Create Spotify Playlist</ModalHeader>
               <ModalBody>
                 <p>Creating playlist for Basket ID: {currentBasketId}</p>
-                <CreatePlaylist />
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>

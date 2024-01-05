@@ -3,7 +3,7 @@ import { useSpotify } from "../Spotify/SpotifyContext";
 import { Input, Button } from "@nextui-org/react";
 import SearchResults from "../Search/SearchResults";
 
-const SpotifySearch = ({ basketId }) => {
+const SpotifySearch = ({ basketId, handleSongToBasket }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState({
     tracks: { items: [] },
@@ -97,6 +97,7 @@ const SpotifySearch = ({ basketId }) => {
           onSongClick={handleSongClick}
           onArtistClick={handleArtistClick}
           onAlbumClick={handleAlbumClick}
+          handleSongToBasket={handleSongToBasket}
         />
       )}
     </div>

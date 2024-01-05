@@ -9,7 +9,12 @@ import {
 } from "@nextui-org/react";
 import SpotifySearch from "../Search/SpotifySearch";
 
-export default function AddSongs({ isOpen, onClose, basketId }) {
+export default function AddSongs({
+  isOpen,
+  onClose,
+  basketId,
+  handleSongToBasket,
+}) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalContent>
@@ -18,7 +23,10 @@ export default function AddSongs({ isOpen, onClose, basketId }) {
         </ModalHeader>
         <ModalBody>
           <p>Search for songs/albums</p>
-          <SpotifySearch basketId={basketId} />
+          <SpotifySearch
+            handleSongToBasket={handleSongToBasket}
+            basketId={basketId}
+          />
         </ModalBody>
         <ModalFooter>
           <Button color="danger" variant="light" onPress={onClose}>
