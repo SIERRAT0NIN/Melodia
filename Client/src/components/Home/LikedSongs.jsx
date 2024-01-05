@@ -101,11 +101,19 @@ const LikedSongs = () => {
             ))}
           </TableBody>
         </Table>
-        <SongPages
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
+        <SongModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          songData={selectedSong}
+          // onAddToPlaylist={handleAddToPlaylist} // Define this method as per your logic
         />
+        <div className="flex justify-center">
+          <SongPages
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
+        </div>
       </div>
     </div>
   );

@@ -104,11 +104,13 @@ const SavedSongs = () => {
             ))}
           </TableBody>
         </Table>
-        <SongPages
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
-        />
+        <div className="flex justify-center">
+          <SongPages
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
+        </div>
       </div>
       <br />
       <SavedPlaylist playlists={playlists} setPlaylists={setPlaylists} />

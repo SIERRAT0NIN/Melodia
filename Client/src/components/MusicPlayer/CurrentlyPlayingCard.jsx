@@ -56,8 +56,8 @@ export default function CurrentlyPlayingCard() {
 
         const data = await response.json();
         setCurrentlyPlaying(data);
-        setSongPosition(data.progress_ms); // Update song position
-        setIsPlaying(data.is_playing); // Update playing state
+        setSongPosition(data.progress_ms);
+        setIsPlaying(data.is_playing);
       } catch (error) {
         console.error("Error fetching currently playing track:", error);
         setError("Error fetching data");
@@ -65,9 +65,8 @@ export default function CurrentlyPlayingCard() {
         setLoading(false);
       }
     };
-
     fetchCurrentlyPlaying();
-  }, [setAccessToken]); // Remove setAccessToken if you're not using it in the fetch
+  }, [currentlyPlaying]); // Remove setAccessToken if you're not using it in the fetch
 
   const handleNextPrevious = async (direction) => {
     try {
@@ -75,7 +74,6 @@ export default function CurrentlyPlayingCard() {
         method: "POST",
         headers: { Authorization: `Bearer ${storedAccessToken}` },
       });
-      fetchCurrentlyPlaying(); // Refresh the currently playing track
     } catch (error) {
       console.error(`Error with ${direction} track:`, error);
     }

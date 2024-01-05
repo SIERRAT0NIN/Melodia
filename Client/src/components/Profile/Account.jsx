@@ -79,7 +79,7 @@ const Account = () => {
         <SpotifyTopTracks userId={userId} accessToken={accessToken} />
         <SpotifyTopArtists userId={userId} accessToken={accessToken} />
       </div>
-      <button className="bn632-hover bn19" onClick={logout}>
+      <button className=" bn19" onClick={logout}>
         Logout
       </button>
     </div>
