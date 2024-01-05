@@ -15,7 +15,6 @@ export default function NavBar() {
     <>
       <Navbar isBordered className="glassmorphism-nav">
         <NavbarContent justify="space-between">
-          {/* Grouping Brand and Title together on the left */}
           <div className="flex items-center justify-start">
             <NavbarBrand className="flex items-center mr-4">
               <EqualizerRoundedIcon />
@@ -53,7 +52,6 @@ export default function NavBar() {
           </ButtonGroup>
         </div>
       </Navbar>
-      {/* <SpotifySearch /> */}
     </>
   );
 }

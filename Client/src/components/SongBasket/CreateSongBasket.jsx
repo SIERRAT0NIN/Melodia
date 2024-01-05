@@ -115,7 +115,11 @@ export const CreateSongBasket = ({
 
   return (
     <div>
-      <Button onClick={() => setIsModalVisible(true)}>
+      <Button
+        color="secondary"
+        variant="faded"
+        onClick={() => setIsModalVisible(true)}
+      >
         Create a new song basket
       </Button>
 
@@ -164,13 +168,13 @@ export const CreateSongBasket = ({
         </ModalContent>
       </Modal>
 
-      {songBaskets.map((basket) => (
+      {/* {songBaskets.map((basket) => (
         <SongBasket
           key={basket.id}
           id={basket.id}
           loadSongBasket={loadSongBasket}
         />
-      ))}
+      ))} */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}

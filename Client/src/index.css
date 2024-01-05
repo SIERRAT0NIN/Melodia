@@ -812,3 +812,11 @@ button:focus-visible {
   -webkit-backdrop-filter: blur(20px);
   color: white;
 }
+.deletebasket {
+  background: #000;
+  background: rgba(151, 1, 1, 0.501);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(20px);
+  color: white;
+}

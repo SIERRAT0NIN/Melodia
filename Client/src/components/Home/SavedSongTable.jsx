@@ -108,7 +108,7 @@ const SavedSongs = () => {
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={onPageChange}
-        />{" "}
+        />
       </div>
       <br />
       <SavedPlaylist playlists={playlists} setPlaylists={setPlaylists} />

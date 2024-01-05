@@ -169,7 +169,7 @@ function BasketCollection({ setSongCount, songCount }) {
     <div>
       <NavBar />
       <VerifyJWT />
-      <div>
+      <div className="flex justify-center">
         <CreateSongBasket
           loadSongBasket={loadSongBasket}
           setSongCount={setSongCount}
@@ -180,12 +180,16 @@ function BasketCollection({ setSongCount, songCount }) {
         {basketData.map((basket, index) => (
           <div key={basket.basket_id}>
             <Image src={basket.playlist_img}></Image>
-            <h3>Basket ID: {basket.basket_id}</h3>
-            <h2>Name: {basket.playlist_name}</h2>
-            <h3>Description: {basket.playlist_description}</h3>
-            <div>
+            <div className="deletebasket flex justify-center">
+              <h3>Basket ID: {basket.basket_id}</h3>
+
+              <h2>Name: {basket.playlist_name}</h2>
+
+              <h3>Description: {basket.playlist_description}</h3>
+            </div>
+            <div className=" flex justify-center">
               <button
-                className="bn54"
+                className="bn54 "
                 onClick={() => openSearchModal(basket.basket_id)}
               >
                 <span className="bn54span">Add songs</span>
@@ -258,9 +262,9 @@ function BasketCollection({ setSongCount, songCount }) {
                 )}
               </TableBody>
             </Table>
-            <div>
+            <div className="flex justify-center ">
               <button
-                className="bn54"
+                className="bn54 deletebasket"
                 onClick={() => deleteBasket(basket.basket_id)}
               >
                 <span className="bn54span">Delete basket</span>
