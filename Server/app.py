@@ -986,12 +986,12 @@ def add_song_to_basket():
         basket_id = song_data['basket_id']
 
         # Create a new SongBasket instance
-        new_song_basket = Song(track_id=track_id, track_name=track_name, track_image=track_image, track_album=track_album, track_artist=track_artist, track_uri=track_uri, basket_id=basket_id)
+        new_song_basket = Song(track_id=track_id, track_name=track_name, track_image=track_image, track_album=track_album, track_artist=track_artist, track_uri=track_uri, basket_id=basket_id, )
 
         try:
             db.session.add(new_song_basket)
             db.session.flush()
-            added_songs.append({"track_id": new_song_basket.id, "track_id": track_id})
+            added_songs.append({"track_id": new_song_basket.id, "track_id": track_id, "track_name":track_name, "track_image":track_image,'track_album':track_album,'track_artist':track_artist, 'track_uri':track_uri,'basket_id':basket_id}, )
          
             db.session.execute(text(f'INSERT INTO song_basket_association (basket_id, song_id) VALUES ({basket_id}, {new_song_basket.id})'))
         except Exception as e:

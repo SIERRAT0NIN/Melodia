@@ -4,7 +4,7 @@ import NavBar from "../Home/NavBar";
 import { useNavigate } from "react-router-dom";
 import SpotifyTopTracks from "./TopTracks";
 import SpotifyTopArtists from "./TopArtist";
-import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap/dist/css/bootstrap.min.css";
 
 const Account = () => {
   const {
@@ -79,7 +79,9 @@ const Account = () => {
         <SpotifyTopTracks userId={userId} accessToken={accessToken} />
         <SpotifyTopArtists userId={userId} accessToken={accessToken} />
       </div>
-      <button onClick={logout}>Logout</button>
+      <button className=" bn19" onClick={logout}>
+        Logout
+      </button>
     </div>
   );
 };

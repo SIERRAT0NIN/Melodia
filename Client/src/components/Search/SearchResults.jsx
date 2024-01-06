@@ -87,8 +87,6 @@ function SearchResults({
     const songData = prepareSongDataForBackend();
     const accessToken = localStorage.getItem("accessToken");
 
-    console.log("JWT : ", accessToken);
-
     try {
       const response = await fetch("http://localhost:5556/songs", {
         method: "POST",
@@ -99,10 +97,13 @@ function SearchResults({
         body: JSON.stringify(songData),
       });
 
-      const data = await response.json();
-      debugger;
-      handleSongToBasket(data[0].basket_id, data);
-      console.log("Response from backend:", data);
+      if (!response.ok) {
+        throw new Error("Failed to send songs to backend");
+      }
+
+      const responseData = await response.json();
+      console.log("Response from backend:", responseData);
+      handleSongToBasket(selectedBasketId, responseData);
     } catch (error) {
       console.error("Error sending selected songs to backend:", error);
     }
@@ -246,9 +247,9 @@ function SearchResults({
         onClose={() => setIsModalOpen(false)}
         songData={selectedItem}
         scrollBehavior={"inside"}
-      />{" "}
+      />
       <Button onClick={() => sendSelectedSongToBackend()}>
-        Send to Backend
+        Save Song Basket!
       </Button>
     </div>
   );

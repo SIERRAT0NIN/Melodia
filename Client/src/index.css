@@ -179,7 +179,7 @@ button:focus-visible {
   bottom: 0;
   right: 0;
   z-index: -1;
-  background: #0e0e10;
+  background: #383eef;
 }
 
 .bn30:hover {
@@ -746,11 +746,11 @@ button:focus-visible {
   padding: 25px;
 }
 .profile {
-  width: "150px";
-  height: "150px";
+  width: 100px;
+  height: 100px;
   position: relative;
-  border-radius: "50%";
-  margin-left: 39%;
+  border-radius: 50%;
+  margin-left: 43%;
 }
 .glassmorphism-artist {
   background: rgba(211, 0, 106, 0.477);
@@ -762,6 +762,15 @@ button:focus-visible {
   color: white;
   padding: 25px;
   margin-top: 10px;
+}
+.artisttable {
+  position: relative;
+  left: 40%;
+  margin-top: 5%;
+}
+.tracktable {
+  left: 6%;
+  position: relative;
 }
 .glassmorphism-tracks {
   /* background: rgb(7 1 44 / 48%); */
@@ -777,17 +786,41 @@ button:focus-visible {
 }
 
 .track-table {
-  border-radius: 10px 0px 0px;
-  /* background: #000; */
-  background-color: #000000;
+  border-radius: 10px 0px 0px 0px;
+  background: rgba(58, 58, 58, 0.501);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(20px);
+  color: white;
 }
 .track-table2 {
   border-radius: 0px 10px 0px 0px;
-  /* background: #000; */
-  background-color: #000000;
+  background: #000;
+  background: rgba(58, 58, 58, 0.501);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(20px);
+  color: white;
 }
 .artist-table {
   border-radius: 10px 10px 0px 0px;
   /* background: #000; */
-  background-color: #000000;
+  background: #000;
+  background: rgba(58, 58, 58, 0.501);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(20px);
+  color: white;
+}
+.deletebasket {
+  background: #000;
+  background: rgba(151, 1, 1, 0.501);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(20px);
+  color: white;
+}
+.liked-song-img {
+  width: 100px;
+  height: 100px;
 }

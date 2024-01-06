@@ -20,7 +20,7 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import NavBar from "../Home/NavBar";
-import CreatePlaylist from "../Playlist/CreatePlaylist";
+
 import AddSongs from "./AddSongs";
 import BasketSearchModal from "./BasketSearchModal";
 import EditBasketModal from "./EditBasketModal";
@@ -49,15 +49,35 @@ function BasketCollection({ setSongCount, songCount }) {
   const closeEditModal = () => {
     setIsEditModalOpen(false);
   };
-  const handleSongToBasket = (basket_id, songs) => {
+  // const handleSongToBasket = (basket_id, songs) => {
+  //   setBasketData((currentBaskets) =>
+  //     currentBaskets.map((basket) => {
+  //       if (basket.basket_id === basket_id) {
+  //         return { ...basket, songs: [...basket.songs, ...songs] };
+  //       } else return basket;
+  //     })
+  //   );
+  // };
+  const handleSongToBasket = (basket_id, response) => {
     setBasketData((currentBaskets) =>
       currentBaskets.map((basket) => {
         if (basket.basket_id === basket_id) {
-          return { ...basket, songs: [...basket.songs, ...songs] };
-        } else return basket;
+          const newSongs = response.added_songs.map((song) => ({
+            track_id: song.track_id,
+            track_name: song.track_name,
+            track_artist: song.track_artist,
+            track_album: song.track_album,
+            track_image: song.track_image,
+            track_uri: song.track_uri,
+          }));
+          return { ...basket, songs: [...basket.songs, ...newSongs] };
+        } else {
+          return basket;
+        }
       })
     );
   };
+
   const loadSongBasket = () => {
     fetch(`http://localhost:5556/song_basket/${jwtUserId}`)
       .then((response) => {
@@ -69,7 +89,6 @@ function BasketCollection({ setSongCount, songCount }) {
       .then((data) => {
         console.log("Basket Data: ", data);
         setBasketData(data);
-        setSongCount(data.songs.length); // Update song count based on fetched data
       })
       .catch((error) => {
         console.error(
@@ -158,8 +177,8 @@ function BasketCollection({ setSongCount, songCount }) {
     });
   };
   const openEditModal = (basket) => {
-    setCurrentBasketInfo(basket); // Set the information of the basket to be edited
-    setIsEditModalOpen(true); // Open the Edit Modal
+    setCurrentBasketInfo(basket);
+    setIsEditModalOpen(true);
   };
   const uris = basketData
     .map((basket) => basket.songs.map((song) => song.track_uri))
@@ -169,138 +188,149 @@ function BasketCollection({ setSongCount, songCount }) {
     <div>
       <NavBar />
       <VerifyJWT />
-      <div>
+      <div className="flex justify-center">
         <CreateSongBasket
           loadSongBasket={loadSongBasket}
           setSongCount={setSongCount}
           songCount={songCount}
         />
       </div>
-      <div className="glassmorphism-basket">
-        {basketData.map((basket, index) => (
-          <div key={basket.basket_id}>
-            <Image src={basket.playlist_img}></Image>
-            <h3>Basket ID: {basket.basket_id}</h3>
-            <h2>Name: {basket.playlist_name}</h2>
-            <h3>Description: {basket.playlist_description}</h3>
-            <div>
-              <button
-                className="bn54"
-                onClick={() => openSearchModal(basket.basket_id)}
-              >
-                <span className="bn54span">Add songs</span>
-              </button>
-              <button className="bn54" onClick={() => openEditModal(basket)}>
-                <span className="bn54span">Edit Basket </span>
-              </button>
-              <AddSongs
-                handleSongToBasket={handleSongToBasket}
-                isOpen={isOpen}
-                onClose={onSearchModalClose}
-              />
-              <BasketSearchModal
-                isOpen={isSearchModalOpen}
-                onClose={closeSearchModal}
-                basketId={selectedBasketId}
-              />
-              <EditBasketModal
-                isOpen={isEditModalOpen}
-                onClose={closeEditModal}
-                basketInfo={currentBasketInfo}
-                updateBasket={updateBasket}
-                jwtUserId={jwtUserId}
-                loadSongBasket={loadSongBasket}
-                name={name}
-                setName={setName}
-                description={description}
-                setDescription={setDescription}
-                image={image}
-                setImage={setImage}
-              />
-            </div>
-            <Table striped aria-label="Song Basket Table">
-              <TableHeader>
-                <TableColumn aria-label="Song Column">Song</TableColumn>
-                {/* <TableColumn aria-label="Artist Column">Artist</TableColumn>
-                <TableColumn aria-label="Image Column"></TableColumn> */}
-              </TableHeader>
-              <TableBody>
-                {basket.songs.length > 0 ? (
-                  basket.songs.map((song) => (
-                    <TableRow key={song.track_id}>
-                      <TableCell>
-                        <Button
-                          className="rm-song"
-                          onClick={() =>
-                            removeSongFromBasket(basket.basket_id, song.id)
-                          }
-                        >
-                          Remove
-                        </Button>
-                        {song.track_name}
-                      </TableCell>
-                      {/* <TableCell>
-                        {song.track_artist || "Unknown Artist"}
-                      </TableCell>
-                      <TableCell>
-                        <Image
-                          className="basket-img"
-                          src={song.track_image}
-                          isBlurred
-                        ></Image>
-                      </TableCell> */}
+      {basketData.length === 0 ? (
+        <div className="no-baskets-message">
+          <h2>There are currently no baskets</h2>
+        </div>
+      ) : (
+        <div className="glassmorphism-basket">
+          {basketData.map((basket, index) => (
+            <div key={basket.basket_id}>
+              <Image src={basket.playlist_img}></Image>
+              <div className="deletebasket flex justify-center">
+                <h3>Basket ID: {basket.basket_id}</h3>
+
+                <h2>Name: {basket.playlist_name}</h2>
+
+                <h3>Description: {basket.playlist_description}</h3>
+              </div>
+              <div className=" flex justify-center">
+                <button
+                  className="bn54 "
+                  onClick={() => openSearchModal(basket.basket_id)}
+                >
+                  <span className="bn54span">Add songs</span>
+                </button>
+                <button className="bn54" onClick={() => openEditModal(basket)}>
+                  <span className="bn54span">Edit Basket </span>
+                </button>
+                <AddSongs
+                  handleSongToBasket={handleSongToBasket}
+                  isOpen={isOpen}
+                  onClose={onSearchModalClose}
+                />
+                <BasketSearchModal
+                  isOpen={isSearchModalOpen}
+                  onClose={closeSearchModal}
+                  basketId={selectedBasketId}
+                />
+                <EditBasketModal
+                  isOpen={isEditModalOpen}
+                  onClose={closeEditModal}
+                  basketInfo={currentBasketInfo}
+                  updateBasket={updateBasket}
+                  jwtUserId={jwtUserId}
+                  loadSongBasket={loadSongBasket}
+                  name={name}
+                  setName={setName}
+                  description={description}
+                  setDescription={setDescription}
+                  image={image}
+                  setImage={setImage}
+                />
+              </div>
+              <Table striped aria-label="Song Basket Table">
+                <TableHeader>
+                  <TableColumn aria-label="Song Column">Song</TableColumn>
+                  {/* <TableColumn aria-label="Artist Column">Artist</TableColumn> */}
+                  {/* <TableColumn aria-label="Image Column"></TableColumn>  */}
+                </TableHeader>
+                <TableBody>
+                  {basket.songs.length > 0 ? (
+                    basket.songs.map((song) => (
+                      <TableRow key={song.track_id}>
+                        <TableCell>
+                          <Button
+                            className="rm-song"
+                            onClick={() =>
+                              removeSongFromBasket(
+                                basket.basket_id,
+                                song.track_id
+                              )
+                            }
+                          >
+                            Remove
+                          </Button>
+                          {song.track_name}
+                        </TableCell>
+                        {/* Uncomment and modify these if you want to include more columns */}
+                        {/* <TableCell>
+          {song.track_artist || "Unknown Artist"}
+        </TableCell>
+        <TableCell>
+          <Image className="basket-img" src={song.track_image} isBlurred></Image>
+        </TableCell> */}
+                      </TableRow>
+                    ))
+                  ) : (
+                    // Update this part
+                    <TableRow>
+                      <TableCell colSpan={3}>No songs in basket</TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={3}>No songs in basket</TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-            <div>
-              <button
-                className="bn54"
-                onClick={() => deleteBasket(basket.basket_id)}
-              >
-                <span className="bn54span">Delete basket</span>
-              </button>
-            </div>
-            <button className="bn5" onClick={() => showModal(basket.basket_id)}>
+                  )}
+                </TableBody>
+              </Table>
+              <div className="flex justify-center ">
+                <button
+                  className="bn54 deletebasket"
+                  onClick={() => deleteBasket(basket.basket_id)}
+                >
+                  <span className="bn54span">Delete basket</span>
+                </button>
+              </div>
+              {/* <button className="bn5" onClick={() => showModal(basket.basket_id)}>
               Create into a Spotify Playlist
-            </button>
-            <CreateSpotifyPlaylist
-              songUris={uris}
-              name={name}
-              description={description}
-              image={image}
-            />
-          </div>
-        ))}
-      </div>
-      {/* {showSpotifySearch && (
-        <AddSongs
-          basketId={selectedBasketId}
-          onClose={() => setShowSpotifySearch(false)}
-        />
-      )} */}
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Create Spotify Playlist</ModalHeader>
-              <ModalBody>
-                <p>Creating playlist for Basket ID: {currentBasketId}</p>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
-                  Close
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+            </button> */}
+              <CreateSpotifyPlaylist
+                songUris={uris}
+                name={name}
+                description={description}
+                image={image}
+              />
+            </div>
+          ))}
+        </div>
+        // {/* {showSpotifySearch && (
+        //   <AddSongs
+        //     basketId={selectedBasketId}
+        //     onClose={() => setShowSpotifySearch(false)}
+        //   />
+        // )} */}
+        // {/* <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        //   <ModalContent>
+        //     {(onClose) => (
+        //       <>
+        //         <ModalHeader>Create Spotify Playlist</ModalHeader>
+        //         <ModalBody>
+        //           <p>Creating playlist for Basket ID: {currentBasketId}</p>
+        //         </ModalBody>
+        //         <ModalFooter>
+        //           <Button color="danger" variant="light" onPress={onClose}>
+        //             Close
+        //           </Button>
+        //         </ModalFooter>
+        //       </>
+        //     )}
+        //   </ModalContent>
+        // </Modal> */}
+      )}
     </div>
   );
 }

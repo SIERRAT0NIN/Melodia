@@ -13,25 +13,32 @@ import {
 import { useState, useEffect } from "react";
 import { useSpotify } from "../Spotify/SpotifyContext";
 
-const SongModal = ({ isOpen, onClose, songData, onAddToPlaylist }) => {
+const SongModal = ({ isOpen, onClose, songData }) => {
   const [popoverMessage, setPopoverMessage] = useState("");
-  const [isLiked, setIsLiked] = useState(false); // Default to false, assuming not liked initially
+  const [isLiked, setIsLiked] = useState(false);
   const { accessToken } = useSpotify();
 
-  if (!songData) return null;
+  useEffect(() => {
+    if (!songData || !accessToken) return;
 
-  const handleLikeUnlikeClick = async () => {
-    try {
-      const newIsLiked = !isLiked;
-      await likeUnlikeSong(songData.id, newIsLiked);
-      setIsLiked(newIsLiked); // Update the like state
-      setPopoverMessage(
-        newIsLiked ? "Song has been liked!" : "Song has been unliked!"
-      );
-    } catch (error) {
-      console.error("Error in like/unlike action:", error);
-    }
-  };
+    const checkIfSongIsLiked = async () => {
+      const url = `https://api.spotify.com/v1/me/tracks/contains?ids=${songData.id}`;
+      try {
+        const response = await fetch(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+        const isLikedArray = await response.json();
+        setIsLiked(isLikedArray.length > 0 && isLikedArray[0]);
+      } catch (error) {
+        console.error("Error checking if song is liked:", error);
+      }
+    };
+
+    checkIfSongIsLiked();
+  }, [songData, accessToken]);
 
   const likeUnlikeSong = async (songId, shouldBeLiked) => {
     if (!accessToken) {
@@ -56,15 +63,22 @@ const SongModal = ({ isOpen, onClose, songData, onAddToPlaylist }) => {
       if (!response.ok) {
         throw new Error("Failed to update song like status");
       }
-      // Update the state if needed, e.g., refresh the list of liked songs
     } catch (error) {
       console.error("Error:", error);
     }
   };
 
-  const handleAddToPlaylistClick = () => {
-    onAddToPlaylist(); // Call the passed callback function
-    setPopoverMessage("Choose a playlist");
+  const handleLikeUnlikeClick = async () => {
+    try {
+      const newIsLiked = !isLiked;
+      await likeUnlikeSong(songData.id, newIsLiked);
+      setIsLiked(newIsLiked);
+      setPopoverMessage(
+        newIsLiked ? "Song has been liked!" : "Song has been unliked!"
+      );
+    } catch (error) {
+      console.error("Error in like/unlike action:", error);
+    }
   };
 
   const popoverContent = (
@@ -75,29 +89,7 @@ const SongModal = ({ isOpen, onClose, songData, onAddToPlaylist }) => {
     </PopoverContent>
   );
 
-  useEffect(() => {
-    const checkIfSongIsLiked = async () => {
-      if (!songData || !accessToken) return;
-
-      const url = `https://api.spotify.com/v1/me/tracks/contains?ids=${songData.id}`;
-      try {
-        const response = await fetch(url, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-        const isLikedArray = await response.json();
-        if (isLikedArray.length > 0) {
-          setIsLiked(isLikedArray[0]); // Assuming the response is an array with one element
-        }
-      } catch (error) {
-        console.error("Error checking if song is liked:", error);
-      }
-    };
-
-    checkIfSongIsLiked();
-  }, [songData, accessToken]);
+  if (!songData) return null;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} backdrop="blur">
@@ -109,7 +101,6 @@ const SongModal = ({ isOpen, onClose, songData, onAddToPlaylist }) => {
             sizes="lg"
             alt={songData.name}
           />
-
           <h2>{songData.name}</h2>
           <h4>{songData.artists.map((artist) => artist.name).join(", ")}</h4>
           <h4>{songData.album.name}</h4>
@@ -119,14 +110,6 @@ const SongModal = ({ isOpen, onClose, songData, onAddToPlaylist }) => {
           <p>Popularity: {songData.popularity}</p>
         </ModalBody>
         <ModalFooter className="flex justify-center items-center">
-          <Popover placement="top" color={"default"}>
-            <PopoverTrigger>
-              <Button className="bn30" onClick={handleAddToPlaylistClick}>
-                Add to playlist
-              </Button>
-            </PopoverTrigger>
-            {popoverContent}
-          </Popover>
           <Popover placement="top" color={isLiked ? "error" : "success"}>
             <PopoverTrigger>
               <Button className="bn30" onClick={handleLikeUnlikeClick}>

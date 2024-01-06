@@ -38,10 +38,10 @@ const SpotifyTopTracks = ({ userId, accessToken }) => {
     <div className="glassmorphism-tracks ">
       <div className="container mt-3  ">
         <h1>Top Tracks</h1>
-        <table className="table ">
+        <table className="table tracktable">
           <thead>
             <tr>
-              <th className="track-table" scope="col">
+              <th className="track-table " scope="col">
                 Track
               </th>
               <th className="track-table2" scope="col">
@@ -52,7 +52,7 @@ const SpotifyTopTracks = ({ userId, accessToken }) => {
           <tbody>
             {topTracks.map((track) => (
               <tr key={track.id}>
-                <td className="black">{track.name}</td>
+                <td>{track.name}</td>
 
                 <td>{track.artists.map((artist) => artist.name).join(", ")}</td>
               </tr>

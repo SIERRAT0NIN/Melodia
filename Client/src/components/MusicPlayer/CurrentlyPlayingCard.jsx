@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Card,
   CardBody,
@@ -10,20 +10,19 @@ import {
 import { HeartIcon } from "./HeartIcon";
 import { NextIcon } from "./NextIcon";
 import { PauseCircleIcon } from "./PauseCircleIcon";
-
 import { RepeatOneIcon } from "./RepeatOneIcon";
 import { ShuffleIcon } from "./ShuffleIcon";
 import { PreviousIcon } from "./PreviousIcon";
-import { useSpotify } from "../Spotify/SpotifyContext";
 
 export default function CurrentlyPlayingCard() {
   const [liked, setLiked] = useState(false);
   const [currentlyPlaying, setCurrentlyPlaying] = useState();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { setAccessToken } = useSpotify();
-  const [songPosition, setSongPosition] = useState(0);
+  const [songPosition, setSongPosition] = useState();
   const [isPlaying, setIsPlaying] = useState(false);
+  const pollInterval = 1000; // Poll every 1000 milliseconds (1 second)
+  const intervalIdRef = useRef(null); // Use useRef to persist interval ID
 
   function formatTime(milliseconds) {
     const totalSeconds = Math.floor(milliseconds / 1000);
@@ -33,6 +32,7 @@ export default function CurrentlyPlayingCard() {
   }
 
   const storedAccessToken = localStorage.getItem("accessToken");
+
   useEffect(() => {
     if (!storedAccessToken) {
       console.error("Access token is null");
@@ -56,8 +56,8 @@ export default function CurrentlyPlayingCard() {
 
         const data = await response.json();
         setCurrentlyPlaying(data);
-        setSongPosition(data.progress_ms); // Update song position
-        setIsPlaying(data.is_playing); // Update playing state
+        setSongPosition(data.progress_ms);
+        setIsPlaying(data.is_playing);
       } catch (error) {
         console.error("Error fetching currently playing track:", error);
         setError("Error fetching data");
@@ -67,7 +67,57 @@ export default function CurrentlyPlayingCard() {
     };
 
     fetchCurrentlyPlaying();
-  }, [setAccessToken]); // Remove setAccessToken if you're not using it in the fetch
+  }, [currentlyPlaying]);
+
+  useEffect(() => {
+    if (!storedAccessToken) {
+      return; // Do not set up polling if there is no access token
+    }
+
+    // Start polling for song position
+    intervalIdRef.current = setInterval(() => {
+      if (isPlaying) {
+        updateSongPosition();
+      }
+    }, pollInterval);
+
+    // Cleanup function to clear the interval
+    return () => {
+      if (intervalIdRef.current) {
+        clearInterval(intervalIdRef.current);
+      }
+    };
+  }, [isPlaying, storedAccessToken]);
+
+  const updateSongPosition = async () => {
+    if (!storedAccessToken) {
+      console.error("Access token is null");
+      setError("Access token is not available");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "https://api.spotify.com/v1/me/player/currently-playing",
+        {
+          headers: { Authorization: `Bearer ${storedAccessToken}` },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch currently playing track");
+      }
+
+      const data = await response.json();
+      setSongPosition(data.progress_ms);
+    } catch (error) {
+      console.error("Error fetching currently playing track:", error);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleNextPrevious = async (direction) => {
     try {
@@ -75,7 +125,6 @@ export default function CurrentlyPlayingCard() {
         method: "POST",
         headers: { Authorization: `Bearer ${storedAccessToken}` },
       });
-      fetchCurrentlyPlaying(); // Refresh the currently playing track
     } catch (error) {
       console.error(`Error with ${direction} track:`, error);
     }
@@ -114,13 +163,8 @@ export default function CurrentlyPlayingCard() {
   if (!currentlyPlaying || !currentlyPlaying.item)
     return <p>No currently playing track.</p>;
 
-  const handlePrevious = async () => {
-    handleNextPrevious("previous");
-  };
-
-  const handleNext = async () => {
-    handleNextPrevious("next");
-  };
+  const handlePrevious = () => handleNextPrevious("previous");
+  const handleNext = () => handleNextPrevious("next");
 
   return (
     <Card
