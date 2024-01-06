@@ -820,3 +820,7 @@ button:focus-visible {
   -webkit-backdrop-filter: blur(20px);
   color: white;
 }
+.liked-song-img {
+  width: 100px;
+  height: 100px;
+}

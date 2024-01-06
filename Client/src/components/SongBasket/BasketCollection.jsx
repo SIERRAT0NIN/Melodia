@@ -177,8 +177,8 @@ function BasketCollection({ setSongCount, songCount }) {
     });
   };
   const openEditModal = (basket) => {
-    setCurrentBasketInfo(basket); // Set the information of the basket to be edited
-    setIsEditModalOpen(true); // Open the Edit Modal
+    setCurrentBasketInfo(basket);
+    setIsEditModalOpen(true);
   };
   const uris = basketData
     .map((basket) => basket.songs.map((song) => song.track_uri))
