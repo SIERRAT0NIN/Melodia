@@ -299,6 +299,7 @@ function BasketCollection({ setSongCount, songCount }) {
               Create into a Spotify Playlist
             </button> */}
               <CreateSpotifyPlaylist
+                basketData={basketData}
                 songUris={uris}
                 name={name}
                 description={description}
