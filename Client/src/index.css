@@ -655,7 +655,7 @@ button:focus-visible {
 }
 .rm-song {
   color: #fff;
-  background: rgba(171, 107, 255, 0.477);
+  background: rgba(83, 0, 191, 0.477);
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -814,7 +814,7 @@ button:focus-visible {
 }
 .deletebasket {
   background: #000;
-  background: rgba(151, 1, 1, 0.501);
+  background: rgba(0, 99, 90, 0.501);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(20px);
@@ -823,4 +823,7 @@ button:focus-visible {
 .liked-song-img {
   width: 100px;
   height: 100px;
+}
+.basket-info {
+  border-radius: 15px;
 }

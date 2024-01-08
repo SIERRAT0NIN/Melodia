@@ -167,14 +167,6 @@ export const CreateSongBasket = ({
           </Formik>
         </ModalContent>
       </Modal>
-
-      {/* {songBaskets.map((basket) => (
-        <SongBasket
-          key={basket.id}
-          id={basket.id}
-          loadSongBasket={loadSongBasket}
-        />
-      ))} */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}

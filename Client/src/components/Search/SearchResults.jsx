@@ -18,7 +18,7 @@ function SearchResults({
   onSongClick,
   onArtistClick,
   onAlbumClick,
-  handleSongToBasket,
+  // handleSongToBasket,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -26,7 +26,7 @@ function SearchResults({
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [isArtistModalOpen, setIsArtistModalOpen] = useState(false);
   const [isAlbumModalOpen, setIsAlbumModalOpen] = useState(false);
-  const { selectedBasketId } = useSpotify();
+  const { selectedBasketId, handleSongToBasket } = useSpotify();
   const [selectedSongs, setSelectedSongs] = useState([]);
 
   const handleItemClick = (item) => {
@@ -154,7 +154,7 @@ function SearchResults({
       searchData.albums.items.forEach((album) => {
         rows.push(
           <TableRow
-            key={album.id}
+            key={`track-${album.id}`}
             clickable
             onClick={() => handleItemClick(album)}
           >
