@@ -69,22 +69,6 @@ export const SpotifyProvider = ({ children }) => {
     );
   };
 
-  // const handleSongToBasket = (basket_id, response) => {
-
-  //   setBasketData((currentBaskets) =>
-  //     currentBaskets.map((basket) => {
-  //       if (basket.basket_id === basket_id) {
-  //         const newSongs = response.added_songs.map((song) => ({
-  //           // ... song properties
-  //         }));
-  //         return { ...basket, songs: [...basket.songs, ...newSongs] };
-  //       } else {
-  //         return basket;
-  //       }
-  //     })
-  //   );
-  // };
-
   return (
     <SpotifyContext.Provider
       value={{

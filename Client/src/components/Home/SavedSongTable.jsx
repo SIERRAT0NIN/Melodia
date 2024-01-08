@@ -22,12 +22,12 @@ const SavedSongs = () => {
 
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
-    const limit = 20; // Number of items per page
+    const limit = 30;
 
     if (!accessToken) return;
 
     const fetchUserSavedTracks = async () => {
-      const offset = (currentPage - 1) * limit; // Calculate the offset based on the current page
+      const offset = (currentPage - 1) * limit;
 
       try {
         const response = await fetch(
@@ -42,7 +42,7 @@ const SavedSongs = () => {
         if (response.ok) {
           const data = await response.json();
           setSavedTracks(data.items.map((item) => item.track));
-          setTotalPages(Math.ceil(data.total / limit)); // Update total pages based on the total number of items
+          setTotalPages(Math.ceil(data.total / limit));
         } else {
           console.error(
             "Error fetching user saved tracks:",

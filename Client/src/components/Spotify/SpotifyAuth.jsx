@@ -32,10 +32,6 @@ const SpotifyAuth = ({
   const client_secret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
   const client_id = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
   const redirect_uri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
-  // const client_secret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
-  // const client_id = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
-  // const redirect_uri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
-  // const jwtToken = localStorage.getItem("jwtToken"); // Retrieve JWT token from localStorage
 
   const calculateAccessTokenExpiration = () => {
     const currentTime = new Date();
@@ -173,9 +169,6 @@ const SpotifyAuth = ({
             setUserImg(null);
           }
         } else {
-          console.error("Error fetching user profile:", response.statusText);
-        }
-        {
           console.error("Error fetching user profile:", response.statusText);
         }
       } catch (error) {
@@ -459,11 +452,6 @@ const SpotifyAuth = ({
         .catch((error) => console.error(error));
     }
   }, [accessToken]);
-
-  // const logout = () => {
-  //   localStorage.removeItem("jwtToken");
-  //   // Perform other cleanup tasks, like resetting state
-  // };
   return <div></div>;
 };
 

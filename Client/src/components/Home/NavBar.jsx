@@ -2,13 +2,10 @@ import {
   Navbar,
   NavbarBrand,
   NavbarContent,
-  NavbarItem,
-  Link,
   Button,
   ButtonGroup,
 } from "@nextui-org/react";
 import EqualizerRoundedIcon from "@mui/icons-material/EqualizerRounded";
-// import SpotifySearch from "../Search/SpotifySearch.jsx";
 
 export default function NavBar() {
   return (

@@ -9,11 +9,9 @@ import {
   Card,
   CardFooter,
   Button,
-  useDisclosure,
   Image,
 } from "@nextui-org/react";
 import SpotifyAuth from "../Spotify/SpotifyAuth";
-import SavedPlaylist from "../Playlist/SavedPlaylist";
 import SongModal from "./SongDetail";
 import { useSpotify } from "../Spotify/SpotifyContext";
 import SongPages from "./SongPages";
@@ -28,8 +26,6 @@ const LikedSongs = () => {
   const [hasNoSongs, setHasNoSongs] = useState(false);
   const [currentAlbumTracks, setCurrentAlbumTracks] = useState([]);
   const [showAlbumTracksModal, setShowAlbumTracksModal] = useState(false);
-
-  // const { isOpen, toggle: toggleAlbumTracksModal } = useDisclosure();
 
   const { selectedSong, setSelectedSong, playlists, setPlaylists } =
     useSpotify();
@@ -115,7 +111,7 @@ const LikedSongs = () => {
   };
   const handleShowAlbumTracks = async (albumId) => {
     await fetchAlbumTracks(albumId);
-    setShowAlbumTracksModal(true); // Open the modal
+    setShowAlbumTracksModal(true);
   };
   return (
     <div>
@@ -170,14 +166,7 @@ const LikedSongs = () => {
                             <p className="text-tiny text-white/80">
                               {(track.album && track.album.name) || "N/A"}
                             </p>
-                            {/* <Button
-                              className="text-tiny text-black bg-black/20"
-                              variant="flat"
-                              color="default"
-                              radius="lg"
-                              size="sm"
-                              onClick={() => fetchAlbumTracks(track.album.id)}
-                            > */}
+
                             <Album
                               isOpen={showAlbumTracksModal}
                               onClose={() => setShowAlbumTracksModal(false)}
@@ -189,8 +178,6 @@ const LikedSongs = () => {
                               size="sm"
                               onClick={() => fetchAlbumTracks(track.album.id)}
                             />
-                            {/* See more!
-                            </Button> */}
                             <Button
                               onClick={() =>
                                 handleShowAlbumTracks(track.album.id)

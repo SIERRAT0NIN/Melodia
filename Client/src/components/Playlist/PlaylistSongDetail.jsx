@@ -28,10 +28,9 @@ const SongModal = ({ isOpen, onClose, song }) => {
       .catch((error) => console.error(error));
   };
 
-  const handleAddToPlaylistClick = () => {
-    setPopoverMessage("Song added to playlist.");
-  };
-
+  // const handleAddToPlaylistClick = () => {
+  //   setPopoverMessage("Song added to playlist.");
+  // };
   const popoverContent = (
     <PopoverContent>
       <div className="px-1 py-2">
@@ -87,14 +86,6 @@ const SongModal = ({ isOpen, onClose, song }) => {
           <p>Popularity: {song.popularity}</p>
         </ModalBody>
         <ModalFooter>
-          {/* <Popover placement="top" color={"default"}>
-            <PopoverTrigger>
-              <Button className="bn30" onClick={handleAddToPlaylistClick}>
-                Add to playlist
-              </Button>
-            </PopoverTrigger>
-            {popoverContent}
-          </Popover> */}
           <Popover placement="top" color={isLiked ? "error" : "success"}>
             <PopoverTrigger>
               <Button className="bn30" onClick={handleLikeUnlikeClick}>

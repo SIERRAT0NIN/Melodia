@@ -33,7 +33,7 @@ export default function Playlist() {
 
         if (response.ok) {
           const data = await response.json();
-          setPlaylists(data.items); // Update your state with the fetched playlists
+          setPlaylists(data.items);
         } else {
           console.error("Error fetching user playlists:", response.statusText);
         }
@@ -45,7 +45,29 @@ export default function Playlist() {
     fetchUserPlaylists();
   }, []);
 
-  const openModalWithPlaylist = (playlist) => {
+  const openModalWithPlaylist = async (playlist) => {
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (!playlist.tracks) {
+      try {
+        const response = await fetch(
+          `https://api.spotify.com/v1/playlists/${playlist.id}/tracks`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          playlist.tracks = data.items; // Add tracks to playlist
+        } else {
+          console.error("Error fetching playlist songs:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error fetching playlist songs:", error);
+      }
+    }
     setSelectedPlaylist(playlist);
     onOpen();
   };

@@ -28,8 +28,7 @@ const VerifyJWT = () => {
       const data = await response.json();
       if (response.ok && data.message === "Token is valid!") {
         setIsTokenValid(true);
-        setJwtUserId(data.user_id); // Log or use the user_id as needed
-        // Perform further actions based on the user_id
+        setJwtUserId(data.user_id);
       } else {
         setIsTokenValid(false);
         setErrorMessage(data.message || "Error verifying token");
@@ -41,15 +40,7 @@ const VerifyJWT = () => {
   };
 
   console.log("JWT User Id: ", jwtUserId);
-  return (
-    <div>
-      {/* {errorMessage ? (
-        <p>Error: {errorMessage}</p>
-      ) : (
-        <p>Token is {isTokenValid ? "valid" : "invalid"}.</p>
-      )} */}
-    </div>
-  );
+  return <div></div>;
 };
 
 export default VerifyJWT;

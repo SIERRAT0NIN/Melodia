@@ -8,8 +8,6 @@ import {
   ModalFooter,
   Button,
   Image,
-  RadioGroup,
-  Radio,
 } from "@nextui-org/react";
 import DeletePlaylistBtn from "./DeletePlaylistBtn";
 import EditPlaylistModal from "./EditPlaylist";
@@ -54,7 +52,6 @@ export default function PlaylistDetails({
         }
       } catch (error) {
         console.error("Error fetching tracks:", error);
-        // Handle the error appropriately here
       }
     };
 
@@ -76,7 +73,6 @@ export default function PlaylistDetails({
             description: updatedDetails.description,
           };
         }
-        // Return the playlist as is if it's not the one that was updated
         return pl;
       });
     });
@@ -135,7 +131,6 @@ export default function PlaylistDetails({
             Close
           </Button>
         </ModalFooter>
-        {/* Edit Playlist Modal */}
         {isEditModalOpen && (
           <EditPlaylistModal
             playlistId={id}

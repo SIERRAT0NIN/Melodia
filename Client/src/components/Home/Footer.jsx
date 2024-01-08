@@ -23,11 +23,6 @@ const Footer = () => {
                 href="https://www.linkedin.com/in/sierra-alberto23/"
                 className="text-white"
               >
-                {/* <FontAwesomeIcon
-                  icon="fa-brands fa-github"
-                  beatFade
-                  style={{ color: "#ffffff" }}
-                /> */}
                 LinkedIn
               </a>
             </Button>

@@ -1,12 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Modal,
-  Button,
-  Input,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@nextui-org/react";
+import { Button, Input } from "@nextui-org/react";
 
 function EditPlaylistModal({
   playlistId,
