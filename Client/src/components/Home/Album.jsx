@@ -1,24 +1,29 @@
+import React from "react";
 import {
   Modal,
-  ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
   Button,
-  useDisclosure,
 } from "@nextui-org/react";
 
 const Album = ({ isOpen, onClose, tracks }) => {
   return (
-    <Modal open={isOpen} onClose={onClose}>
-      <ModalHeader>
-        <h3>Album Tracks</h3>
-      </ModalHeader>
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalHeader>Album Tracks</ModalHeader>
       <ModalBody>
-        {tracks.map((track, index) => (
-          <div key={index}>{track.name}</div>
-        ))}
+        <div>
+          {tracks.map((track, index) => (
+            <div key={track.id || index}>
+              <strong>{track.name}</strong>
+              {/* Add more track details if needed */}
+            </div>
+          ))}
+        </div>
       </ModalBody>
+      <ModalFooter>
+        <Button onClick={onClose}>Close</Button>
+      </ModalFooter>
     </Modal>
   );
 };

@@ -28,6 +28,7 @@ export const SpotifyProvider = ({ children }) => {
   const [playlistName, setPlaylistName] = useState("");
   const [playlistDescription, setPlaylistDescription] = useState("");
   const [playlistImage, setPlaylistImage] = useState("");
+  const [basketData, setBasketData] = useState([]);
 
   useEffect(() => {
     const fetchAccessToken = async () => {
@@ -55,143 +56,35 @@ export const SpotifyProvider = ({ children }) => {
     }
   }, [userId]);
 
-  // const sendSelectedSongToBackend = async (selectedItems) => {
-  //   try {
-  //     const response = await fetch("http://localhost:5556/songbasket", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(selectedItems),
-  //     });
+  const handleSongToBasket = (basket_id, response) => {
+    setBasketData((currentBaskets) =>
+      currentBaskets.map((basket) => {
+        if (basket.basket_id === basket_id) {
+          const newSongs = response.added_songs.map((song) => ({}));
+          return { ...basket, songs: [...basket.songs, ...newSongs] };
+        } else {
+          return basket;
+        }
+      })
+    );
+  };
 
-  //     const data = await response.json();
-  //     console.log("Response from backend:", data);
-  //   } catch (error) {
-  //     console.error("Error sending selected song to backend:", error);
-  //   }
+  // const handleSongToBasket = (basket_id, response) => {
+
+  //   setBasketData((currentBaskets) =>
+  //     currentBaskets.map((basket) => {
+  //       if (basket.basket_id === basket_id) {
+  //         const newSongs = response.added_songs.map((song) => ({
+  //           // ... song properties
+  //         }));
+  //         return { ...basket, songs: [...basket.songs, ...newSongs] };
+  //       } else {
+  //         return basket;
+  //       }
+  //     })
+  //   );
   // };
-  // // useEffect hook to call the function when selectedSong changes
-  // useEffect(() => {
-  //   if (selectedSong) {
-  //     sendSelectedSongToBackend(selectedItems);
-  //   }
-  // }, [selectedItems]);
-  // const sendSelectedSongToBackend = async (song) => {
-  //   const songData = {
-  //     id: song.id,
-  //     name: song.name,
-  //     // image: song.images[1].url,
-  //   };
-  //   try {
-  //     const response = await fetch("http://localhost:5556/songbasket", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(songData),
-  //     });
 
-  //     const data = await response.json();
-  //     console.log("Response from backend:", data);
-  //   } catch (error) {
-  //     console.error("Error sending selected song to backend:", error);
-  //   }
-  //   console.log(songData, "SONG DATA");
-  // };
-  // // useEffect hook to call the function when selectedSong changes
-  // useEffect(() => {
-  //   if (selectedSong) {
-  //     sendSelectedSongToBackend(selectedSong);
-  //   }
-  // }, [selectedSong]);
-
-  // useEffect(() => {
-  //   if (!refreshToken) return;
-
-  //   const storeRefreshTokenInBackend = async () => {
-  //     try {
-  //       const response = await fetch(
-  //         "http://localhost:5556/store_refresh_token",
-  //         {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //           },
-  //           body: JSON.stringify({
-  //             user_id: userId,
-  //             refresh_token: refreshToken,
-  //           }),
-  //         }
-  //       );
-
-  //       const data = await response.json();
-  //       console.log("SRTIB: ", response);
-  //       console.log("Response from backend:", data);
-  //     } catch (error) {
-  //       console.error("Error storing refresh token:", error);
-  //     }
-  //   };
-
-  //   storeRefreshTokenInBackend();
-  // }, [userId, refreshToken]);
-  // useEffect(() => {
-  //   if (!accessToken) return;
-
-  //   const storeTokensInBackend = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:5556/store_tokens", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           user_id: userId,
-  //           access_token: accessToken,
-  //           refresh_token: refreshToken,
-  //         }),
-  //       });
-
-  //       const data = await response.json();
-  //       console.log("SRTIB: ", response);
-  //       console.log("Response from backend:", data);
-  //     } catch (error) {
-  //       console.error("Error storing refresh token:", error);
-  //     }
-  //   };
-
-  //   storeTokensInBackend();
-  // }, [userId, accessToken, refreshToken]);
-
-  // useEffect(() => {
-  //   if (!accessToken) return;
-
-  //   const storeAccessTokenInBackend = async () => {
-  //     try {
-  //       const response = await fetch(
-  //         "http://localhost:5556/store_tokens", // Update this URL as needed
-  //         {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //           },
-  //           body: JSON.stringify({
-  //             user_id: userId,
-  //             access_token: accessToken,
-  //           }),
-  //         }
-  //       );
-
-  //       const data = await response.json();
-  //       console.log("Store AccessToken in Backend: ", response);
-  //       console.log("Response from backend:", data);
-  //     } catch (error) {
-  //       console.error("Error storing access token:", error);
-  //     }
-  //   };
-
-  //   storeAccessTokenInBackend();
-  // }, [userId, accessToken]);
   return (
     <SpotifyContext.Provider
       value={{
@@ -238,6 +131,9 @@ export const SpotifyProvider = ({ children }) => {
         setPlaylistName,
         playlistImage,
         setPlaylistImage,
+        basketData,
+        setBasketData,
+        handleSongToBasket,
       }}
     >
       {children}

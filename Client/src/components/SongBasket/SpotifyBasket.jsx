@@ -82,7 +82,13 @@
 import React, { useState } from "react";
 import { useSpotify } from "../Spotify/SpotifyContext";
 
-const CreateSpotifyPlaylist = ({ songUris, name, description, image }) => {
+const CreateSpotifyPlaylist = ({
+  songUris,
+  name,
+  description,
+  image,
+  basketData,
+}) => {
   const [playlistId, setPlaylistId] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
   const { jwtUserId } = useSpotify();
@@ -104,6 +110,7 @@ const CreateSpotifyPlaylist = ({ songUris, name, description, image }) => {
       return;
     }
 
+    console.log(basketData);
     try {
       // Step 1: Create a new playlist
       const createResponse = await fetch(
@@ -115,8 +122,8 @@ const CreateSpotifyPlaylist = ({ songUris, name, description, image }) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            name: "New Basket",
-            description: "This is an example Song Basket!",
+            name: basketData[0].playlist_name,
+            description: basketData[0].playlist_description,
           }),
         }
       );

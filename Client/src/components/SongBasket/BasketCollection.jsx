@@ -58,25 +58,18 @@ function BasketCollection({ setSongCount, songCount }) {
   //     })
   //   );
   // };
-  const handleSongToBasket = (basket_id, response) => {
-    setBasketData((currentBaskets) =>
-      currentBaskets.map((basket) => {
-        if (basket.basket_id === basket_id) {
-          const newSongs = response.added_songs.map((song) => ({
-            track_id: song.track_id,
-            track_name: song.track_name,
-            track_artist: song.track_artist,
-            track_album: song.track_album,
-            track_image: song.track_image,
-            track_uri: song.track_uri,
-          }));
-          return { ...basket, songs: [...basket.songs, ...newSongs] };
-        } else {
-          return basket;
-        }
-      })
-    );
-  };
+  // const handleSongToBasket = (basket_id, response) => {
+  //   setBasketData((currentBaskets) =>
+  //     currentBaskets.map((basket) => {
+  //       if (basket.basket_id === basket_id) {
+  //         const newSongs = response.added_songs.map((song) => ({}));
+  //         return { ...basket, songs: [...basket.songs, ...newSongs] };
+  //       } else {
+  //         return basket;
+  //       }
+  //     })
+  //   );
+  // };
 
   const loadSongBasket = () => {
     fetch(`http://localhost:5556/song_basket/${jwtUserId}`)
@@ -97,7 +90,9 @@ function BasketCollection({ setSongCount, songCount }) {
         );
       });
   };
-
+  useEffect(() => {
+    loadSongBasket();
+  }, [jwtUserId]);
   function deleteBasket(basketId) {
     fetch(`http://localhost:5556/delete_basket/${jwtUserId}/${basketId}`, {
       method: "DELETE",
@@ -203,8 +198,23 @@ function BasketCollection({ setSongCount, songCount }) {
         <div className="glassmorphism-basket">
           {basketData.map((basket, index) => (
             <div key={basket.basket_id}>
-              <Image src={basket.playlist_img}></Image>
-              <div className="deletebasket flex justify-center">
+              <div className="flex justify-center">
+                <Image
+                  style={{
+                    width: "300px",
+                    height: "300px",
+                    objectFit: "cover",
+                  }}
+                  src={basket.playlist_img}
+                ></Image>
+              </div>
+              <div
+                className="deletebasket  basket-info justify-center"
+                style={{
+                  width: "250px",
+                  height: "100px",
+                }}
+              >
                 <h3>Basket ID: {basket.basket_id}</h3>
 
                 <h2>Name: {basket.playlist_name}</h2>
@@ -222,7 +232,7 @@ function BasketCollection({ setSongCount, songCount }) {
                   <span className="bn54span">Edit Basket </span>
                 </button>
                 <AddSongs
-                  handleSongToBasket={handleSongToBasket}
+                  // handleSongToBasket={handleSongToBasket}
                   isOpen={isOpen}
                   onClose={onSearchModalClose}
                 />
@@ -299,6 +309,7 @@ function BasketCollection({ setSongCount, songCount }) {
               Create into a Spotify Playlist
             </button> */}
               <CreateSpotifyPlaylist
+                basketData={basketData}
                 songUris={uris}
                 name={name}
                 description={description}
@@ -334,5 +345,4 @@ function BasketCollection({ setSongCount, songCount }) {
     </div>
   );
 }
-
 export default BasketCollection;

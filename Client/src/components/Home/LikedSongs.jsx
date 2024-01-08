@@ -9,6 +9,7 @@ import {
   Card,
   CardFooter,
   Button,
+  useDisclosure,
   Image,
 } from "@nextui-org/react";
 import SpotifyAuth from "../Spotify/SpotifyAuth";
@@ -25,8 +26,10 @@ const LikedSongs = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(10);
   const [hasNoSongs, setHasNoSongs] = useState(false);
-  const [showAlbumTracksModal, setShowAlbumTracksModal] = useState(true);
   const [currentAlbumTracks, setCurrentAlbumTracks] = useState([]);
+  const [showAlbumTracksModal, setShowAlbumTracksModal] = useState(false);
+
+  // const { isOpen, toggle: toggleAlbumTracksModal } = useDisclosure();
 
   const { selectedSong, setSelectedSong, playlists, setPlaylists } =
     useSpotify();
@@ -84,6 +87,8 @@ const LikedSongs = () => {
   };
 
   const fetchAlbumTracks = async (albumId) => {
+    console.log("Fetching album tracks for album ID:", albumId); // Debugging log
+
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) return;
 
@@ -97,8 +102,10 @@ const LikedSongs = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setShowAlbumTracksModal(true);
         setCurrentAlbumTracks(data.items);
+        console.log("Fetched album tracks:", data.items); // Debugging log
+        setShowAlbumTracksModal(true);
+        // toggleAlbumTracksModal(true);
       } else {
         console.error("Error fetching album tracks:", response.statusText);
       }
@@ -106,11 +113,14 @@ const LikedSongs = () => {
       console.error("Error fetching album tracks:", error);
     }
   };
-  console.log(currentAlbumTracks);
-
+  const handleShowAlbumTracks = async (albumId) => {
+    await fetchAlbumTracks(albumId);
+    setShowAlbumTracksModal(true); // Open the modal
+  };
   return (
     <div>
       <NavBar />
+
       <SpotifyAuth onSavedTracksChange={handleSavedTracksChange} />
       <div>
         {hasNoSongs ? (
@@ -123,11 +133,11 @@ const LikedSongs = () => {
             shadow="none"
           >
             <TableHeader>
-              <TableColumn color="primary">Song Title</TableColumn>
+              <TableColumn>Song Title</TableColumn>
               <TableColumn>Artist</TableColumn>
               <TableColumn>Album</TableColumn>
             </TableHeader>
-            <TableBody color="primary">
+            <TableBody>
               {savedTracks.map((track, index) => (
                 <TableRow
                   css={{ cursor: "pointer" }}
@@ -139,7 +149,7 @@ const LikedSongs = () => {
                     {(track.artists && track.artists[0].name) || "N/A"}
                   </TableCell>
                   <TableCell>
-                    {(track.album && track.album.name) || "N/A"}
+                    {/* {(track.album && track.album.name) || "N/A"}     */}
                     {track.album &&
                       track.album.images &&
                       track.album.images.length > 0 && (
@@ -160,15 +170,33 @@ const LikedSongs = () => {
                             <p className="text-tiny text-white/80">
                               {(track.album && track.album.name) || "N/A"}
                             </p>
-                            <Button
+                            {/* <Button
                               className="text-tiny text-black bg-black/20"
                               variant="flat"
                               color="default"
                               radius="lg"
                               size="sm"
                               onClick={() => fetchAlbumTracks(track.album.id)}
+                            > */}
+                            <Album
+                              isOpen={showAlbumTracksModal}
+                              onClose={() => setShowAlbumTracksModal(false)}
+                              tracks={currentAlbumTracks}
+                              className="text-tiny text-black bg-black/20"
+                              variant="flat"
+                              color="default"
+                              radius="lg"
+                              size="sm"
+                              onClick={() => fetchAlbumTracks(track.album.id)}
+                            />
+                            {/* See more!
+                            </Button> */}
+                            <Button
+                              onClick={() =>
+                                handleShowAlbumTracks(track.album.id)
+                              }
                             >
-                              See more!
+                              See Album Tracks
                             </Button>
                           </CardFooter>
                         </Card>
@@ -179,10 +207,16 @@ const LikedSongs = () => {
             </TableBody>
           </Table>
         )}
+
         <SongModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           songData={selectedSong}
+        />
+        <Album
+          isOpen={showAlbumTracksModal}
+          onClose={() => setShowAlbumTracksModal(false)}
+          tracks={currentAlbumTracks}
         />
         <div className="flex justify-center">
           <SongPages
@@ -192,11 +226,6 @@ const LikedSongs = () => {
           />
         </div>
       </div>
-      <Album
-        isOpen={showAlbumTracksModal}
-        onClose={() => setShowAlbumTracksModal(false)}
-        tracks={currentAlbumTracks}
-      />
     </div>
   );
 };

@@ -1196,7 +1196,7 @@ api.add_resource(UserPlaylistFollow, '/user_playlist_follow/<string:playlist_id>
 
 
 if __name__ == '__main__':
-    print(app.url_map)
+   
     app.run(debug=True, port=5556)
 
 

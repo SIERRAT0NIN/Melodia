@@ -53,7 +53,6 @@ const SpotifyTopTracks = ({ userId, accessToken }) => {
             {topTracks.map((track) => (
               <tr key={track.id}>
                 <td>{track.name}</td>
-
                 <td>{track.artists.map((artist) => artist.name).join(", ")}</td>
               </tr>
             ))}
