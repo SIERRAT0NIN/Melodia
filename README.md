@@ -25,10 +25,13 @@ Additional Information
 Installation
 ------
 
+$npm install
+$npm run dev
+
 
 Contributing
 
 Alberto Sierra
-
+[![Netlify Status](https://api.netlify.com/api/v1/badges/63becd50-2729-477c-84b7-077de9f55301/deploy-status)](https://app.netlify.com/sites/melodia/deploys)
 License
 MIT
