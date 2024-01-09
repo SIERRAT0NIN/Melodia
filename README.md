@@ -25,6 +25,9 @@ Additional Information
 Installation
 ------
 
+$npm install
+$npm run dev
+
 
 Contributing
 
