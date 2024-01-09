@@ -301,7 +301,7 @@ class TokenExchange(Resource):
         token_info = exchange_code(code)
         if token_info:
             session['token_info'] = token_info
-            return redirect('http://localhost:5555/home')  
+            return redirect('https://melodia.netlify.app/')  
         else:
             return ({'error': str(e)}), 500
     def get(self):
