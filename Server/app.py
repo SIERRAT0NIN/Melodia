@@ -291,7 +291,7 @@ class Redirect(Resource):
         code = request.args.get('code')
         token_info = create_spotify_oauth().get_access_token(code)
         session[TOKEN_INFO] = token_info
-        return redirect('http://127.0.0.1:5556/token-exchange')
+        return redirect('https://melodia.netlify.app/token-exchange')
 
 class TokenExchange(Resource):
     def get(self):
