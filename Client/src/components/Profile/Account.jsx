@@ -57,7 +57,7 @@ const Account = () => {
     setDisplayName(null);
     setUserEmail(null);
     setUserImg(null);
-    navigate("/"); // Replace "/login" with your login route
+    navigate("/");
   };
 
   return (
@@ -65,12 +65,7 @@ const Account = () => {
       <NavBar />
 
       <div className="glassmorphism-profile">
-        <img
-          className="profile"
-          src={userImg}
-          alt="Profile"
-          // style={{ width: "150px", height: "150px", borderRadius: "50%" }}
-        />
+        <img className="profile" src={userImg} alt="Profile" />
         <h1>{displayName}</h1>
         <h2>{userId}</h2>
         <p>{userEmail}</p>

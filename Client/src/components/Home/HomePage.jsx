@@ -11,11 +11,8 @@ function HomePage() {
       <div className="nav-container">
         <NavBar />
       </div>
-
       <div className="saved-song-table-container">
         <br />
-        {/* <CurrentlyPlayingCard accessToken={accessToken} /> */}
-
         <CurrentlyPlayingCard />
         <br />
         <SavedSongTable />

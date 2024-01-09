@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useSpotify } from "../Spotify/SpotifyContext"; // assuming this is the path to your SpotifyContext
-import { Button, Select } from "@nextui-org/react";
+import { Select } from "@nextui-org/react";
 
 const AddToPlaylist = () => {
   const [selectedPlaylistId, setSelectedPlaylistId] = useState("");

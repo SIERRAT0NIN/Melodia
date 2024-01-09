@@ -4,14 +4,8 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Button,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
   Image,
 } from "@nextui-org/react";
-import { useState } from "react";
-import { useSpotify } from "../Spotify/SpotifyContext";
 
 const SearchAlbumModal = ({ isOpen, onClose, albumData, scrollBehavior }) => {
   if (!albumData) return null;

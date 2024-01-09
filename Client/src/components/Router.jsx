@@ -4,10 +4,6 @@ import CreatePlaylist from "./Playlist/CreatePlaylist";
 import HomePage from "./Home/HomePage";
 
 import Logout from "./Home/Logout";
-import SavedPlaylist from "./Playlist/SavedPlaylist";
-import SavedSongTable from "./Home/SavedSongTable";
-// import SongBasket from "./SongBasket/SongBasket";
-import NotFound from "./Home/NotFound";
 import CurrentlyPlayingCard from "./MusicPlayer/CurrentlyPlayingCard";
 
 import Blob from "./Home/NewLoginBlob";
@@ -37,7 +33,6 @@ function App() {
             <Route path="/baskets" element={<BasketCollection />} />
             <Route path="/" element={<Blob />} />
             <Route path="/logout" element={<Logout />} />
-            <Route path="*" element={<NotFound />} />
           </>
         ) : (
           <>

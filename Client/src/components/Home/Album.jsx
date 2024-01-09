@@ -16,7 +16,6 @@ const Album = ({ isOpen, onClose, tracks }) => {
           {tracks.map((track, index) => (
             <div key={track.id || index}>
               <strong>{track.name}</strong>
-              {/* Add more track details if needed */}
             </div>
           ))}
         </div>

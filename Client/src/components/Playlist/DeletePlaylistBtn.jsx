@@ -24,8 +24,6 @@ function DeletePlaylistBtn({ playlistId }) {
 
       if (response.ok) {
         console.log("Playlist deleted (unfollowed) successfully");
-        // You might want to add some logic here to update the UI
-        // or inform the parent component about the deletion
       } else {
         console.error(
           "Error deleting (unfollowing) the playlist:",
