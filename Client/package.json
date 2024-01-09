@@ -1,6 +1,6 @@
 {
   "name": "music-project",
-  "proxy": "http://127.0.0.1:5556",
+  // "proxy": "http://127.0.0.1:5556",
   "private": true,
   "version": "0.0.0",
   "type": "module",
