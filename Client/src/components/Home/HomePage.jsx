@@ -6,11 +6,18 @@ import Container from "react-bootstrap/Container";
 import Footer from "./Footer";
 import SpotifyAuth from "../Spotify/SpotifyAuth";
 import { useSpotify } from "../Spotify/SpotifyContext";
+import { useLocation } from "react-router-dom";
+
 function HomePage() {
   const { accessToken, setAccessToken } = useSpotify(null);
+  const location = useLocation();
+
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get("code");
+    // const urlParams = new URLSearchParams(window.location.search);
+    const query = new URLSearchParams(location.search);
+
+    // const code = urlParams.get("code");
+    const code = query.get("code");
 
     if (code) {
       // Send the authorization code to your backend
@@ -32,7 +39,7 @@ function HomePage() {
           console.error("Error exchanging authorization code:", error);
         });
     }
-  }, [setAccessToken]);
+  }, [location]);
   console.log(accessToken);
   return (
     <>
