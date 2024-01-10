@@ -4,10 +4,12 @@ import CurrentlyPlayingCard from "../MusicPlayer/CurrentlyPlayingCard";
 import SavedSongTable from "./SavedSongTable";
 import Container from "react-bootstrap/Container";
 import Footer from "./Footer";
+import SpotifyAuth from "../Spotify/SpotifyAuth";
 
 function HomePage() {
   return (
     <Container>
+      <SpotifyAuth />
       <div className="nav-container">
         <NavBar />
       </div>
