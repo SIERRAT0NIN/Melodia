@@ -2,16 +2,15 @@ import { Route, Routes } from "react-router-dom";
 import Account from "./Profile/Account";
 import CreatePlaylist from "./Playlist/CreatePlaylist";
 import HomePage from "./Home/HomePage";
-
 import Logout from "./Home/Logout";
 import CurrentlyPlayingCard from "./MusicPlayer/CurrentlyPlayingCard";
-
 import Blob from "./Home/NewLoginBlob";
 import { BrowserRouter as Router } from "react-router-dom";
 import SearchResults from "./Search/SearchResults";
 import BasketCollection from "./SongBasket/BasketCollection";
 import Playlist from "./Playlist/Playlists";
 import LikedSongs from "./Home/LikedSongs";
+
 function App() {
   const is_logged_in = true;
 
