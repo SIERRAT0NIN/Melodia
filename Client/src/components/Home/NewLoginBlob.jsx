@@ -5,7 +5,6 @@ const Blob = () => {
     {
       name: "Melodía",
       description: "Your personal music app",
-
       username: "Sign in with Spotify!",
       className: "linkedin",
     },
