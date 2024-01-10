@@ -3,7 +3,7 @@ const Blob = () => {
     {
       name: "Melodía",
       description: "Your personal music app",
-      url: "https://melodia.netlify.app/home",
+      url: "/home",
       username: "Sign in with Spotify!",
       className: "linkedin",
     },
