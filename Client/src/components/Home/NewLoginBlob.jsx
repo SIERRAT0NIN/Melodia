@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const Blob = () => {
   const blobContent = [
     {
@@ -19,9 +21,7 @@ const Blob = () => {
           <div className="content">
             <h2>{social.name}</h2>
             <p>{social.description}</p>
-            <a href={social.url} rel="noopener noreferrer">
-              {social.username}
-            </a>
+            <Link to="/home">{social.username}</Link>
           </div>
         </div>
       ))}
