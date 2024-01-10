@@ -13,7 +13,7 @@ function HomePage() {
     const code = urlParams.get("code");
 
     if (code) {
-      // Send the authorization code to the backend
+      // Send the authorization code to your backend
       fetch("http://127.0.0.1:5556/token-exchange", {
         method: "POST",
         headers: {
@@ -24,8 +24,7 @@ function HomePage() {
         .then((response) => response.json())
         .then((data) => {
           if (data.access_token) {
-            // Handle the access token as needed in your app
-            setAccessToken(data.access_token);
+            setAccessToken(data.access_token); // Save the access token using the method provided by your context or state management
             console.log("Access Token:", data.access_token);
           }
         })
@@ -33,23 +32,25 @@ function HomePage() {
           console.error("Error exchanging authorization code:", error);
         });
     }
-  }, []);
+  }, [setAccessToken]);
   console.log(accessToken);
   return (
-    <Container>
-      <div className="nav-container">
-        <SpotifyAuth />
-        <NavBar />
-      </div>
-      <div className="saved-song-table-container">
-        <br />
-        <CurrentlyPlayingCard />
-        <br />
-        <SavedSongTable />
-        <br />
-      </div>
-      <Footer />
-    </Container>
+    <>
+      <SpotifyAuth />
+      <Container>
+        <div className="nav-container">
+          <NavBar />
+        </div>
+        <div className="saved-song-table-container">
+          <br />
+          <CurrentlyPlayingCard />
+          <br />
+          <SavedSongTable />
+          <br />
+        </div>
+        <Footer />
+      </Container>
+    </>
   );
 }
 
