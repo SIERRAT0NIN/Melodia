@@ -177,7 +177,9 @@ const LikedSongs = () => {
                               color="default"
                               radius="lg"
                               size="sm"
-                              onClick={() => fetchAlbumTracks(track.album.id)}
+                              onClick={(e) =>
+                                fetchAlbumTracks(track.album.id, e)
+                              }
                             />
                             <Button
                               onClick={(e) =>

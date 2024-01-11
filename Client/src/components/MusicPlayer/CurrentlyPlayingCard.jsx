@@ -67,7 +67,7 @@ export default function CurrentlyPlayingCard() {
     };
 
     fetchCurrentlyPlaying();
-  }, [currentlyPlaying]);
+  }, [currentlyPlaying]); //making fetch call every second? is that okay?
 
   useEffect(() => {
     if (!storedAccessToken) {

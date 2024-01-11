@@ -1,5 +1,3 @@
-import { Link } from "react-router-dom";
-
 const Blob = () => {
   const blobContent = [
     {
@@ -30,7 +28,6 @@ const Blob = () => {
   ];
   if (!client_id || !client_secret || !redirect_uri) {
     console.error("Spotify credentials are not properly set.");
-
     return;
   }
 
@@ -38,7 +35,6 @@ const Blob = () => {
     const authUrl = `https://accounts.spotify.com/authorize?client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scopes.join(
       "%20"
     )}&response_type=code`;
-
     window.location.href = authUrl;
   };
   return (
