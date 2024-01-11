@@ -5,20 +5,20 @@ import SavedSongTable from "./SavedSongTable";
 import Container from "react-bootstrap/Container";
 import Footer from "./Footer";
 import SpotifyAuth from "../Spotify/SpotifyAuth";
-import { useSpotify } from "../Spotify/SpotifyContext";
-import { useLocation } from "react-router-dom";
+// import { useSpotify } from "../Spotify/SpotifyContext";
+// import { useLocation } from "react-router-dom";
 
 function HomePage() {
   // const { accessToken, setAccessToken } = useSpotify(null);
   const { accessToken, setAccessToken } = useState(null);
-  const location = useLocation();
+  // const location = useLocation();
 
   useEffect(() => {
-    // const urlParams = new URLSearchParams(window.location.search);
-    const query = new URLSearchParams(location.search);
+    const urlParams = new URLSearchParams(window.location.search);
+    // const query = new URLSearchParams(location.search);
 
-    // const code = urlParams.get("code");
-    const code = query.get("code");
+    const code = urlParams.get("code");
+    // const code = query.get("code");
 
     if (code) {
       // Send the authorization code to your backend
@@ -33,6 +33,8 @@ function HomePage() {
         .then((data) => {
           if (data.access_token) {
             setAccessToken(data.access_token); // Save the access token using the method provided by your context or state management
+            localStorage.setItem("accessToken", data.access_token); //! ACCESS TOKEN
+
             console.log("Access Token:", data.access_token);
           }
         })
@@ -40,8 +42,8 @@ function HomePage() {
           console.error("Error exchanging authorization code:", error);
         });
     }
-  }, [location]);
-  console.log(accessToken);
+  }, [accessToken]);
+
   return (
     <>
       <SpotifyAuth />
