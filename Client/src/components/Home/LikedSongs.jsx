@@ -109,7 +109,8 @@ const LikedSongs = () => {
       console.error("Error fetching album tracks:", error);
     }
   };
-  const handleShowAlbumTracks = async (albumId) => {
+  const handleShowAlbumTracks = async (albumId, event) => {
+    event.stopPropagation();
     await fetchAlbumTracks(albumId);
     setShowAlbumTracksModal(true);
   };
@@ -176,12 +177,16 @@ const LikedSongs = () => {
                               color="default"
                               radius="lg"
                               size="sm"
-                              onClick={() => fetchAlbumTracks(track.album.id)}
+                              onClick={(e) =>
+                                fetchAlbumTracks(track.album.id, e)
+                              }
                             />
                             <Button
-                              onClick={() =>
-                                handleShowAlbumTracks(track.album.id)
+                              onClick={(e) =>
+                                handleShowAlbumTracks(track.album.id, e)
                               }
+                              color="default"
+                              variant="shadow"
                             >
                               See Album Tracks
                             </Button>

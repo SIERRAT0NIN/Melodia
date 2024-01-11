@@ -223,10 +223,10 @@ def get_current_user_id():
 
 def store_token_for_user(user_id, token_info):
 
-    user_token = UserToken.query.filter_by(user_id=user_id).first()
+    user_token = Token.query.filter_by(user_id=user_id).first()
 
     if not user_token:
-        user_token = UserToken(user_id=user_id)
+        user_token = Token(user_id=user_id)
         db.session.add(user_token)
 
     user_token.access_token = token_info['access_token']
@@ -241,7 +241,7 @@ def encode_client_credentials(client_id, client_secret):
     return client_credentials_b64
 
 def get_token_for_user(user_id):
-    user_token = UserToken.query.filter_by(user_id=user_id).first()
+    user_token = Token.query.filter_by(user_id=user_id).first()
     if user_token:
         if datetime.utcnow() < user_token.expires_at:
             return {
@@ -301,7 +301,7 @@ class TokenExchange(Resource):
         token_info = exchange_code(code)
         if token_info:
             session['token_info'] = token_info
-            return redirect('https://melodia.netlify.app/')  
+            return redirect('https://melodia.netlify.app/home')  
         else:
             return ({'error': str(e)}), 500
     def get(self):
@@ -336,23 +336,7 @@ class TokenExchange(Resource):
             return ({'error': str(e)}), 500     
  
 class SavedSongs(Resource):
-    # def get(self):
-    #     code = request.args.get('code')
-    #     if not code:
-    #         return {'message': 'No code provided'}, 400
-    #     access_token = self.get_access_token_from_request()        
-    #     token_info = exchange_code(code)
-    #     if token_info:
-    #         session['token_info'] = token_info
-    #         return redirect('http://127.0.0.1:5556/user_saved_tracks')  
-    #     else:
-    #         return ({'error': str(e)}), 500
-    #         # results = sp.current_user_saved_tracks()
-    #         # songs = self.extract_songs(results)
-            
-    #         # return ({'songs': songs}), 200
-    #         # except Exception as e:
-    #         # return ({"error": str(e)}), 500
+
     def get(self):
         access_token = self.get_access_token_from_request()
         if not access_token:
@@ -772,7 +756,6 @@ class RefreshTokenResource(Resource):
         try:
             data = request.json
             user_id = data.get('user_id') 
-            # user_id = 'alberto_sierra'  
             refresh_token = data.get('refresh_token')
 
             if not user_id or not refresh_token:
@@ -1196,23 +1179,8 @@ api.add_resource(UserPlaylistFollow, '/user_playlist_follow/<string:playlist_id>
 
 
 if __name__ == '__main__':
-   
     app.run(debug=True, port=5556)
 
 
 
-
-
-
-
-
-
-
-
-
-# class LoginPage(Resource):
-#     def get(self):  
-#         return 'Sign In with Spotify!'
-# api.add_resource(LoginPage, '/login')
-    
 
