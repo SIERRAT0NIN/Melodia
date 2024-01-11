@@ -30,8 +30,8 @@ const Blob = () => {
   ];
   if (!client_id || !client_secret || !redirect_uri) {
     console.error("Spotify credentials are not properly set.");
-    // Optionally, display an error message to the user
-    return; // Stop further execution
+
+    return;
   }
 
   const redirectToSpotifyLogin = () => {
