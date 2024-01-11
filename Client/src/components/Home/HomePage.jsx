@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "./NavBar";
 import CurrentlyPlayingCard from "../MusicPlayer/CurrentlyPlayingCard";
 import SavedSongTable from "./SavedSongTable";
@@ -9,7 +9,8 @@ import { useSpotify } from "../Spotify/SpotifyContext";
 import { useLocation } from "react-router-dom";
 
 function HomePage() {
-  const { accessToken, setAccessToken } = useSpotify(null);
+  // const { accessToken, setAccessToken } = useSpotify(null);
+  const { accessToken, setAccessToken } = useState(null);
   const location = useLocation();
 
   useEffect(() => {

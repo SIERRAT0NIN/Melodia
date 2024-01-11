@@ -19,7 +19,7 @@ export default function NavBar() {
                 Melody
               </p>
             </NavbarBrand>
-            <a href="http://localhost:5555/home">
+            <a href="melodia.netlify.app/home">
               <h1 className="home-nav">Melodía</h1>
             </a>
           </div>
