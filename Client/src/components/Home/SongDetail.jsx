@@ -90,6 +90,11 @@ const SongModal = ({ isOpen, onClose, songData }) => {
   );
 
   if (!songData) return null;
+  const handleShowAlbumTracks = async (albumId, event) => {
+    event.stopPropagation();
+    await fetchAlbumTracks(albumId);
+    setShowAlbumTracksModal(true);
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} backdrop="blur">
@@ -108,6 +113,13 @@ const SongModal = ({ isOpen, onClose, songData }) => {
         <ModalBody>
           <p>Release Date: {songData.album.release_date}</p>
           <p>Popularity: {songData.popularity}</p>
+          <div>
+            {tracks.map((track, index) => (
+              <div key={track.id || index}>
+                <strong>{track.name}</strong>
+              </div>
+            ))}
+          </div>
         </ModalBody>
         <ModalFooter className="flex justify-center items-center">
           <Popover placement="top" color={isLiked ? "error" : "success"}>
