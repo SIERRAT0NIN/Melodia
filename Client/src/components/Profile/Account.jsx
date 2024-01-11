@@ -39,7 +39,7 @@ const Account = () => {
           setDisplayName(data.display_name);
           setUserEmail(data.email);
           setUserImg(
-            data.images && data.images.length > 0 ? data.images[0].url : null
+            data.images && data.images.length > 0 ? data.images[1].url : null
           );
         } else {
           console.error("Error fetching user profile:", response.statusText);
