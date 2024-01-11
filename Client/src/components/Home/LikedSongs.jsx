@@ -109,11 +109,11 @@ const LikedSongs = () => {
       console.error("Error fetching album tracks:", error);
     }
   };
-  const handleShowAlbumTracks = async (albumId, event) => {
-    event.stopPropagation();
-    await fetchAlbumTracks(albumId);
-    setShowAlbumTracksModal(true);
-  };
+  // const handleShowAlbumTracks = async (albumId, event) => {
+  //   event.stopPropagation();
+  //   await fetchAlbumTracks(albumId);
+  //   setShowAlbumTracksModal(true);
+  // };
   return (
     <div>
       <NavBar />
@@ -181,7 +181,7 @@ const LikedSongs = () => {
                                 fetchAlbumTracks(track.album.id, e)
                               }
                             />
-                            <Button
+                            {/* <Button
                               onClick={(e) =>
                                 handleShowAlbumTracks(track.album.id, e)
                               }
@@ -189,7 +189,7 @@ const LikedSongs = () => {
                               variant="shadow"
                             >
                               See Album Tracks
-                            </Button>
+                            </Button> */}
                           </CardFooter>
                         </Card>
                       )}
@@ -205,11 +205,11 @@ const LikedSongs = () => {
           onClose={() => setIsModalOpen(false)}
           songData={selectedSong}
         />
-        <Album
+        {/* <Album
           isOpen={showAlbumTracksModal}
           onClose={() => setShowAlbumTracksModal(false)}
           tracks={currentAlbumTracks}
-        />
+        /> */}
         <div className="flex justify-center">
           <SongPages
             currentPage={currentPage}

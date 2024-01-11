@@ -1,3 +1,4 @@
+import { Button } from "@nextui-org/react";
 const Blob = () => {
   const blobContent = [
     {
@@ -47,7 +48,13 @@ const Blob = () => {
           <div className="content">
             <h2>{social.name}</h2>
             <p>{social.description}</p>
-            <button onClick={redirectToSpotifyLogin}>{social.username}</button>
+            <Button
+              color="primary"
+              variant="faded"
+              onClick={redirectToSpotifyLogin}
+            >
+              {social.username}
+            </Button>
           </div>
         </div>
       ))}
