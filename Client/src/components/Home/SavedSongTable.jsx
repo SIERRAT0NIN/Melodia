@@ -75,7 +75,7 @@ const SavedSongs = () => {
 
   //!Added class name flex gap-4 items-center
   return (
-    <div className="flex gap-4 items-center">
+    <div className="flex items-center song-table">
       <SpotifyAuth
         onSavedTracksChange={handleSavedTracksChange}
         onPlaylistsChange={handlePlaylistsChange}
