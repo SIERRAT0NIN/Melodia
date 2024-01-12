@@ -60,7 +60,7 @@ export default function CurrentlyPlayingCard() {
         setIsPlaying(data.is_playing);
       } catch (error) {
         console.error("Error fetching currently playing track:", error);
-        setError("Error fetching data");
+        setError("No song currently playing");
       } finally {
         setLoading(false);
       }
@@ -113,7 +113,7 @@ export default function CurrentlyPlayingCard() {
       setSongPosition(data.progress_ms);
     } catch (error) {
       console.error("Error fetching currently playing track:", error);
-      setError("Error fetching data");
+      setError("No song currently playing.");
     } finally {
       setLoading(false);
     }
