@@ -3,6 +3,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile devices */
+@media (max-width: 768px) {
+  .responsive-wrapper {
+    padding: 4vw; /* smaller padding on smaller screens */
+    flex-direction: column; /* stack items vertically */
+  }
+}
+
+/* Larger devices */
+@media (min-width: 769px) {
+  .responsive-wrapper {
+    padding: 8vh 8vw; /* adjust padding for larger screens */
+  }
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -826,4 +841,9 @@ button:focus-visible {
 }
 .basket-info {
   border-radius: 15px;
+}
+
+.song-table {
+  width: 100px;
+  height: 100px;
 }
