@@ -85,20 +85,20 @@ const SavedSongs = () => {
       />
       <div className="auto relative items-center">
         <Table color="success" aria-label="Saved Songs Table">
-          <TableHeader wrapper className="table-header">
+          <TableHeader wrapper className="table-header relative">
             <TableColumn>Song Title</TableColumn>
-            <TableColumn>Artist</TableColumn>
-            <TableColumn>Album</TableColumn>
+            <TableColumn className="artist-column">Artist</TableColumn>
+            <TableColumn className="album-column">Album</TableColumn>
           </TableHeader>
-          <TableBody wrapper>
+          <TableBody className="responsive-table-wrapper flex">
             {savedTracks.map((track, index) => (
               <TableRow
                 css={{ cursor: "pointer" }}
                 key={track.id || index}
                 onClick={() => onSongClick(track)}
-                className="table-row "
+                className="table-row"
               >
-                <TableCell className="table-cell">
+                <TableCell className="table-cell ">
                   {track.name || "N/A"}
                 </TableCell>
                 <TableCell className="table-cell">

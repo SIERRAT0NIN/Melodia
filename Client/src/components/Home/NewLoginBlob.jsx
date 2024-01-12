@@ -16,7 +16,7 @@ const Blob = () => {
   const client_secret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
   const client_id = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
   const redirect_uri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
-  console.log(client_id);
+
   const scopes = [
     "user-read-playback-position",
     "user-read-playback-state",
@@ -45,7 +45,7 @@ const Blob = () => {
     window.location.href = authUrl;
   };
   return (
-    <div className="flex gap-4 items-center navigation-bar ">
+    <div className="flex gap-4 items-center blob-container">
       {blobContent.map((social) => (
         <div key={social.name} className={`square ${social.className}`}>
           <span></span>

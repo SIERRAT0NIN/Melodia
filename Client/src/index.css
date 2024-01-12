@@ -43,6 +43,39 @@
     font-size: smaller; /* Adjust font size for smaller screens */
   }
 }
+@media (max-width: 480px) {
+  .album-column {
+    display: none;
+  }
+}
+@media (max-width: 768px) {
+  .table-row {
+    padding: 0px; /* Reduced padding */
+  }
+}
+@media (max-width: 768px) {
+  .album-column {
+    display: none;
+  }
+}
+@media (max-width: 768px) {
+  .artist-column {
+    display: none;
+  }
+}
+@media (max-width: 768px) {
+  .table-cell {
+    display: block;
+    width: 100%;
+    /* text-align: left; */
+    /* padding: 4px 0; Adjust as needed */
+  }
+}
+@media (max-width: 768px) {
+  .table-cell {
+    font-size: 14px; /* Smaller font size */
+  }
+}
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -872,4 +905,7 @@ button:focus-visible {
 .song-table {
   width: 100px;
   height: 100px;
+}
+.blob-container {
+  position: relative;
 }
