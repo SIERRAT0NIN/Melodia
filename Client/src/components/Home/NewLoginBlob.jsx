@@ -1,5 +1,5 @@
 import { Button } from "@nextui-org/react";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { Button, Grid, Card } from "@nextui-org/react";
 
 const Blob = () => {
   const blobContent = [
@@ -41,21 +41,22 @@ const Blob = () => {
     window.location.href = authUrl;
   };
   return (
-    <div className="container">
+    <div className="flex gap-4 items-center">
       {blobContent.map((social) => (
-        <div key={social.name} className="row mb-3">
-          <div className={`col-12 col-md-6 square ${social.className}`}>
-            <div className="content">
-              <h2>{social.name}</h2>
-              <p>{social.description}</p>
-              <Button
-                color="primary"
-                variant="faded"
-                onClick={redirectToSpotifyLogin}
-              >
-                {social.username}
-              </Button>
-            </div>
+        <div key={social.name} className={`square ${social.className}`}>
+          <span></span>
+          <span></span>
+          <span></span>
+          <div className="content">
+            <h2>{social.name}</h2>
+            <p>{social.description}</p>
+            <Button
+              color="primary"
+              variant="faded"
+              onClick={redirectToSpotifyLogin}
+            >
+              {social.username}
+            </Button>
           </div>
         </div>
       ))}
