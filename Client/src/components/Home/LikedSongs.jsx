@@ -17,6 +17,7 @@ import { useSpotify } from "../Spotify/SpotifyContext";
 import SongPages from "./SongPages";
 import NavBar from "./NavBar";
 import Album from "./Album";
+import Footer from "./Footer";
 
 const LikedSongs = () => {
   const [savedTracks, setSavedTracks] = useState([]);
@@ -218,6 +219,7 @@ const LikedSongs = () => {
           />
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

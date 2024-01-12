@@ -69,6 +69,7 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
+    { text: "Home", href: "/home" },
     { text: "Profile", href: "/account" },
     { text: "Liked Songs", href: "/saved_songs" },
     { text: "Saved Playlist", href: "/user_playlist" },
@@ -77,7 +78,7 @@ export default function App() {
   ];
 
   return (
-    <Navbar onMenuOpenChange={setIsMenuOpen}>
+    <Navbar shouldHideOnScroll onMenuOpenChange={setIsMenuOpen}>
       <NavbarContent>
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
