@@ -842,3 +842,8 @@ button:focus-visible {
 .basket-info {
   border-radius: 15px;
 }
+
+.song-table {
+  width: 100px;
+  height: 100px;
+}
