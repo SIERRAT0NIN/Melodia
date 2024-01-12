@@ -70,9 +70,9 @@ export default function App() {
 
   const menuItems = [
     { text: "Profile", href: "/account" },
-    { text: "Liked Songs", href: "/liked-songs" },
-    { text: "Saved Playlist", href: "/saved-playlist" },
-    { text: "Song Basket", href: "/song-basket" },
+    { text: "Liked Songs", href: "/saved_songs" },
+    { text: "Saved Playlist", href: "/user_playlist" },
+    { text: "Song Basket", href: "/baskets" },
     { text: "Log Out", href: "/logout" },
   ];
 
