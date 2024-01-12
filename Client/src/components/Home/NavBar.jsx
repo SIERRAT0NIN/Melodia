@@ -52,7 +52,7 @@
 //     </>
 //   );
 // }
-import React from "react";
+import React, { useState } from "react";
 import {
   Navbar,
   NavbarBrand,
@@ -66,14 +66,14 @@ import {
 } from "@nextui-org/react";
 
 export default function App() {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
-    "Profile",
-    "Liked Songs",
-    "Saved Playlist",
-    "Song Basket",
-    "Log Out",
+    { text: "Profile", href: "/profile" },
+    { text: "Liked Songs", href: "/liked-songs" },
+    { text: "Saved Playlist", href: "/saved-playlist" },
+    { text: "Song Basket", href: "/song-basket" },
+    { text: "Log Out", href: "/logout" },
   ];
 
   return (
@@ -90,8 +90,8 @@ export default function App() {
 
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         <NavbarItem>
-          <Link color="foreground" href="#">
-            Features
+          <Link color="foreground" href="/account">
+            Profile
           </Link>
         </NavbarItem>
         <NavbarItem isActive>
@@ -127,7 +127,7 @@ export default function App() {
                   : "foreground"
               }
               className="w-full"
-              href="#"
+              href={item.href} // Use href from the menuItems array
               size="lg"
             >
               {item}
