@@ -69,7 +69,7 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
-    { text: "Profile", href: "/profile" },
+    { text: "Profile", href: "/account" },
     { text: "Liked Songs", href: "/liked-songs" },
     { text: "Saved Playlist", href: "/saved-playlist" },
     { text: "Song Basket", href: "/song-basket" },
