@@ -75,30 +75,36 @@ const SavedSongs = () => {
 
   //!Added class name flex gap-4 items-center
   return (
-    <div className="flex items-center song-table">
+    <div
+      className="auto relative items-center  responsive-table-wrapper"
+      color="primary"
+    >
       <SpotifyAuth
         onSavedTracksChange={handleSavedTracksChange}
         onPlaylistsChange={handlePlaylistsChange}
       />
-      <div>
-        <Table color="default" aria-label="Saved Songs Table">
-          <TableHeader>
+      <div className="auto relative items-center">
+        <Table color="success" aria-label="Saved Songs Table">
+          <TableHeader wrapper className="table-header">
             <TableColumn>Song Title</TableColumn>
             <TableColumn>Artist</TableColumn>
             <TableColumn>Album</TableColumn>
           </TableHeader>
-          <TableBody>
+          <TableBody wrapper>
             {savedTracks.map((track, index) => (
               <TableRow
                 css={{ cursor: "pointer" }}
                 key={track.id || index}
                 onClick={() => onSongClick(track)}
+                className="table-row "
               >
-                <TableCell>{track.name || "N/A"}</TableCell>
-                <TableCell>
+                <TableCell className="table-cell">
+                  {track.name || "N/A"}
+                </TableCell>
+                <TableCell className="table-cell">
                   {(track.artists && track.artists[0].name) || "N/A"}
                 </TableCell>
-                <TableCell>
+                <TableCell className="table-cell">
                   {(track.album && track.album.name) || "N/A"}
                 </TableCell>
               </TableRow>

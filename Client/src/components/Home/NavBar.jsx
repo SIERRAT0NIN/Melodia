@@ -10,7 +10,7 @@ import EqualizerRoundedIcon from "@mui/icons-material/EqualizerRounded";
 export default function NavBar() {
   return (
     <>
-      <Navbar isBordered className="glassmorphism-nav">
+      <Navbar isBordered className="glassmorphism-nav navigation-bar">
         <NavbarContent justify="space-between">
           <div className="flex items-center justify-start">
             <NavbarBrand className="flex items-center mr-4">
