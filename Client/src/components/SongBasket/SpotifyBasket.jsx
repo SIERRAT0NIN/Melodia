@@ -79,6 +79,7 @@
 // };
 
 // export default CreateSpotifyPlaylist;
+import { Button } from "@nextui-org/react";
 import React, { useState } from "react";
 import { useSpotify } from "../Spotify/SpotifyContext";
 
@@ -178,9 +179,15 @@ const CreateSpotifyPlaylist = ({
 
   return (
     <div>
-      <button className="bn5" onClick={createPlaylist}>
+      <Button
+        color="success"
+        variant="solid"
+        onClick={createPlaylist}
+        size="lg"
+        className="create-pl"
+      >
         Create Playlist and Add Songs
-      </button>
+      </Button>
       {statusMessage && <p>{statusMessage}</p>}
       {playlistId && <p>Playlist ID: {playlistId}</p>}
     </div>

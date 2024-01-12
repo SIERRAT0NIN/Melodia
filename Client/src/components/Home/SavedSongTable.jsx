@@ -12,17 +12,22 @@ import SavedPlaylist from "../Playlist/SavedPlaylist";
 import SongModal from "./SongDetail";
 import { useSpotify } from "../Spotify/SpotifyContext";
 import SongPages from "./SongPages";
+import PlaylistPages from "./PlaylistPages";
 const SavedSongs = () => {
   const [savedTracks, setSavedTracks] = useState([]);
+  const [savedPlaylist, setSavedPlaylist] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(10);
+  const [currentPlaylistPage, setCurrentPlaylistPage] = useState(1);
+  const [totalPlaylistPages, setTotalPlaylistPages] = useState(0);
+
   const { selectedSong, setSelectedSong, playlists, setPlaylists } =
     useSpotify();
+  const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
-    const limit = 30;
+    const limit = 25;
 
     if (!accessToken) return;
 
@@ -55,12 +60,53 @@ const SavedSongs = () => {
     };
 
     fetchUserSavedTracks();
-  }, [currentPage]);
+  }, [accessToken, currentPage]);
+
+  useEffect(() => {
+    const limit = 25;
+
+    if (!accessToken) return;
+
+    const fetchUserSavedPlaylist = async () => {
+      const offset = (currentPlaylistPage - 1) * limit;
+
+      try {
+        const response = await fetch(
+          `https://api.spotify.com/v1/me/playlists?limit=${limit}&offset=${offset}`, // Corrected the URL
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data.items);
+          setSavedPlaylist(data.items); // Corrected the map to data.items
+          setTotalPlaylistPages(Math.ceil(data.total / limit)); // Set total pages for playlists
+
+          // Removed setTotalPages as we might have a different total page count for playlists
+        } else {
+          console.error(
+            "Error fetching user saved playlists:",
+            response.statusText
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching user saved playlists:", error);
+      }
+    };
+
+    fetchUserSavedPlaylist(); // Call the correct function here
+  }, [accessToken, currentPlaylistPage]);
 
   const handleSavedTracksChange = (tracks) => {
     setSavedTracks(tracks);
   };
-
+  const onPlaylistPageChange = (newPage) => {
+    setCurrentPlaylistPage(newPage);
+  };
   const handlePlaylistsChange = (playlists) => {
     setPlaylists(playlists);
   };
@@ -120,7 +166,27 @@ const SavedSongs = () => {
         </div>
       </div>
       <br />
-      <SavedPlaylist playlists={playlists} setPlaylists={setPlaylists} />
+      {/* SavedPlaylist should include both the display of the playlists and the pagination for playlists */}
+      <SavedPlaylist
+        playlists={savedPlaylist}
+        setPlaylists={setSavedPlaylist}
+      />
+      {/* Pagination for saved playlists, only if playlists are being displayed */}
+      {savedPlaylist.length > 0 && (
+        <div className="flex justify-center">
+          {/* <SongPages
+            currentPage={currentPlaylistPage}
+            totalPages={totalPlaylistPages}
+            onPageChange={onPlaylistPageChange}
+          /> */}
+          <PlaylistPages
+            currentPage={currentPlaylistPage}
+            totalPages={totalPlaylistPages}
+            onPageChange={onPlaylistPageChange}
+          />
+        </div>
+      )}
+      {/* Conditional rendering for the song detail modal */}
       {selectedSong && (
         <SongModal
           isOpen={isModalOpen}
