@@ -11,6 +11,7 @@ import {
 import PlaylistDetails from "./PlaylistDetails";
 import { useSpotify } from "../Spotify/SpotifyContext";
 import NavBar from "../Home/NavBar";
+import Footer from "../Home/Footer";
 export default function Playlist() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
@@ -102,6 +103,7 @@ export default function Playlist() {
         onClose={onOpenChange}
         setPlaylists={setPlaylists}
       />
+      <Footer />
     </div>
   );
 }

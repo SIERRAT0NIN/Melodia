@@ -25,6 +25,7 @@ import AddSongs from "./AddSongs";
 import BasketSearchModal from "./BasketSearchModal";
 import EditBasketModal from "./EditBasketModal";
 import CreateSpotifyPlaylist from "./SpotifyBasket";
+import Footer from "../Home/Footer";
 
 function BasketCollection({ setSongCount, songCount }) {
   const {
@@ -342,6 +343,7 @@ function BasketCollection({ setSongCount, songCount }) {
         //   </ModalContent>
         // </Modal> */}
       )}
+      <Footer />
     </div>
   );
 }

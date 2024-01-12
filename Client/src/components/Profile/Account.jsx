@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import SpotifyTopTracks from "./TopTracks";
 import SpotifyTopArtists from "./TopArtist";
 // import "bootstrap/dist/css/bootstrap.min.css";
-
+import { Button } from "@nextui-org/react";
 const Account = () => {
   const {
     userId,
@@ -74,9 +74,7 @@ const Account = () => {
         <SpotifyTopTracks userId={userId} accessToken={accessToken} />
         <SpotifyTopArtists userId={userId} accessToken={accessToken} />
       </div>
-      <button className=" bn19" onClick={logout}>
-        Logout
-      </button>
+      <Button onClick={logout}>Logout</Button>
     </div>
   );
 };

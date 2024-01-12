@@ -18,6 +18,29 @@ const SongModal = ({ isOpen, onClose, songData }) => {
   const [isLiked, setIsLiked] = useState(false);
   const { accessToken } = useSpotify();
 
+  const [albumTracks, setAlbumTracks] = useState([]);
+
+  // Function to fetch album tracks
+  const fetchAlbumTracks = async (albumId) => {
+    if (!accessToken) return;
+
+    try {
+      const response = await fetch(
+        `https://api.spotify.com/v1/albums/${albumId}/tracks`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Error fetching album tracks: ${response.status}`);
+      }
+      const data = await response.json();
+      setAlbumTracks(data.items);
+    } catch (error) {
+      console.error("Error fetching album tracks:", error);
+    }
+  };
+
   useEffect(() => {
     if (!songData || !accessToken) return;
 
@@ -39,7 +62,11 @@ const SongModal = ({ isOpen, onClose, songData }) => {
 
     checkIfSongIsLiked();
   }, [songData, accessToken]);
-
+  useEffect(() => {
+    if (isOpen && songData) {
+      fetchAlbumTracks(songData.album.id);
+    }
+  }, [isOpen, songData, accessToken]);
   const likeUnlikeSong = async (songId, shouldBeLiked) => {
     if (!accessToken) {
       console.error("Access Token is not available.");
@@ -97,7 +124,12 @@ const SongModal = ({ isOpen, onClose, songData }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} backdrop="blur">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      backdrop="blur"
+      scrollBehavior={"outside"}
+    >
       <ModalContent>
         <ModalHeader className="flex flex-col justify-center items-center gap-1">
           <Image
@@ -121,6 +153,14 @@ const SongModal = ({ isOpen, onClose, songData }) => {
                   <strong>{track.name}</strong>
                 </div>
               ))}
+          </div>
+          <div>
+            <h3>
+              <strong>Album Tracks:</strong>
+            </h3>
+            {albumTracks.map((track, index) => (
+              <p key={track.id || index}>{track.name}</p>
+            ))}
           </div>
         </ModalBody>
         <ModalFooter className="flex justify-center items-center">
