@@ -10,12 +10,12 @@ const Blob = () => {
     },
   ];
 
-  const client_secret = "2fb5a9bb603a48aeadc6dfb28eeb00a0";
-  const client_id = "6abb9eac788d42e08c2a50e3f5ff4e53";
-  const redirect_uri = "http://localhost:5555/home";
-  // const client_secret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
-  // const client_id = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
-  // const redirect_uri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
+  // const client_secret = "2fb5a9bb603a48aeadc6dfb28eeb00a0";
+  // const client_id = "6abb9eac788d42e08c2a50e3f5ff4e53";
+  // const redirect_uri = "http://localhost:5555/home";
+  const client_secret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
+  const client_id = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+  const redirect_uri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
   console.log(client_id);
   const scopes = [
     "user-read-playback-position",
@@ -45,7 +45,7 @@ const Blob = () => {
     window.location.href = authUrl;
   };
   return (
-    <div className="flex gap-4 items-center">
+    <div className="flex gap-4 items-center navigation-bar ">
       {blobContent.map((social) => (
         <div key={social.name} className={`square ${social.className}`}>
           <span></span>

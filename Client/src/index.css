@@ -3,40 +3,45 @@
 @tailwind components;
 @tailwind utilities;
 
+@media (max-width: 600px) {
+  .saved-songs-container {
+    /* Adjust padding, margins, and other properties for mobile */
+    padding: 10px;
+  }
+
+  /* Adjust table layout or font sizes if necessary */
+  .saved-songs-table {
+    font-size: 14px;
+  }
+
+  /* Any other mobile-specific styles */
+}
 /* For mobile devices */
 @media (max-width: 768px) {
-  .responsive-table-wrapper {
-    overflow-x: auto;
+  .responsive-table {
+    overflow-x: auto; /* Makes the table scrollable horizontally */
   }
 
-  .table-cell,
-  .table-header {
-    padding: 8px; /* Smaller padding */
-    font-size: 14px; /* Smaller font size */
+  .table-row {
+    display: block;
+    margin-bottom: 1rem; /* Stacks rows vertically */
   }
 
-  .navigation-bar {
-    display: none; /* Hide the navigation bar on small screens */
-  }
-
-  .hamburger-menu {
-    display: block; /* Show a hamburger menu icon on small screens */
-  }
-
-  /* You can also hide certain columns on small screens */
-  .hide-on-mobile {
-    display: none;
-  }
-}
-
-/* For larger devices */
-@media (min-width: 769px) {
-  .hamburger-menu {
-    display: none; /* Hide the hamburger menu icon */
-  }
+  /* Adjust font size, padding, and margins as necessary */
 
   .navigation-bar {
-    display: flex; /* Show the full navigation bar */
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .square {
+    width: 100%; /* Make square blocks full width on small screens */
+    margin: 0 0 20px; /* Add some margin to the bottom */
+  }
+
+  .content h2,
+  .content p {
+    font-size: smaller; /* Adjust font size for smaller screens */
   }
 }
 
