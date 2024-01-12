@@ -42,6 +42,7 @@ CORS(app, resources={
         r"/baskets": {"origins": "http://localhost:5555"},
         r"/song_basket/<string: user_id>": {"origins": "http://localhost:5555"},
         r"/create_song_basket": {"origins": "http://localhost:5555"},
+        r"/song_basket/*": {"origins": "http://localhost:5555"}
     })   
 # def generate_jwt_secret(length=32):
 #     return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode()
@@ -1075,8 +1076,9 @@ class SongBasketResource(Resource):
         db.session.add(new_basket)
         db.session.commit()
         return {'message': 'Basket created'}, 201
+    
     def delete(self, user_id, basket_id, id):
-        print('User:', user_id, 'Basket:', basket_id, 'Song ID:', id)
+
         basket = SongBasket.query.filter_by(user_id=user_id, basket_id=basket_id).first()
         if not basket:
             return {'message': 'Basket not found'}, 404

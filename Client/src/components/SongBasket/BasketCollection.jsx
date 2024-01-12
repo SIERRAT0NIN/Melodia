@@ -121,9 +121,6 @@ function BasketCollection({ setSongCount, songCount }) {
     onOpen();
   };
 
-  const closeModal = () => {
-    setIsModalVisible(false);
-  };
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
   const openSpotifySearch = (basketId) => {
@@ -256,6 +253,13 @@ function BasketCollection({ setSongCount, songCount }) {
                   image={image}
                   setImage={setImage}
                 />
+                <Button
+                  color="danger"
+                  variant="shadow"
+                  onClick={() => deleteBasket(basket.basket_id)}
+                >
+                  <span className="bn54span">Delete basket</span>
+                </Button>
               </div>
               <Table striped aria-label="Song Basket Table">
                 <TableHeader>
@@ -299,23 +303,17 @@ function BasketCollection({ setSongCount, songCount }) {
                 </TableBody>
               </Table>
               <div className="flex justify-center ">
-                <button
-                  className="bn54 deletebasket"
-                  onClick={() => deleteBasket(basket.basket_id)}
-                >
-                  <span className="bn54span">Delete basket</span>
-                </button>
+                <CreateSpotifyPlaylist
+                  basketData={basketData}
+                  songUris={uris}
+                  name={name}
+                  description={description}
+                  image={image}
+                />
               </div>
               {/* <button className="bn5" onClick={() => showModal(basket.basket_id)}>
               Create into a Spotify Playlist
             </button> */}
-              <CreateSpotifyPlaylist
-                basketData={basketData}
-                songUris={uris}
-                name={name}
-                description={description}
-                image={image}
-              />
             </div>
           ))}
         </div>
