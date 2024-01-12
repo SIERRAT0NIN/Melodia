@@ -3,18 +3,40 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Mobile devices */
+/* For mobile devices */
 @media (max-width: 768px) {
-  .responsive-wrapper {
-    padding: 4vw; /* smaller padding on smaller screens */
-    flex-direction: column; /* stack items vertically */
+  .responsive-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .table-cell,
+  .table-header {
+    padding: 8px; /* Smaller padding */
+    font-size: 14px; /* Smaller font size */
+  }
+
+  .navigation-bar {
+    display: none; /* Hide the navigation bar on small screens */
+  }
+
+  .hamburger-menu {
+    display: block; /* Show a hamburger menu icon on small screens */
+  }
+
+  /* You can also hide certain columns on small screens */
+  .hide-on-mobile {
+    display: none;
   }
 }
 
-/* Larger devices */
+/* For larger devices */
 @media (min-width: 769px) {
-  .responsive-wrapper {
-    padding: 8vh 8vw; /* adjust padding for larger screens */
+  .hamburger-menu {
+    display: none; /* Hide the hamburger menu icon */
+  }
+
+  .navigation-bar {
+    display: flex; /* Show the full navigation bar */
   }
 }
 
