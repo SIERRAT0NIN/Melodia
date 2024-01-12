@@ -73,8 +73,9 @@ const SavedSongs = () => {
     setCurrentPage(newPage); // Update the current page
   };
 
+  //!Added class name flex gap-4 items-center
   return (
-    <div>
+    <div className="flex gap-4 items-center">
       <SpotifyAuth
         onSavedTracksChange={handleSavedTracksChange}
         onPlaylistsChange={handlePlaylistsChange}

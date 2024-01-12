@@ -1,5 +1,4 @@
 import { Button } from "@nextui-org/react";
-import { Button, Grid, Card } from "@nextui-org/react";
 
 const Blob = () => {
   const blobContent = [
