@@ -117,7 +117,7 @@ export default function App() {
       </NavbarContent>
       <NavbarMenu>
         {menuItems.map((item, index) => (
-          <NavbarMenuItem key={`${item}-${index}`}>
+          <NavbarMenuItem key={`${item.text}-${index}`}>
             <Link
               color={
                 index === 2
@@ -130,7 +130,7 @@ export default function App() {
               href={item.href} // Use href from the menuItems array
               size="lg"
             >
-              {item}
+              {item.text} {/* Display the text property of each item */}
             </Link>
           </NavbarMenuItem>
         ))}
