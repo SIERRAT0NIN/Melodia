@@ -26,6 +26,7 @@ import BasketSearchModal from "./BasketSearchModal";
 import EditBasketModal from "./EditBasketModal";
 import CreateSpotifyPlaylist from "./SpotifyBasket";
 import Footer from "../Home/Footer";
+import Navbar2 from "../Home/NavBar2";
 
 function BasketCollection({ setSongCount, songCount }) {
   const {
@@ -179,9 +180,9 @@ function BasketCollection({ setSongCount, songCount }) {
 
   return (
     <div>
-      <NavBar />
+      <Navbar2 />
       <VerifyJWT />
-      <div className="flex justify-center">
+      <div className="flex justify-center ">
         <CreateSongBasket
           loadSongBasket={loadSongBasket}
           setSongCount={setSongCount}
@@ -193,7 +194,7 @@ function BasketCollection({ setSongCount, songCount }) {
           <h2>There are currently no baskets</h2>
         </div>
       ) : (
-        <div className="glassmorphism-basket">
+        <div className="glassmorphism-basket w-1/2 mx-auto">
           {basketData.map((basket, index) => (
             <div key={basket.basket_id}>
               <div className="flex justify-center">
@@ -206,13 +207,7 @@ function BasketCollection({ setSongCount, songCount }) {
                   src={basket.playlist_img}
                 ></Image>
               </div>
-              <div
-                className="deletebasket  basket-info justify-center"
-                style={{
-                  width: "250px",
-                  height: "100px",
-                }}
-              >
+              <div className="deletebasket  basket-info justify-center p-5 w-1/3">
                 <h3>Basket ID: {basket.basket_id}</h3>
 
                 <h2>Name: {basket.playlist_name}</h2>

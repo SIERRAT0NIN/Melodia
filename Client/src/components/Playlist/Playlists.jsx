@@ -78,32 +78,34 @@ export default function Playlist() {
   }
 
   return (
-    <div>
-      <NavBar />
-      <Table aria-label="User Playlists" css={{ cursor: "pointer" }}>
-        <TableHeader>
-          <TableColumn>Playlist Name</TableColumn>
-        </TableHeader>
-        <TableBody>
-          {playlists.map((playlist) => (
-            <TableRow
-              key={playlist.id}
-              onClick={() => openModalWithPlaylist(playlist)}
-              css={{ cursor: "pointer" }}
-            >
-              <TableCell>{playlist.name || "N/A"}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <>
+      <div className="">
+        <Table aria-label="User Playlists" css={{ cursor: "pointer" }}>
+          <TableHeader>
+            <TableColumn className="text-lg bg-gradient-to-r from-blue-500 to-yellow-500 text-white p-5 rounded text-center shadow-md">
+              Playlist Name
+            </TableColumn>
+          </TableHeader>
+          <TableBody>
+            {playlists.map((playlist) => (
+              <TableRow
+                key={playlist.id}
+                onClick={() => openModalWithPlaylist(playlist)}
+                css={{ cursor: "pointer" }}
+              >
+                <TableCell>{playlist.name || "N/A"}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
-      <PlaylistDetails
-        playlist={selectedPlaylist}
-        isOpen={isOpen}
-        onClose={onOpenChange}
-        setPlaylists={setPlaylists}
-      />
-      <Footer />
-    </div>
+        <PlaylistDetails
+          playlist={selectedPlaylist}
+          isOpen={isOpen}
+          onClose={onOpenChange}
+          setPlaylists={setPlaylists}
+        />
+      </div>
+    </>
   );
 }

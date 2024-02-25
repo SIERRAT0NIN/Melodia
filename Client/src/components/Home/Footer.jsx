@@ -10,22 +10,22 @@ const Footer = () => {
             <p>Alberto Sierra</p>
           </div>
           <div className="col-md-6 mb-3">
-            <Button variant="flat">
-              <a
-                href="https://github.com/SIERRAT0NIN/Phase5-project"
-                className="text-white me-2"
-              >
+            <a
+              href="https://github.com/SIERRAT0NIN/Phase5-project"
+              className="text-white me-2"
+            >
+              <Button color="primary" variant="ghost" className="m-3">
                 Github
-              </a>
-            </Button>
-            <Button variant="flat">
-              <a
-                href="https://www.linkedin.com/in/sierra-alberto23/"
-                className="text-white"
-              >
+              </Button>
+            </a>
+            <a
+              href="https://www.linkedin.com/in/sierra-alberto23/"
+              className="text-white me-2"
+            >
+              <Button color="primary" variant="ghost">
                 LinkedIn
-              </a>
-            </Button>
+              </Button>
+            </a>
           </div>
         </div>
       </div>

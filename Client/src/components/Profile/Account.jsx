@@ -6,6 +6,7 @@ import SpotifyTopTracks from "./TopTracks";
 import SpotifyTopArtists from "./TopArtist";
 // import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "@nextui-org/react";
+import Navbar2 from "../Home/NavBar2";
 const Account = () => {
   const {
     userId,
@@ -62,7 +63,7 @@ const Account = () => {
 
   return (
     <div className="profile-container" style={{ textAlign: "center" }}>
-      <NavBar />
+      <Navbar2 />
 
       <div className="glassmorphism-profile">
         <img className="profile" src={userImg} alt="Profile" />
@@ -74,7 +75,9 @@ const Account = () => {
         <SpotifyTopTracks userId={userId} accessToken={accessToken} />
         <SpotifyTopArtists userId={userId} accessToken={accessToken} />
       </div>
-      <Button onClick={logout}>Logout</Button>
+      <Button variant="shadow" color="danger" className="m-5" onClick={logout}>
+        Logout
+      </Button>
     </div>
   );
 };

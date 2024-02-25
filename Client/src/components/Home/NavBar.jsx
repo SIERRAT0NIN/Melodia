@@ -112,8 +112,8 @@ export default function App() {
         </NavbarItem>
         <NavbarItem>
           {/* <Button as={Link} color="primary" href="#" variant="flat">
-            Sign Up
-          </Button> */}
+              Sign Up
+            </Button> */}
         </NavbarItem>
       </NavbarContent>
       <NavbarMenu>
