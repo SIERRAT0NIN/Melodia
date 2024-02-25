@@ -5,6 +5,10 @@ import SavedSongTable from "./SavedSongTable";
 import Container from "react-bootstrap/Container";
 import Footer from "./Footer";
 import SpotifyAuth from "../Spotify/SpotifyAuth";
+
+import Playlist from "../Playlist/Playlists";
+import Navbar2 from "./NavBar2";
+import SpotifyTopArtists from "../Profile/TopArtist";
 // import { useSpotify } from "../Spotify/SpotifyContext";
 // import { useLocation } from "react-router-dom";
 
@@ -46,20 +50,15 @@ function HomePage() {
 
   return (
     <>
-      <SpotifyAuth />
-      <Container>
-        <div className="nav-container">
-          <NavBar />
-        </div>
-        <div className="saved-song-table-container">
-          <br />
-          <CurrentlyPlayingCard />
-          <br />
-          <SavedSongTable />
-          <br />
-        </div>
-        <Footer />
-      </Container>
+      <Navbar2 />
+      <div className="m-4">
+        <CurrentlyPlayingCard />
+      </div>
+      <div className="flex flex-col md:flex-row justify-center p-5 space-y-4 md:space-y-0 md:space-x-4">
+        <SavedSongTable />
+        <Playlist />
+      </div>
+      <Footer />
     </>
   );
 }

@@ -1,19 +1,33 @@
-// // Import the NextUI plugin using ES6 module syntax
 import { nextui } from "@nextui-org/react";
-import vitePluginTailwind from "vite-plugin-tailwind";
-import react from "@vitejs/plugin-react";
-import "./postcss.config";
 
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+import daisyui from "daisyui";
+
+export default {
   content: [
     "./index.html",
-    "./*.{js,ts,jsx,tsx}",
+    "./src/**/*.{js,ts,jsx,tsx}",
     "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      backdropFilter: {
+        none: "none",
+        blur: "blur(15px)",
+      },
+      backgroundColor: {
+        glass: "rgba(255, 255, 255, 0.4)",
+      },
+      borderColor: {
+        glass: "rgba(255, 255, 255, 0.5)",
+      },
+    },
+    container: {
+      center: true,
+    },
   },
   darkMode: "class",
-  plugins: [nextui(), vitePluginTailwind(), react()],
+  plugins: [nextui(), require("daisyui")],
+  daisyui: {
+    themes: false,
+  },
 };

@@ -44,11 +44,6 @@ CORS(app, resources={
         r"/create_song_basket": {"origins": "http://localhost:5555"},
         r"/song_basket/*": {"origins": "http://localhost:5555"}
     })   
-# def generate_jwt_secret(length=32):
-#     return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode()
-
-# JWT_SECRET = generate_jwt_secret()
-# print("jwt secret key",JWT_SECRET)
 
 
 def generate_jwt_token(user_id):

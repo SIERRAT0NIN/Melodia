@@ -38,7 +38,7 @@ const SpotifyTopTracks = ({ userId, accessToken }) => {
     <div className="glassmorphism-tracks ">
       <div className="container mt-3  ">
         <h1>Top Tracks</h1>
-        <table className="table tracktable">
+        <table className="table">
           <thead>
             <tr>
               <th className="track-table " scope="col">

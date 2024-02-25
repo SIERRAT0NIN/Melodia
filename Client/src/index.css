@@ -1,8 +1,16 @@
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Pacifico&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Pacifico&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+.monserrat {
+  font-family: "Montserrat", sans-serif;
+}
+.pacifico {
+  font-family: "Pacifico", cursive;
+}
 @media (max-width: 600px) {
   .saved-songs-container {
     /* Adjust padding, margins, and other properties for mobile */

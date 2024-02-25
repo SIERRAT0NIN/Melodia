@@ -1,6 +1,10 @@
 import { Button } from "@nextui-org/react";
+import React, { useState, useEffect } from "react";
+import Footer from "./Footer";
 
 const Blob = () => {
+  const [isError, setIsError] = useState(false);
+
   const blobContent = [
     {
       name: "Melodía",
@@ -33,38 +37,50 @@ const Blob = () => {
     "playlist-modify-public",
     "playlist-modify-private",
   ];
-  if (!client_id || !client_secret || !redirect_uri) {
-    console.error("Spotify credentials are not properly set.");
-    return;
-  }
+  useEffect(() => {
+    if (!client_id || !client_secret || !redirect_uri) {
+      console.error("Spotify credentials are not properly set.");
+      setIsError(true); // This will now only run once, when the component mounts
+    }
+  }, [client_id, client_secret, redirect_uri]); // Dependencies array
 
+  // const redirectToSpotifyLogin = () => {
+  //   const authUrl = `https://accounts.spotify.com/authorize?client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scopes.join(
+  //     "%20"
+  //   )}&response_type=code`;
+  //   window.location.href = authUrl;
+  // };
   const redirectToSpotifyLogin = () => {
     const authUrl = `https://accounts.spotify.com/authorize?client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scopes.join(
       "%20"
     )}&response_type=code`;
     window.location.href = authUrl;
   };
+
   return (
-    <div className="flex gap-4 items-center blob-container">
-      {blobContent.map((social) => (
-        <div key={social.name} className={`square ${social.className}`}>
-          <span></span>
-          <span></span>
-          <span></span>
-          <div className="content">
-            <h2>{social.name}</h2>
-            <p>{social.description}</p>
-            <Button
-              color="primary"
-              variant="faded"
-              onClick={redirectToSpotifyLogin}
-            >
-              {social.username}
-            </Button>
+    <>
+      <div className="flex justify-center gap-4 items-center blob-container">
+        {blobContent.map((social) => (
+          <div key={social.name} className={`square ${social.className}`}>
+            <span></span>
+            <span></span>
+            <span></span>
+            <div className="content">
+              <h2>{social.name}</h2>
+              <p>{social.description}</p>
+              <Button
+                color="primary"
+                variant="faded"
+                onClick={redirectToSpotifyLogin}
+              >
+                {social.username}
+              </Button>
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+      <Footer />
+    </>
   );
 };
 

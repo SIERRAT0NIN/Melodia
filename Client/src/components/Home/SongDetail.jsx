@@ -124,57 +124,72 @@ const SongModal = ({ isOpen, onClose, songData }) => {
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      backdrop="blur"
-      scrollBehavior={"outside"}
-    >
-      <ModalContent>
-        <ModalHeader className="flex flex-col justify-center items-center gap-1">
-          <Image
-            isBlurred
-            src={songData.album.images[1].url}
-            sizes="lg"
-            alt={songData.name}
-          />
-          <h2>{songData.name}</h2>
-          <h4>{songData.artists.map((artist) => artist.name).join(", ")}</h4>
-          <h4>{songData.album.name}</h4>
-        </ModalHeader>
-        <ModalBody>
-          <p>Release Date: {songData.album.release_date}</p>
-          <p>Popularity: {songData.popularity}</p>
-          <div>
-            {songData &&
-              songData.artists &&
-              songData.artists.map((track, index) => (
-                <div key={track.id || index}>
-                  <strong>{track.name}</strong>
-                </div>
+    <div className="w-full">
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        // backdrop="blur"
+        scrollBehavior={"outside"}
+        className="backdrop-blur-lg bg-opacity-20 	"
+      >
+        <ModalContent className="">
+          <ModalHeader className="flex flex-col justify-center items-center gap-1 text-black ">
+            <Image
+              isBlurred
+              src={songData.album.images[1].url}
+              sizes="lg"
+              alt={songData.name}
+            />
+            <div>
+              <h2 className="text-white">{songData.name}</h2>
+              <h4 className="text-white">
+                {songData.artists.map((artist) => artist.name).join(", ")}
+              </h4>
+              <h4 className="text-white">{songData.album.name}</h4>
+            </div>
+          </ModalHeader>
+          <ModalBody className="text-black justify-center flex">
+            <p>Release Date: {songData.album.release_date}</p>
+            <p>Popularity: {songData.popularity}</p>
+            <div>
+              {songData &&
+                songData.artists &&
+                songData.artists.map((track, index) => (
+                  <div key={track.id || index}>
+                    <strong>{track.name}</strong>
+                  </div>
+                ))}
+            </div>
+            <div className="bg-white/60 rounded-lg">
+              <h3 className="justify-center flex">
+                <strong className="">Album Tracks:</strong>
+              </h3>
+              {albumTracks.map((track, index) => (
+                <p className="justify-center flex" key={track.id || index}>
+                  {track.name}
+                </p>
               ))}
-          </div>
-          <div>
-            <h3>
-              <strong>Album Tracks:</strong>
-            </h3>
-            {albumTracks.map((track, index) => (
-              <p key={track.id || index}>{track.name}</p>
-            ))}
-          </div>
-        </ModalBody>
-        <ModalFooter className="flex justify-center items-center">
-          <Popover placement="top" color={isLiked ? "error" : "success"}>
-            <PopoverTrigger>
-              <Button className="bn30" onClick={handleLikeUnlikeClick}>
-                {isLiked ? "Unlike" : "Like"}
-              </Button>
-            </PopoverTrigger>
-            {popoverContent}
-          </Popover>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+            </div>
+          </ModalBody>
+          <ModalFooter className="flex justify-center items-center">
+            <Popover placement="top" color={isLiked ? "error" : "success"}>
+              <PopoverTrigger>
+                <Button className="bn30" onClick={handleLikeUnlikeClick}>
+                  {isLiked ? "Unlike" : "Like"}
+                </Button>
+              </PopoverTrigger>
+              {popoverContent}
+            </Popover>
+            <Button
+              color="error"
+              variant="text"
+              onClick={onClose}
+              className="bn30"
+            />
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </div>
   );
 };
 

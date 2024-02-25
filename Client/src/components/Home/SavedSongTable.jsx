@@ -122,7 +122,7 @@ const SavedSongs = () => {
   //!Added class name flex gap-4 items-center
   return (
     <div
-      className="auto relative items-center  responsive-table-wrapper"
+      className="auto relative items-center  responsive-table-wrapper mr-3"
       color="primary"
     >
       <SpotifyAuth
@@ -131,10 +131,19 @@ const SavedSongs = () => {
       />
       <div className="auto relative items-center">
         <Table color="success" aria-label="Saved Songs Table">
-          <TableHeader wrapper className="table-header relative">
-            <TableColumn>Song Title</TableColumn>
-            <TableColumn className="artist-column">Artist</TableColumn>
-            <TableColumn className="album-column">Album</TableColumn>
+          <TableHeader
+            wrapper
+            className="table-header relative justify-between text-lg"
+          >
+            <TableColumn className="text-lg bg-gradient-to-r from-blue-500  to-green-500 text-white p-5  rounded-tl-md text-center shadow-md 		">
+              Song Title
+            </TableColumn>
+            <TableColumn className="text-lg bg-gradient-to-r  from-green-500 to-purple-500  text-white   p-5  text-center shadow-md   		">
+              Artist
+            </TableColumn>
+            <TableColumn className="text-lg bg-gradient-to-r from-purple-500 to-yellow-500 text-white p-5   rounded-tr-md text-center shadow-md    		">
+              Album
+            </TableColumn>
           </TableHeader>
           <TableBody className="responsive-table-wrapper flex">
             {savedTracks.map((track, index) => (
@@ -144,13 +153,13 @@ const SavedSongs = () => {
                 onClick={() => onSongClick(track)}
                 className="table-row"
               >
-                <TableCell className="table-cell ">
+                <TableCell className=" sm:table-cell ">
                   {track.name || "N/A"}
                 </TableCell>
-                <TableCell className="table-cell">
+                <TableCell className="hidden md:table-cell">
                   {(track.artists && track.artists[0].name) || "N/A"}
                 </TableCell>
-                <TableCell className="table-cell">
+                <TableCell className="hidden md:table-cell">
                   {(track.album && track.album.name) || "N/A"}
                 </TableCell>
               </TableRow>
@@ -167,25 +176,25 @@ const SavedSongs = () => {
       </div>
       <br />
       {/* SavedPlaylist should include both the display of the playlists and the pagination for playlists */}
-      <SavedPlaylist
+      {/* <SavedPlaylist
         playlists={savedPlaylist}
         setPlaylists={setSavedPlaylist}
-      />
+      /> */}
       {/* Pagination for saved playlists, only if playlists are being displayed */}
-      {savedPlaylist.length > 0 && (
-        <div className="flex justify-center">
-          {/* <SongPages
+      {/* {savedPlaylist.length > 0 && (
+        <div className="flex justify-center"> */}
+      {/* <SongPages
             currentPage={currentPlaylistPage}
             totalPages={totalPlaylistPages}
             onPageChange={onPlaylistPageChange}
           /> */}
-          <PlaylistPages
+      {/* <PlaylistPages
             currentPage={currentPlaylistPage}
             totalPages={totalPlaylistPages}
             onPageChange={onPlaylistPageChange}
-          />
-        </div>
-      )}
+          /> */}
+      {/* </div>
+      )} */}
       {/* Conditional rendering for the song detail modal */}
       {selectedSong && (
         <SongModal
