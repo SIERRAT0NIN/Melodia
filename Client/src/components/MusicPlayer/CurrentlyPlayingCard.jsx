@@ -160,6 +160,13 @@ export default function CurrentlyPlayingCard() {
   // Handlers for next and previous
   const handlePrevious = () => handleNextPrevious("previous");
   const handleNext = () => handleNextPrevious("next");
+
+  const formatTime = (ms) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000); // Use Math.floor to always round down
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  };
+
   return (
     <div className="">
       <Card
@@ -226,7 +233,8 @@ export default function CurrentlyPlayingCard() {
                 <div className="flex justify-between">
                   <p className="text-small">{songPosition}</p>
                   <p className="text-small text-foreground/50">
-                    {currentlyPlaying?.item?.duration_ms}
+                    {/* {(currentlyPlaying.item.duration_ms)} */}
+                    {formatTime(currentlyPlaying.item.duration_ms)}
                   </p>
                 </div>
               </div>
