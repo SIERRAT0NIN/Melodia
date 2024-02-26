@@ -85,7 +85,9 @@ export default function Playlist() {
   if (!playlists || playlists.length === 0) {
     return <p>No playlists available.</p>;
   }
-
+  const onPageChange = (newPage) => {
+    setCurrentPage(newPage); // Update the current page
+  };
   return (
     <>
       <div className="">
