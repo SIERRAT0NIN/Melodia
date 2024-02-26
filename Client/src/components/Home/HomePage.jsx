@@ -22,7 +22,6 @@ function HomePage() {
     // const query = new URLSearchParams(location.search);
 
     const code = urlParams.get("code");
-    // const code = query.get("code");
 
     if (code) {
       // Send the authorization code to your backend

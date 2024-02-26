@@ -44,12 +44,6 @@ const Blob = () => {
     }
   }, [client_id, client_secret, redirect_uri]); // Dependencies array
 
-  // const redirectToSpotifyLogin = () => {
-  //   const authUrl = `https://accounts.spotify.com/authorize?client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scopes.join(
-  //     "%20"
-  //   )}&response_type=code`;
-  //   window.location.href = authUrl;
-  // };
   const redirectToSpotifyLogin = () => {
     const authUrl = `https://accounts.spotify.com/authorize?client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scopes.join(
       "%20"
